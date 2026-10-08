@@ -124,11 +124,26 @@ function frame(dtReal) {
 
 let last = performance.now();
 let errCount = 0;
+// adaptive resolution: keep frame time near 60 fps on unknown hardware
+const PR_MAX = Math.min(window.devicePixelRatio || 1, 1.5);
+let prAcc = 0, prN = 0;
+function adaptResolution(dt) {
+  prAcc += dt; prN++;
+  if (prAcc < 1.5) return;
+  const avg = prAcc / prN;
+  prAcc = 0; prN = 0;
+  let pr = pipeline.pixelRatio;
+  if (avg > 1 / 45 && pr > 0.7) pr = Math.max(0.7, pr - 0.15);
+  else if (avg < 1 / 58 && pr < PR_MAX) pr = Math.min(PR_MAX, pr + 0.1);
+  if (Math.abs(pr - pipeline.pixelRatio) > 1e-3) { pipeline.pixelRatio = pr; resize(); }
+}
 function loop(now) {
   // schedule first so one bad frame can never freeze the whole game
   requestAnimationFrame(loop);
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
   last = now;
+  if (!document.hidden) adaptResolution((now - (loop.prev ?? now)) / 1000);
+  loop.prev = now;
   try {
     frame(dt);
   } catch (e) {

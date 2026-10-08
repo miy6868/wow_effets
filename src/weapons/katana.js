@@ -20,9 +20,10 @@ const CORE = [2.6, 3.6, 5.0];
 // three stacked crescents: main, thin outer flash, faint inner wash
 function slashLayers(extra = {}) {
   return [
-    { width: 0.5, tail: 1.0, streak: 0.8, ...extra },
+    { ink: true, rIn: 1.05 * (extra.scale ?? 1), rOut: 2.1 * (extra.scale ?? 1), width: 0.38, color: [0.02, 0.03, 0.09], alpha: 0.7, tail: 0.75, fade: 0.14, streak: 0.6, cone: 0.15, da0: -0.25 },
+    { width: 0.42, tail: 0.9, streak: 0.8, ...extra },
     { rIn: 1.75 * (extra.scale ?? 1), rOut: 2.25 * (extra.scale ?? 1), width: 0.3, color: [0.6, 1.3, 2.6], core: [2.5, 3, 3.6], tail: 0.5, fade: 0.1, streak: 0.3, cone: 0.05 },
-    { rIn: 0.25, rOut: 1.5 * (extra.scale ?? 1), width: 0.9, color: [0.05, 0.18, 0.7], core: [0.15, 0.4, 1.1], alpha: 0.6, tail: 1.6, fade: 0.32, streak: 1 },
+    { rIn: 0.35, rOut: 1.5 * (extra.scale ?? 1), width: 0.8, color: [0.04, 0.14, 0.55], core: [0.1, 0.3, 0.8], alpha: 0.32, tail: 1.2, fade: 0.28, streak: 1 },
   ];
 }
 

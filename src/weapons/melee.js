@@ -295,7 +295,7 @@ export class SwingMove {
         sweep: sl.sweep ?? (w1 - w0) * 1.05, hold: sl.hold ?? 0.03, fade: sl.fade ?? 0.2,
         color: sl.color ?? baseColor, core: sl.core ?? this.w.core ?? [4, 4.5, 5],
         width: sl.width ?? 0.75, tail: sl.tail ?? 1.0, streak: sl.streak ?? 0.75, alpha: sl.alpha ?? 1,
-        expand: sl.expand ?? 0.1, renderOrder: sl.renderOrder, cone: sl.cone,
+        expand: sl.expand ?? 0.1, renderOrder: sl.renderOrder ?? (sl.ink ? 12 : undefined), cone: sl.cone, ink: sl.ink,
       });
     }
   }

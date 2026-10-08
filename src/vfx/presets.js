@@ -50,6 +50,17 @@ export const COL = {
   ice: [0.6, 0.9, 1.0],
 };
 
+/** Dark ink streaks layered under bright sparks (anime-style contrast accent). */
+export function inkShards(p, along, out, s = 1, n = 5) {
+  const fx = G.fx;
+  for (let i = 0; i < n; i++) {
+    _v2.copy(along).multiplyScalar(0.8).addScaledVector(out, 0.6);
+    cone(_v2, 0.9, _v2);
+    fx.alpha.emit({ pos: p, vel: _v2.multiplyScalar(rand(6, 13) * s), shape: SHAPE.STREAK, size: rand(0.05, 0.09) * s, stretch: 0.04, anchor: 1,
+      life: rand(0.1, 0.18), color: [0.03, 0.03, 0.08], colorEnd: [0.03, 0.03, 0.08], alpha: 0.85, alphaEnd: 0, drag: 6 });
+  }
+}
+
 export const FXP = {
   // ── melee hits ──────────────────────────────────────────────────────────────
   /** Clean sharp slash hit. tangent = swing direction at contact. */
@@ -77,6 +88,7 @@ export const FXP = {
       fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(3, 8) * s), shape: SHAPE.DIAMOND, size: rand(0.07, 0.13) * s, sizeEnd: 0, life: rand(0.25, 0.5), color: mul(color, 2.5), alphaEnd: 0.6, drag: 2, gravity: 6 });
     }
     fx.ring({ pos: p, billboard: true, r0: 0.1 * s, r1: 0.85 * s, w0: 0.07, w1: 0.015, color: mul(color, 1.6), life: 0.13, sharp: 0.7 });
+    inkShards(p, tangent, dir, s, 5);
     fx.light(p, color, 1.8, 4 * s, 0.12);
   },
 
@@ -97,6 +109,7 @@ export const FXP = {
       cone(dir, 1.3, _v2);
       fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, 0.3), vel: _v2.multiplyScalar(rand(3, 5)), size: rand(0.12, 0.2) * s, sizeEnd: rand(0.3, 0.45) * s, life: rand(0.3, 0.45), mode: PUFF.SMOKE, color: [0.66, 0.62, 0.68], shade: [0.38, 0.35, 0.48], drag: 6, rise: 1.2, dissolveStart: 0.1 });
     }
+    inkShards(p, dir, dir, s * 1.2, 7);
     fx.light(p, color, 2.5, 5 * s, 0.16);
   },
 

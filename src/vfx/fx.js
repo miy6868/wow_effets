@@ -308,10 +308,11 @@ export class FX {
         uSeed: { value: Math.random() * 10 }, uWidth: { value: o.width ?? 0.8 },
         uColor: { value: col3(o.color ?? [0.5, 1.2, 3.0]) },
         uCore: { value: col3(o.core ?? [4, 4.5, 5]) },
-        uAlpha: { value: o.alpha ?? 1 }, uStreak: { value: o.streak ?? 0.7 },
+        uAlpha: { value: o.alpha ?? 1 }, uStreak: { value: o.streak ?? 0.7 }, uInk: { value: o.ink ? 1 : 0 },
       },
       vertexShader: slashVertex, fragmentShader: slashFragment, side: THREE.DoubleSide,
     }));
+    if (o.ink) premultiplied(mat);
     const m = new THREE.Mesh(geo('slash'), mat);
     m.frustumCulled = false;
     m.renderOrder = o.renderOrder ?? 14;

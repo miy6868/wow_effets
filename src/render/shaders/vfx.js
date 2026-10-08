@@ -71,6 +71,7 @@ export const slashFragment = /* glsl */ `
   uniform vec3 uCore;      // edge color (HDR)
   uniform float uAlpha;
   uniform float uStreak;   // strand noise strength
+  uniform float uInk;      // 1: dark ink layer (premultiplied alpha blend)
   varying vec2 vUv;
   void main() {
     float u = vUv.x, v = vUv.y;

@@ -176,13 +176,13 @@ export const FXP = {
       if (dirBias) _v2.addScaledVector(dirBias, 1.0);
       _v2.normalize().multiplyScalar(rand(2.5, 5) * s);
       const r = rand(0.25, 0.45) * s;
-      fx.puffs.emit({ pos: p.clone().add(_v.set(Math.cos(a) * r, 0.1, Math.sin(a) * r)), vel: _v2, size: rand(0.1, 0.17) * s, sizeEnd: rand(0.26, 0.38) * s, life: rand(0.32, 0.5), mode: PUFF.SMOKE, color: [0.74, 0.7, 0.74], shade: [0.42, 0.39, 0.52], drag: 6, rise: 0.9, dissolveStart: 0.08, stretch: 0.75 });
+      fx.puffs.emit({ pos: p.clone().add(_v.set(Math.cos(a) * r, 0.1, Math.sin(a) * r)), vel: _v2, size: rand(0.1, 0.17) * s, sizeEnd: rand(0.26, 0.38) * s, life: rand(0.32, 0.5), mode: PUFF.SMOKE, color: [0.6, 0.57, 0.62], shade: [0.34, 0.32, 0.44], drag: 6, rise: 0.9, dissolveStart: 0.08, stretch: 0.75 });
     }
   },
 
   slideDust(p, vel, s = 1) {
     _v.copy(vel).setY(0).normalize().negate();
-    G.fx.puffs.emit({ pos: p.clone().setY(0.12), vel: _v.multiplyScalar(rand(0.5, 1.5)).setY(rand(0.5, 1.2)), size: rand(0.1, 0.16) * s, sizeEnd: rand(0.25, 0.36) * s, life: rand(0.3, 0.45), mode: PUFF.SMOKE, color: [0.74, 0.7, 0.74], shade: [0.42, 0.39, 0.52], drag: 4, rise: 0.6, dissolveStart: 0.08, stretch: 0.75 });
+    G.fx.puffs.emit({ pos: p.clone().setY(0.12), vel: _v.multiplyScalar(rand(0.5, 1.5)).setY(rand(0.5, 1.2)), size: rand(0.1, 0.16) * s, sizeEnd: rand(0.25, 0.36) * s, life: rand(0.3, 0.45), mode: PUFF.SMOKE, color: [0.6, 0.57, 0.62], shade: [0.34, 0.32, 0.44], drag: 4, rise: 0.6, dissolveStart: 0.08, stretch: 0.75 });
   },
 
   bodyLand(p, speed, s = 1) {

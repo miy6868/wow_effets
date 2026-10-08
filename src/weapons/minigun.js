@@ -84,7 +84,7 @@ export class Minigun extends GunWeapon {
     const dir = _v.subVectors(this.aimPoint, from).normalize().clone();
     cone(dir, 0.03, dir);
     FXP.muzzleFlash(from, dir, rand(1.3, 1.8), [4, 2.8, 1.2]);
-    fireBullet({ from, dir, speed: 200, dmg: 22, kb: 1.1, stop: 0.025, shake: 0.0, kick: 0.05, width: 0.08, stretch: 0.012, color: [4, 2.6, 1.0], airLift: 1.8, sound: 'hitBullet' });
+    fireBullet({ from, dir, speed: 200, dmg: 22, kb: 1.1, fxScale: 0.7, stop: 0.025, shake: 0.0, kick: 0.05, width: 0.08, stretch: 0.012, color: [4, 2.6, 1.0], airLift: 1.8, sound: 'hitBullet' });
     // casing stream (left side port)
     const port = this.ejectPort(this.modelR, new THREE.Vector3());
     _v2.copy(right).multiplyScalar(-rand(2, 3.5)).add(_v.set(rand(-0.5, 0.5), rand(1.5, 3), rand(-0.5, 0.5)));

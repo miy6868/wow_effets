@@ -64,7 +64,8 @@ export class Shotgun extends GunWeapon {
     for (let i = 0; i < 11; i++) {
       const d = cone(dir, 0.075, new THREE.Vector3());
       fireBullet({
-        from, dir: d, speed: 150, life: 0.32, noHit: true, width: 0.06, stretch: 0.006, glowSize: 0.18,
+        // small per-pellet sparks: eleven full bullet impacts stacked into one white disc
+        from, dir: d, speed: 150, life: 0.32, noHit: true, fxScale: 0.42, width: 0.06, stretch: 0.006, glowSize: 0.18,
         color: [4, 2.6, 1.1], onHit: (pr, dummy) => tally.set(dummy, (tally.get(dummy) ?? 0) + 1),
       });
     }

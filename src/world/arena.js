@@ -127,16 +127,18 @@ export class Arena {
     const k = -this.birdT / T;
     const P = this.birdPath;
     const ang = P.a + P.dir * (k - 0.5) * 1.6;
-    const head = new THREE.Vector3(Math.cos(ang) * P.r, P.h + Math.sin(k * 3) * 2, Math.sin(ang) * P.r);
-    const fwd = new THREE.Vector3(-Math.sin(ang) * P.dir, 0, Math.cos(ang) * P.dir);
-    const side = new THREE.Vector3(fwd.z, 0, -fwd.x);
-    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), fwd);
+    const { head, fwd, side, q, p, sc } = (this.birdTmp ??= { head: new THREE.Vector3(), fwd: new THREE.Vector3(), side: new THREE.Vector3(), q: new THREE.Quaternion(), p: new THREE.Vector3(), sc: new THREE.Vector3() });
+    head.set(Math.cos(ang) * P.r, P.h + Math.sin(k * 3) * 2, Math.sin(ang) * P.r);
+    fwd.set(-Math.sin(ang) * P.dir, 0, Math.cos(ang) * P.dir);
+    side.set(fwd.z, 0, -fwd.x);
+    q.setFromUnitVectors(_zAxis, fwd);
     const t = (this.birdClock = (this.birdClock ?? 0) + dt);
     for (let i = 0; i < this.birdN; i++) {
+      // V formation: leader first, then pairs trailing out to either side
       const row = Math.ceil(i / 2), s = i % 2 ? 1 : -1;
-      const p = head.clone().addScaledVector(fwd, -row * 2.2).addScaledVector(side, i ? s * row * 2.0 : 0).add(new THREE.Vector3(0, Math.sin(t * 0.7 + i) * 0.4, 0));
-      const flap = Math.sin(t * 7 + i * 1.3);
-      this.birdM.compose(p, q, new THREE.Vector3(1.1, 1.1 * flap, 1.1));
+      p.copy(head).addScaledVector(fwd, -row * 2.2).addScaledVector(side, i ? s * row * 2.0 : 0);
+      p.y += Math.sin(t * 0.7 + i) * 0.4;
+      this.birdM.compose(p, q, sc.set(1.1, 1.1 * Math.sin(t * 7 + i * 1.3), 1.1));
       this.birds.setMatrixAt(i, this.birdM);
     }
     this.birds.instanceMatrix.needsUpdate = true;
@@ -572,6 +574,7 @@ export class Arena {
 }
 
 const _ca = new THREE.Color(), _cb = new THREE.Color();
+const _zAxis = new THREE.Vector3(0, 0, 1);
 
 const TIMES = {
   dusk: {

@@ -33,7 +33,7 @@ export class HUD {
     this.skillEl = el('div', 'skill', this.root);
     this.status = el('div', 'status', this.root);
     this.hint = el('div', 'hud-hint', this.root);
-    this.hint.innerHTML = '<b>H</b> 조작법 · <b>F</b> 필살기 · <b>Shift</b> 대시 · <b>C</b> 순간이동 · <b>Z</b> 슬로모션 · <b>P</b> 일시정지';
+    this.hint.innerHTML = '<b>H</b> 조작법 · <b>F</b> 필살기 · <b>Shift</b> 대시 · <b>C</b> 순간이동 · <b>Z</b> 슬로모션 · <b>P</b> 일시정지 · <b>K</b> 달밤';
     this.hintT = 25; // full control line for the first moments of play, then just "H"
     this.playing = false;
     this.ult = el('div', 'ult', this.root);
@@ -58,6 +58,8 @@ export class HUD {
     this.wtitle.dataset.cat = w.category;
     this.wtitle.classList.remove('show'); void this.wtitle.offsetWidth; this.wtitle.classList.add('show');
     this.titleT = 4.0;
+    // a previous weapon's move caption gives way to the new weapon card
+    this.skillT = 0; this.skillEl.classList.remove('on');
     this.cross.classList.toggle('on', w.category !== 'melee');
   }
 

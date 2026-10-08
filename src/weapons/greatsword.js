@@ -43,9 +43,9 @@ export function groundImpact(pos, s = 1, color = [3, 1.0, 0.25]) {
     fx.debris.rock.emit({ pos: p.clone().add(_v.set(Math.cos(a) * r, 0.2, Math.sin(a) * r)), vel: _v2.set(Math.cos(a) * rand(2, 6), rand(6, 13), Math.sin(a) * rand(2, 6)), scale: rand(0.08, 0.2) * s, life: rand(1.2, 2.0) });
   }
   // dust ring rolling outward
-  for (let i = 0; i < 12; i++) {
-    const a = (i / 12) * Math.PI * 2 + rand(-0.1, 0.1);
-    fx.puffs.emit({ pos: p.clone().add(_v.set(Math.cos(a) * 0.9 * s, 0.2, Math.sin(a) * 0.9 * s)), vel: _v2.set(Math.cos(a) * rand(6, 9) * s, rand(0.5, 1.5), Math.sin(a) * rand(6, 9) * s), size: rand(0.16, 0.26) * s, sizeEnd: rand(0.45, 0.65) * s, life: rand(0.45, 0.7), mode: PUFF.SMOKE, color: [0.66, 0.62, 0.68], shade: [0.38, 0.35, 0.48], drag: 5, rise: 0.8, dissolveStart: 0.12, stretch: 0.8 });
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2 + rand(-0.1, 0.1);
+    fx.puffs.emit({ pos: p.clone().add(_v.set(Math.cos(a) * 0.9 * s, 0.2, Math.sin(a) * 0.9 * s)), vel: _v2.set(Math.cos(a) * rand(6, 9) * s, rand(0.5, 1.5), Math.sin(a) * rand(6, 9) * s), size: rand(0.14, 0.22) * s, sizeEnd: rand(0.38, 0.55) * s, life: rand(0.45, 0.7), mode: PUFF.SMOKE, color: [0.5, 0.47, 0.52], shade: [0.3, 0.28, 0.38], drag: 5, rise: 0.8, dissolveStart: 0.1, stretch: 0.75 });
   }
   // embers
   for (let i = 0; i < 26 * s; i++) {
@@ -192,7 +192,7 @@ export class Greatsword extends MeleeWeapon {
       lunge: 4.5 + level * 0.8, minLunge: 2, maxLunge: 6 + level, stopDist: 1.0, lungeWin: [0.05, 0.5], lockRange: 11,
       center: [-0.05, 1.35, 0.1], lean: 0.5, stance: 'air', cam: { dist: 7.2 + level * 0.6 },
       hits: [],
-      slash: layers({ scale: 1.15 + level * 0.1 }),
+      slash: layers({ scale: 1.1 + level * 0.06, alpha: 0.8 }),
       whoosh: 'whooshBig', whooshPitch: 0.65,
       onStart: (m) => {
         m.player.vel.y = 13; m.player.grounded = false; m.player.gravityScale = 1.15;
@@ -236,7 +236,7 @@ function slamKnock(pos, radius, kb, lift, dmg = 260) {
       if (dir.lengthSq() < 1e-4) dir.set(0, 0, 1);
       dir.normalize();
       const k = 1 - Math.min(1, dist / (radius + d.radius)) * 0.5;
-      hit(d, { dir, kb: kb * k, lift: lift * k, hitstop: 0.14, atkStop: 0.1, shake: 0, kind: 'heavy', fxScale: 0.9, dmg: Math.round(dmg * k), sound: 'hitHeavy' });
+      hit(d, { dir, kb: kb * k, lift: lift * k, hitstop: 0.14, atkStop: 0.1, shake: 0, kind: 'heavy', fxScale: 0.6, dmg: Math.round(dmg * k), sound: 'hitHeavy' });
     }
   }
 }

@@ -225,7 +225,7 @@ export const FXP = {
     fx.add.emit({ pos: p, shape: SHAPE.SPIKES, size: 4.2 * s, sizeEnd: 5.6 * s, life: 0.1, color: [1.8, 1.3, 0.7], alphaEnd: 0, rot: Math.random() * 6 });
     fx.sphere({ pos: p, r0: 0.4 * s, r1: 2.4 * s, color: [1.5, 0.9, 0.4], coreColor: [2.2, 1.8, 1.2], life: 0.12, power: 1.4, core: 0.6 });
     // 2. shock rings
-    fx.ring({ pos: p.clone().setY(0.08), normal: UP, r0: 0.5 * s, r1: 6.5 * s, w0: 0.06, w1: 0.008, color: [1.1, 0.8, 0.5], life: 0.4, sharp: 1 });
+    fx.ring({ pos: p.clone().setY(0.08), normal: UP, r0: 0.5 * s, r1: 6.0 * s, w0: 0.05, w1: 0.008, color: [0.7, 0.48, 0.28], life: 0.38, sharp: 1 });
     fx.ring({ pos: p, billboard: true, r0: 0.4 * s, r1: 3.0 * s, w0: 0.05, w1: 0.01, color: [0.8, 0.6, 0.42], life: 0.22, sharp: 1 });
     // 3. fireball core (cel fire puffs)
     for (let i = 0; i < 14; i++) {

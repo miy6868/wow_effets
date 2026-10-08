@@ -331,6 +331,12 @@ export class Player {
   applyVisual() {
     const m = this.model;
     m.root.position.copy(this.pos);
+    // attacker shudder during hitstop: the blade "bites" into the target
+    if (this.hitstopT > 0) {
+      const k = Math.min(1, this.hitstopT / 0.08) * 0.022;
+      m.root.position.x += (Math.random() - 0.5) * k;
+      m.root.position.z += (Math.random() - 0.5) * k;
+    }
     m.root.rotation.y = this.yaw;
     m.root.visible = this.invisible <= 0;
     m.apply(this.pose);

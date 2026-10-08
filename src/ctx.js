@@ -10,7 +10,7 @@ export const G = {
   audio: null,
   hud: null,
   settings: {
-    damageNumbers: true,
+    damageNumbers: false,
     shake: 1.0,
     hitstop: 1.0,
     sound: true,

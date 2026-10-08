@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { G } from './ctx.js';
 import { Pipeline } from './render/pipeline.js';
 import { toonGlobals } from './render/shaders/toon.js';
-import { Arena } from './world/arena.js';
+import { Arena, Ambience } from './world/arena.js';
 import { CameraRig } from './core/camera.js';
 import { Input } from './core/input.js';
 import { Time, tickTime, slowmo } from './core/time.js';
@@ -32,6 +32,7 @@ const screen = new ScreenFX(pipeline);
 
 Object.assign(G, { scene, fx, rig, pipeline, input, audio, screen, fxp: FXP, slowmo, time: 0 });
 
+const ambience = new Ambience(fx);
 const dummies = new DummyManager(scene);
 G.dummies = dummies;
 const player = new Player(scene);
@@ -97,6 +98,7 @@ function frame(dtReal) {
   player.update(Time.dt, input);
   dummies.update(Time.dt);
   projectiles.update(Time.dt);
+  ambience.update(Time.dt, player.pos);
   fx.update(Time.dt);
 
   const camOpts = { ...(player.weapon?.cameraOpts?.(player) ?? {}), ...(player.action?.cam ?? {}) };
@@ -154,6 +156,7 @@ function makePortrait() {
 }
 function isChildOf(o, root) { while (o) { if (o === root) return true; o = o.parent; } return false; }
 
+fx.prewarm(player.model.root);
 if (TEST) {
   input.noLock = true;
   document.body.classList.add('test');

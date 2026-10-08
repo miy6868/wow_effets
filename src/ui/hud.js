@@ -17,11 +17,13 @@ export class HUD {
       s.addEventListener('mousedown', (e) => { e.stopPropagation(); G.player.equip(i); });
       return s;
     });
-    this.wname = el('div', 'wname', this.root);
-    this.wdesc = el('div', 'wdesc', this.root);
+    this.wtitle = el('div', 'wtitle', this.root);
+    this.wcat = el('div', 'cat', this.wtitle);
+    this.wname = el('div', 'wname', this.wtitle);
+    this.wdesc = el('div', 'wdesc', this.wtitle);
     this.comboEl = el('div', 'combo', this.root);
     this.comboN = el('div', 'n', this.comboEl);
-    el('div', 'l', this.comboEl).textContent = 'HITS';
+    el('div', 'l', this.comboEl).textContent = 'COMBO';
     this.comboCount = 0; this.comboT = 0;
     this.scope = el('div', 'scope', this.root);
     this.cross = el('div', 'crosshair', this.root);
@@ -32,7 +34,8 @@ export class HUD {
     this.hint = el('div', 'hint', this.root);
     this.hint.innerHTML = '<b>H</b> 조작법 · <b>F</b> 필살기 · <b>Shift</b> 대시 · <b>C</b> 순간이동 · <b>Z</b> 슬로모션 · <b>P</b> 일시정지';
     this.ult = el('div', 'ult', this.root);
-    this.ult.innerHTML = '<div class="k">F</div><div class="t">필살기</div><div class="fill"></div>';
+    this.ult.innerHTML = '<svg viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="28"/><circle class="fg" cx="32" cy="32" r="28"/></svg><div class="k">F</div><div class="t">ULT</div>';
+    this.ultRing = this.ult.querySelector('.fg');
     this.charge = el('div', 'charge', this.root);
     this.chargeFill = el('div', 'fill', this.charge);
     this.help = document.getElementById('help');
@@ -45,9 +48,13 @@ export class HUD {
   setWeapon(i) {
     this.slots.forEach((s, j) => s.classList.toggle('on', i === j));
     const w = this.weapons[i];
+    const cat = { melee: 'MELEE', gun: 'FIREARM', magic: 'ARCANA' }[w.category] ?? '';
+    this.wcat.textContent = `${cat}  ·  ${String(i + 1).padStart(2, '0')}`;
     this.wname.textContent = w.name;
     this.wdesc.innerHTML = w.desc ?? '';
-    this.wname.classList.remove('pop'); void this.wname.offsetWidth; this.wname.classList.add('pop');
+    this.wtitle.dataset.cat = w.category;
+    this.wtitle.classList.remove('show'); void this.wtitle.offsetWidth; this.wtitle.classList.add('show');
+    this.titleT = 4.0;
     this.cross.classList.toggle('on', w.category !== 'melee');
   }
 
@@ -77,6 +84,7 @@ export class HUD {
     d.vy = 1.5;
     d.el.textContent = n;
     d.el.className = 'dn' + (n >= 200 ? ' big' : '') + (crit ? ' crit' : '');
+    d.big = n >= 200;
     d.el.style.display = 'block';
   }
 
@@ -141,14 +149,15 @@ export class HUD {
       _v.copy(d.pos).project(cam);
       if (d.t > 0.9 || _v.z > 1) { d.alive = false; d.el.style.display = 'none'; continue; }
       const x = (_v.x * 0.5 + 0.5) * W, y = (-_v.y * 0.5 + 0.5) * H;
-      const k = d.t < 0.08 ? 1.6 - d.t / 0.08 * 0.6 : 1;
+      const k = d.t < 0.06 ? 1.35 - d.t / 0.06 * 0.35 : 1;
       const a = d.t > 0.6 ? 1 - (d.t - 0.6) / 0.3 : 1;
       d.el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${k})`;
       d.el.style.opacity = a;
     }
     const cd = G.ultCooldown ?? 0;
     this.ult.classList.toggle('ready', cd <= 0);
-    this.ult.querySelector('.fill').style.height = `${(1 - cd / 4) * 100}%`;
+    this.ultRing.style.strokeDashoffset = `${176 * (cd / 4)}`;
+    if (this.titleT > 0) { this.titleT -= dtReal; if (this.titleT <= 0) this.wtitle.classList.remove('show'); }
     const parts = [];
     if (G.time_userSlow) parts.push('◐ 슬로모션 (Z)');
     if (G.paused) parts.push('❚❚ 일시정지 · 포토모드 (P)');

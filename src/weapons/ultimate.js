@@ -66,7 +66,7 @@ export class UltPhantom extends UltBase {
     const p = this.player;
     this.real0 = Time.real;
     this.color = this.w.color ?? [0.4, 1.0, 2.6];
-    cutIn('무영참', '無 影 斬', hex(this.color));
+    cutIn('무영참', '無影斬 · PHANTOM EDGE', hex(this.color));
     this.targets = nearestTargets(p, 7, 20);
     this.i = 0; this.nextT = 0; this.phase = 'cut';
     this.cam = { dist: 7.5 };
@@ -175,7 +175,7 @@ export class UltDeadEye extends UltBase {
   start() {
     const p = this.player;
     this.real0 = Time.real;
-    cutIn('데드아이', 'D E A D   E Y E', '#ff5a4a');
+    cutIn('데드아이', 'DEAD EYE', '#ff7a5a');
     this.targets = nearestTargets(p, 8, 32);
     this.phase = 'cut'; this.i = 0; this.nextR = 0; this.marks = [];
     this.moveScale = 0;
@@ -266,7 +266,7 @@ export class UltMeteor extends UltBase {
   start() {
     const p = this.player;
     this.real0 = Time.real;
-    cutIn('메테오 스트라이크', 'M E T E O R', '#ff8a3a');
+    cutIn('메테오', 'METEOR STRIKE', '#ffa060');
     // target: crosshair point, or the densest nearby group
     let tgt = this.w.aimPoint.clone(); tgt.y = 0;
     const flat = tgt.clone().sub(p.pos).setY(0);

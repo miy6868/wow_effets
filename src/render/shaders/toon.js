@@ -347,11 +347,11 @@ export function makeGroundMaterial(opts = {}) {
   return new THREE.ShaderMaterial({
     uniforms: {
       ...toonGlobals,
-      uStoneA: { value: new THREE.Color(opts.stoneA ?? 0x7f879c) },
-      uStoneB: { value: new THREE.Color(opts.stoneB ?? 0x727a8f) },
-      uGrout: { value: new THREE.Color(opts.grout ?? 0x5a5f76) },
-      uGrass: { value: new THREE.Color(opts.grass ?? 0x6f9a63) },
-      uGrassDark: { value: new THREE.Color(opts.grassDark ?? 0x5b8352) },
+      uStoneA: { value: new THREE.Color(opts.stoneA ?? 0x737889) },
+      uStoneB: { value: new THREE.Color(opts.stoneB ?? 0x676c7e) },
+      uGrout: { value: new THREE.Color(opts.grout ?? 0x4b4e60) },
+      uGrass: { value: new THREE.Color(opts.grass ?? 0x6a8a4e) },
+      uGrassDark: { value: new THREE.Color(opts.grassDark ?? 0x587a45) },
       uArenaR: { value: opts.arenaR ?? 26 },
     },
     vertexShader: groundVertex,

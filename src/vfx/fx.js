@@ -272,7 +272,10 @@ export class FX {
       if (e.update) e.update(e, k, dt);
       if (e.t >= e.life) {
         e.obj.parent?.remove(e.obj);
-        if (e.dispose !== false) e.obj.traverse((o) => { if (o.material && !o.material.userData.shared) o.material.dispose(); if (o.userData.disposeGeo) o.geometry.dispose(); });
+        // NOTE: materials are intentionally NOT disposed. three.js destroys a shader program when
+        // its last material is disposed, which would force a recompile (a visible hitch) the next
+        // time that effect spawns. Dropped materials are garbage collected.
+        if (e.dispose !== false) e.obj.traverse((o) => { if (o.userData.disposeGeo) o.geometry.dispose(); });
         if (e.onEnd) e.onEnd(e);
         this.effects.splice(i, 1);
       }
@@ -524,7 +527,24 @@ export class FX {
     const life = o.life ?? 0.35, a0 = o.alpha ?? 0.8;
     return this.spawn(g, life, (e, k) => {
       mat.uniforms.uAlpha.value = a0 * (1 - k) * (1 - k);
-    }, this.scene, { dispose: false, onEnd: () => mat.dispose() });
+    }, this.scene, { dispose: false });
+  }
+
+  /** Compile every effect shader up front (spawned invisibly for one frame). */
+  prewarm(root) {
+    const p = new THREE.Vector3(0, -30, 0);
+    const q = new THREE.Quaternion();
+    this.slash({ pos: p, quat: q, a0: 0, a1: 1, alpha: 0, sweep: 0.01, hold: 0.01, fade: 0.01 });
+    this.ring({ pos: p, alpha: 0, life: 0.02 });
+    this.sphere({ pos: p, alpha: 0, life: 0.02 });
+    this.line({ a: p, b: p.clone().setX(1), alpha: 0, life: 0.02 });
+    this.decal({ pos: p, y: -30, alpha: 0, glow: 0, life: 0.02 });
+    this.distort({ pos: p, strength: 0, life: 0.02 });
+    const b = this.beamMesh({ alpha: 0 }); b.mesh.position.copy(p); this.spawn(b.mesh, 0.02);
+    const d = this.diskMesh({ alpha: 0 }); d.mesh.position.copy(p); this.spawn(d.mesh, 0.02);
+    if (root) this.ghost(root, { alpha: 0, life: 0.02 });
+    for (const k in this.debris) this.debris[k].emit({ pos: p, life: 0.02 });
+    this.puffs.emit({ pos: p, life: 0.02 });
   }
 
   clearAll() {

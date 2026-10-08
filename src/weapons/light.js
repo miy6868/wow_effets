@@ -287,7 +287,7 @@ class BeamAction {
   end() {
     if (this.ball) this.ball.t = this.ball.life;
     for (const c of this.circles) c.t = c.life;
-    if (this.beams) for (const [b] of this.beams) { b.mesh.parent?.remove(b.mesh); b.mesh.material.dispose(); }
+    if (this.beams) for (const [b] of this.beams) b.mesh.parent?.remove(b.mesh);
     if (this.splash) { this.splash.max = 0.001; this.splash.life = 1; }
     if (this.srcLight) { this.srcLight.max = 0.001; this.srcLight.life = 1; }
   }

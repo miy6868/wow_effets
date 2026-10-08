@@ -204,8 +204,8 @@ export function singularity(c) {
   }, G.scene, {
     onEnd: () => {
       core.parent?.remove(core);
-      disk.mesh.parent?.remove(disk.mesh); disk.mesh.material.dispose();
-      disk2.mesh.parent?.remove(disk2.mesh); disk2.mesh.material.dispose();
+      disk.mesh.parent?.remove(disk.mesh);
+      disk2.mesh.parent?.remove(disk2.mesh);
       light.max = 0.001; light.life = 1;
       for (const d of pulled) d.juggleGrav = 1;
       collapseBlast(c, pulled);

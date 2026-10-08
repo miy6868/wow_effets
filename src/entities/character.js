@@ -102,12 +102,17 @@ export class CharacterModel {
       this.head.add(b);
     }
     // eyes (glowing, show facing clearly)
-    const eyeGeo = new THREE.CapsuleGeometry(0.028, 0.05, 4, 8);
+    const eyeGeo = new THREE.CapsuleGeometry(0.03, 0.05, 4, 8);
+    const glintGeo = new THREE.SphereGeometry(0.011, 6, 4);
     for (const x of [-0.085, 0.085]) {
-      const e = toonMesh(eyeGeo, { color: c.eye, emissive: 0.9, outline: false, rim: 0, flash: F });
+      const e = toonMesh(eyeGeo, { color: 0x24305e, outline: false, rim: 0, flash: F, spec: 0 });
       e.position.set(x, 0.0, 0.215);
       e.rotation.x = -0.15;
+      e.scale.set(1, 1, 0.6);
       this.head.add(e);
+      const g = toonMesh(glintGeo, { color: c.eye, emissive: 1.4, outline: false, rim: 0 });
+      g.position.set(x + 0.012, 0.022, 0.236);
+      this.head.add(g);
     }
     // headband
     const band = T(new THREE.TorusGeometry(0.235, 0.025, 6, 20), c.scarf);
@@ -276,7 +281,8 @@ export class Scarf {
         P[i].y -= 9.8 * h * h;
         // gentle flutter
         const t = performance.now() * 0.001;
-        P[i].addScaledVector(back, 0.6 * h * h * (1 + Math.sin(t * 7 + i)));
+        P[i].addScaledVector(back, 3.2 * h * h * (1 + 0.6 * Math.sin(t * 6 + i * 0.9)));
+        P[i].y += 1.8 * h * h;
       }
       for (let it = 0; it < 4; it++) {
         for (let i = 1; i < n; i++) {

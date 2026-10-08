@@ -26,8 +26,8 @@ export class Player {
     this.model = new CharacterModel();
     scene.add(this.model.root);
     this.scarves = [
-      new Scarf({ color: this.model.colors.scarf, flash: this.model.flash, n: 11, seg: 0.105, width: 0.12 }),
-      new Scarf({ color: this.model.colors.scarf, flash: this.model.flash, n: 8, seg: 0.1, width: 0.1 }),
+      new Scarf({ color: this.model.colors.scarf, flash: this.model.flash, n: 8, seg: 0.095, width: 0.11 }),
+      new Scarf({ color: this.model.colors.scarf, flash: this.model.flash, n: 6, seg: 0.09, width: 0.09 }),
     ];
     for (const s of this.scarves) scene.add(s.mesh);
     this.pos = new THREE.Vector3(0, 0, 0);

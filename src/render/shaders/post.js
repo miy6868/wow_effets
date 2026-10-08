@@ -181,9 +181,15 @@ export const compositeFrag = /* glsl */ `
 
     col = tonemap(col);
 
-    // grade
+    // grade: split toning (cool shadows, warm highlights) + gentle S-curve
     col *= uGrade;
     float L = luma(col);
+    vec3 shadowTint = vec3(0.86, 0.95, 1.1);
+    vec3 hiTint = vec3(1.06, 1.0, 0.9);
+    col *= mix(shadowTint, hiTint, smoothstep(0.05, 0.75, L));
+    vec3 cc = clamp(col, 0.0, 1.0);
+    col = mix(col, cc * cc * (3.0 - 2.0 * cc), 0.22);
+    L = luma(col);
     col = mix(vec3(L), col, uSaturation * (1.0 - uDesat));
 
     // speed lines (anime radial streaks)
@@ -220,8 +226,9 @@ export const compositeFrag = /* glsl */ `
     }
 
     col = toSRGB(col);
-    // dither to kill banding
-    col += (hash(vUv * uResolution + fract(uTime)) - 0.5) / 255.0;
+    // fine film grain (also kills banding)
+    float gr = hash(vUv * uResolution + fract(uTime * 13.7)) - 0.5;
+    col += gr * (0.022 + 0.02 * (1.0 - luma(col)));
     gl_FragColor = vec4(col, 1.0);
   }
 `;

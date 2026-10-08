@@ -47,9 +47,10 @@ export class Dummy {
     const F = this.flash;
     const heavy = this.heavy;
     const C = heavy
-      ? { body: 0x7d87a8, wood: 0x4a4e66, head: 0x8c95b5, rope: 0xe0b450, tA: 0xff5a4a, tB: 0xfff3e0, eye: 0x1a1426 }
-      : { body: 0xe3b77d, wood: 0x7a5640, head: 0xe8c08a, rope: 0x9a6440, tA: 0xe9483f, tB: 0xfff6e8, eye: 0x241a20 };
-    const T = (g, c, extra = {}) => toonMesh(g, { color: c, flash: F, outlineWidth: 2.4, rim: 0.5, ...extra });
+      ? { body: 0x6e7182, dark: 0x3a3c4a, trim: 0xd4ad62, head: 0x7b7e8f, visor: 0xffb45a, core: 0xff9a3a }
+      : { body: 0xb07a4c, dark: 0x3a2b2e, trim: 0xd4ad62, head: 0xb98552, visor: 0x8fe4ff, core: 0xffc27a };
+    const T = (g, c, extra = {}) => toonMesh(g, { color: c, flash: F, outlineWidth: 2.2, rim: 0.65, ...extra });
+    const add = (m, x, y, z, sc = 1) => { m.position.set(x * s, y * s, z * s); m.scale.multiplyScalar(s * sc); this.bodyG.add(m); return m; };
 
     this.root = new THREE.Group();
     this.yawG = new THREE.Group();
@@ -63,80 +64,83 @@ export class Dummy {
     this.bodyG = new THREE.Group();
     this.bodyG.position.y = -this.cy;
     this.shakeG.add(this.bodyG);
-    const B = this.bodyG;
 
-    for (const x of [-0.18, 0.18]) {
-      const leg = T(new THREE.CapsuleGeometry(0.12, 0.22, 4, 8), C.wood);
-      leg.position.set(x * s, 0.24 * s, 0);
-      leg.scale.setScalar(s);
-      B.add(leg);
-      const foot = T(new THREE.SphereGeometry(0.15, 10, 8), C.wood);
-      foot.scale.set(s, 0.6 * s, 1.3 * s);
-      foot.position.set(x * s, 0.07 * s, 0.05 * s);
-      B.add(foot);
+    // legs: lacquered pegs with brass ankle rings
+    for (const x of [-0.17, 0.17]) {
+      add(T(new THREE.CapsuleGeometry(0.1, 0.26, 4, 10), C.dark), x, 0.3, 0);
+      add(T(new THREE.CylinderGeometry(0.14, 0.17, 0.12, 12), C.dark, { spec: 0.4 }), x, 0.06, 0.02);
+      add(T(new THREE.TorusGeometry(0.105, 0.025, 6, 14), C.trim, { spec: 0.9 }), x, 0.18, 0).rotation.x = Math.PI / 2;
     }
-    const body = T(new THREE.CapsuleGeometry(0.42, 0.5, 6, 14), C.body);
-    body.position.y = 0.98 * s; body.scale.setScalar(s);
-    B.add(body);
-    const belt = T(new THREE.TorusGeometry(0.42, 0.045, 6, 20), C.rope);
-    belt.rotation.x = Math.PI / 2; belt.position.y = 0.72 * s; belt.scale.setScalar(s);
-    B.add(belt);
-    // chest target
-    const disc = (r, c, z) => {
-      const d = T(new THREE.CylinderGeometry(r, r, 0.04, 24), c, { outline: false, rim: 0.2 });
-      d.rotation.x = Math.PI / 2;
-      d.position.set(0, 1.04 * s, z * s);
-      d.scale.setScalar(s);
-      B.add(d);
-    };
-    disc(0.27, C.tA, 0.40); disc(0.185, C.tB, 0.415); disc(0.09, C.tA, 0.43);
-    // scarecrow arms
-    const arms = T(new THREE.CapsuleGeometry(0.1, 1.15, 4, 8), C.wood);
-    arms.rotation.z = Math.PI / 2; arms.position.y = 1.2 * s; arms.scale.setScalar(s);
-    B.add(arms);
-    for (const x of [-0.72, 0.72]) {
-      const hand = T(new THREE.SphereGeometry(0.13, 10, 8), C.body);
-      hand.position.set(x * s, 1.2 * s, 0); hand.scale.setScalar(s);
-      B.add(hand);
-    }
-    // head
-    this.headG = new THREE.Group();
-    this.headG.position.y = 1.62 * s;
-    B.add(this.headG);
-    const head = T(new THREE.SphereGeometry(0.3, 16, 12), C.head);
-    head.scale.setScalar(s);
-    this.headG.add(head);
+    // pelvis + torso (slightly tapered barrel)
+    const torso = add(T(new THREE.CapsuleGeometry(0.4, 0.46, 6, 16), C.body, { spec: 0.35 }), 0, 0.98, 0);
+    torso.scale.set(s, s, s * 0.88);
+    add(T(new THREE.CylinderGeometry(0.36, 0.3, 0.2, 16), C.dark, { spec: 0.4 }), 0, 0.6, 0);
+    add(T(new THREE.TorusGeometry(0.405, 0.03, 6, 22), C.trim, { spec: 0.9 }), 0, 0.72, 0).rotation.x = Math.PI / 2;
+    add(T(new THREE.TorusGeometry(0.3, 0.035, 6, 20), C.trim, { spec: 0.9 }), 0, 1.38, 0).rotation.x = Math.PI / 2;
     if (heavy) {
-      const helm = T(new THREE.SphereGeometry(0.33, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), 0x5b6385, { spec: 0.6 });
-      helm.scale.setScalar(s); helm.position.y = 0.03 * s;
-      this.headG.add(helm);
-      const crest = T(new THREE.BoxGeometry(0.06, 0.2, 0.5), C.rope, { spec: 0.6 });
-      crest.position.y = 0.33 * s; crest.scale.setScalar(s);
-      this.headG.add(crest);
-      for (const x of [-0.62, 0.62]) {
-        const pad = T(new THREE.SphereGeometry(0.24, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), 0x5b6385, { spec: 0.6 });
-        pad.position.set(x * s, 1.3 * s, 0); pad.scale.setScalar(s);
-        B.add(pad);
+      // glowing core set into the chest
+      const ring = add(T(new THREE.TorusGeometry(0.17, 0.04, 8, 20), C.trim, { spec: 0.9 }), 0, 1.04, 0.36);
+      const core = add(T(new THREE.OctahedronGeometry(0.12, 0), C.core, { emissive: 1.4, outline: false, rim: 0 }), 0, 1.04, 0.38);
+      core.scale.set(s, s * 1.3, s * 0.6);
+      this.core = core;
+      for (const x of [-0.6, 0.6]) {
+        const pad = add(T(new THREE.SphereGeometry(0.26, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), C.dark, { spec: 0.6 }), x, 1.32, 0);
+        add(T(new THREE.TorusGeometry(0.2, 0.025, 6, 16), C.trim, { spec: 0.9 }), x, 1.36, 0).rotation.x = Math.PI / 2;
       }
     } else {
-      const tuft = T(new THREE.ConeGeometry(0.1, 0.22, 6), 0xf2d68e);
-      tuft.position.set(0, 0.32 * s, 0); tuft.scale.setScalar(s);
-      this.headG.add(tuft);
+      // paper talisman (ofuda) on the chest
+      const paper = add(T(new THREE.BoxGeometry(0.2, 0.36, 0.015), 0xf1e9d6, { outlineWidth: 1.2, rim: 0.2 }), 0, 1.0, 0.36);
+      paper.rotation.x = -0.12;
+      const ink = add(T(new THREE.BoxGeometry(0.03, 0.22, 0.018), 0xb3262e, { outline: false, rim: 0 }), 0, 0.99, 0.368);
+      ink.rotation.x = -0.12;
+      const seal = add(T(new THREE.CylinderGeometry(0.045, 0.045, 0.018, 12), 0xb3262e, { outline: false, rim: 0 }), 0, 1.12, 0.37);
+      seal.rotation.x = Math.PI / 2 - 0.12;
     }
-    // eyes (normal + X)
+    // jointed arms in a guard pose
+    const arm = (sx) => {
+      const sh = add(T(new THREE.SphereGeometry(0.13, 12, 10), C.dark, { spec: 0.4 }), 0.45 * sx, 1.26, 0);
+      const up = add(T(new THREE.CapsuleGeometry(0.085, 0.26, 4, 10), C.body, { spec: 0.35 }), 0.56 * sx, 1.06, 0.06);
+      up.rotation.set(0.35, 0, 0.35 * sx);
+      add(T(new THREE.SphereGeometry(0.09, 10, 8), C.trim, { spec: 0.9 }), 0.62 * sx, 0.88, 0.14);
+      const lo = add(T(new THREE.CapsuleGeometry(0.075, 0.22, 4, 10), C.body, { spec: 0.35 }), 0.52 * sx, 0.86, 0.32);
+      lo.rotation.set(1.45, 0, -0.25 * sx);
+      add(T(new THREE.SphereGeometry(0.1, 10, 8), C.dark, { spec: 0.4 }), 0.42 * sx, 0.86, 0.48);
+    };
+    arm(-1); arm(1);
+
+    // head: smooth lacquered egg with a glowing visor slit
+    this.headG = new THREE.Group();
+    this.headG.position.y = 1.66 * s;
+    this.bodyG.add(this.headG);
+    const head = T(new THREE.SphereGeometry(0.27, 18, 14), C.head, { spec: 0.5 });
+    head.scale.set(s, s * 1.08, s);
+    this.headG.add(head);
+    const neck = T(new THREE.CylinderGeometry(0.11, 0.13, 0.14, 12), C.dark);
+    neck.position.y = -0.27 * s; neck.scale.setScalar(s);
+    this.headG.add(neck);
+    if (heavy) {
+      const crest = T(new THREE.BoxGeometry(0.06, 0.16, 0.42), C.trim, { spec: 0.9 });
+      crest.position.y = 0.3 * s; crest.scale.setScalar(s);
+      this.headG.add(crest);
+    } else {
+      const knot = T(new THREE.TorusGeometry(0.27, 0.022, 6, 22), C.trim, { spec: 0.9 });
+      knot.rotation.x = Math.PI / 2; knot.position.y = 0.08 * s; knot.scale.setScalar(s);
+      this.headG.add(knot);
+    }
+    const visorGeo = new THREE.CapsuleGeometry(0.035, 0.2, 4, 8);
+    visorGeo.rotateZ(Math.PI / 2);
     this.eyesN = new THREE.Group();
     this.eyesX = new THREE.Group();
     this.headG.add(this.eyesN, this.eyesX);
-    for (const x of [-0.11, 0.11]) {
-      const e = T(new THREE.CapsuleGeometry(0.035, 0.07, 4, 8), C.eye, { outline: false, rim: 0 });
-      e.position.set(x * s, 0.02 * s, 0.27 * s); e.scale.setScalar(s);
-      this.eyesN.add(e);
-      for (const r of [0.8, -0.8]) {
-        const b = T(new THREE.BoxGeometry(0.035, 0.13, 0.03), C.eye, { outline: false, rim: 0 });
-        b.position.set(x * s, 0.03 * s, 0.275 * s); b.rotation.z = r; b.scale.setScalar(s);
-        this.eyesX.add(b);
-      }
-    }
+    const slot = T(new THREE.BoxGeometry(0.34, 0.09, 0.08), C.dark, { outline: false, rim: 0 });
+    slot.position.set(0, 0.0, 0.235 * s); slot.scale.setScalar(s);
+    this.headG.add(slot);
+    const vN = toonMesh(visorGeo, { color: C.visor, emissive: 1.3, outline: false, rim: 0, flash: F });
+    vN.position.set(0, 0.0, 0.27 * s); vN.scale.setScalar(s);
+    this.eyesN.add(vN);
+    const vX = toonMesh(visorGeo, { color: 0xff4a3a, emissive: 1.6, outline: false, rim: 0 });
+    vX.position.set(0, 0.0, 0.27 * s); vX.scale.set(s, s * 0.6, s);
+    this.eyesX.add(vX);
     this.eyesX.visible = false;
     this.root.traverse((o) => { o.frustumCulled = false; });
   }
@@ -204,7 +208,7 @@ export class Dummy {
     else this.flash.value.w = 0;
     this.stunEyes -= dt;
     this.updateStatus(dt);
-    this.eyesX.visible = this.stunEyes > 0 || this.state === 'down';
+    this.eyesX.visible = (this.stunEyes > 0 || this.state === 'down') && (this.state === 'down' || Math.sin(G.time * 45) > -0.4);
     this.eyesN.visible = !this.eyesX.visible;
 
     if (this.hitstop > 0) {

@@ -233,7 +233,6 @@ function spikeCluster(pos, dir, s = 1) {
         fx.debris.shard.emit({ pos: pos.clone().setY(rand(0.3, 1.2)), vel: _v2.normalize().multiplyScalar(rand(2, 5)), scale: rand(0.05, 0.12), life: rand(0.7, 1.2) });
       }
       fx.puffs.emit({ pos: pos.clone().setY(0.4), vel: new THREE.Vector3(0, 0.5, 0), size: 0.3, sizeEnd: 0.7, life: 0.7, mode: PUFF.MIST, color: [0.85, 0.95, 1.05], shade: [0.55, 0.7, 0.9], drag: 2, dissolveStart: 0.1 });
-      for (const m of spikes) { m.material.dispose(); m.children[0]?.material.dispose(); }
     },
   });
 }

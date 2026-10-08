@@ -134,13 +134,13 @@ export const FXP = {
   hitBullet(p, dir, color = COL.hot, s = 1) {
     const fx = G.fx;
     fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 0.9 * s, sizeEnd: 0.05, life: 0.07, color: mul(COL.white, 5), alphaEnd: 0, rot: Math.random() });
-    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 0.9 * s, sizeEnd: 1.2 * s, life: 0.08, color: mul(color, 2), alphaEnd: 0 });
+    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 0.5 * s, sizeEnd: 0.7 * s, life: 0.06, color: mul(color, 1.4), alphaEnd: 0 });
     _v.copy(dir).negate();
     for (let i = 0; i < 7; i++) {
       cone(_v, 0.9, _v2);
       fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(6, 14)), shape: SHAPE.STREAK, size: 0.045, stretch: 0.025, life: rand(0.08, 0.18), color: mul(COL.hot, 5), colorEnd: mul(COL.orange, 2), alphaEnd: 0, drag: 5, gravity: 14 });
     }
-    fx.ring({ pos: p, billboard: true, r0: 0.05, r1: 0.5 * s, w0: 0.15, w1: 0.03, color: mul(color, 2), life: 0.09, sharp: 0.8 });
+    fx.ring({ pos: p, billboard: true, r0: 0.05, r1: 0.32 * s, w0: 0.12, w1: 0.03, color: mul(color, 0.9), life: 0.07, sharp: 0.8 });
     // fluff chunks (dummy stuffing)
     for (let i = 0; i < 3; i++) {
       cone(_v, 1.0, _v2);

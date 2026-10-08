@@ -111,12 +111,20 @@ export class CharacterModel {
     for (const x of [-0.085, 0.085]) {
       const e = toonMesh(eyeGeo, { color: 0x24305e, outline: false, rim: 0, flash: F, spec: 0 });
       e.position.set(x, 0.0, 0.215);
-      e.rotation.x = -0.15;
-      e.scale.set(1, 1, 0.6);
+      e.rotation.set(-0.15, 0, x > 0 ? 0.18 : -0.18);
+      e.scale.set(1.05, 0.78, 0.6);
       this.head.add(e);
       const g = toonMesh(glintGeo, { color: c.eye, emissive: 1.4, outline: false, rim: 0 });
       g.position.set(x + 0.012, 0.022, 0.236);
       this.head.add(g);
+    }
+    // determined brows (angled down toward the center)
+    const browGeo = new THREE.BoxGeometry(0.085, 0.017, 0.02);
+    for (const x of [-0.085, 0.085]) {
+      const b = toonMesh(browGeo, { color: 0x4a4f6e, outline: false, rim: 0, flash: F });
+      b.position.set(x, 0.072, 0.21);
+      b.rotation.set(-0.25, 0, x > 0 ? -0.32 : 0.32);
+      this.head.add(b);
     }
     // headband
     const band = T(new THREE.TorusGeometry(0.235, 0.025, 6, 20), c.scarf);

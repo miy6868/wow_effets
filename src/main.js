@@ -145,20 +145,33 @@ window.__app = {
 
 // cut-in portrait: render the hero's face once through the toon pipeline
 function makePortrait() {
-  const cam = new THREE.PerspectiveCamera(30, 1, 0.05, 50);
+  const cam = new THREE.PerspectiveCamera(24, 1, 0.05, 50);
+  player.model.root.updateMatrixWorld(true);
   const head = player.model.head.getWorldPosition(new THREE.Vector3());
   const fwd = player.forward(new THREE.Vector3());
   const right = player.right(new THREE.Vector3());
-  cam.position.copy(head).addScaledVector(fwd, 1.6).addScaledVector(right, -0.45).add(new THREE.Vector3(0, 0.05, 0));
-  cam.lookAt(head.clone().add(new THREE.Vector3(0, -0.08, 0)));
+  const eyes = head.clone().add(new THREE.Vector3(0, 0.01, 0)).addScaledVector(fwd, 0.15);
+  cam.position.copy(eyes).addScaledVector(fwd, 0.95).addScaledVector(right, -0.28).add(new THREE.Vector3(0, -0.02, 0));
+  cam.lookAt(eyes.clone().add(new THREE.Vector3(0, -0.03, 0)));
+  cam.rotateZ(-0.12); // dutch angle
   const hidden = [];
   scene.traverse((o) => { if (o.isMesh && o.visible && !isChildOf(o, player.model.root)) { o.visible = false; hidden.push(o); } });
+  // dramatic lighting for the still: hard side key, strong cool rim, dark ambient
+  const L = toonGlobals;
+  const saved = { dir: L.uLightDir.value.clone(), col: L.uLightColor.value.clone(), sky: L.uSkyAmb.value.clone(), gnd: L.uGroundAmb.value.clone(), rim: L.uRimColor.value.clone() };
+  L.uLightDir.value.copy(right).multiplyScalar(-1).addScaledVector(fwd, 0.05).add(new THREE.Vector3(0, 0.3, 0)).normalize();
+  L.uLightColor.value.setRGB(1.15, 0.98, 0.85);
+  L.uSkyAmb.value.setRGB(0.8, 0.82, 0.95); L.uGroundAmb.value.setRGB(0.6, 0.62, 0.8);
+  L.uRimColor.value.setRGB(0.6, 0.85, 1.6);
   const prevClear = pipeline.clearColor;
-  pipeline.clearColor = 0x150c2a;
-  const vig = pipeline.u.uVignette.value; pipeline.u.uVignette.value = 0;
+  pipeline.clearColor = 0x0c0818;
+  const vig = pipeline.u.uVignette.value; pipeline.u.uVignette.value = 0.4;
+  const shOn = pipeline.shadow.uniforms.uShadowOn.value; pipeline.shadow.uniforms.uShadowOn.value = 0;
   const url = pipeline.snapshot(scene, cam, 512, 512);
+  pipeline.shadow.uniforms.uShadowOn.value = shOn;
   pipeline.u.uVignette.value = vig;
   pipeline.clearColor = prevClear;
+  L.uLightDir.value.copy(saved.dir); L.uLightColor.value.copy(saved.col); L.uSkyAmb.value.copy(saved.sky); L.uGroundAmb.value.copy(saved.gnd); L.uRimColor.value.copy(saved.rim);
   for (const o of hidden) o.visible = true;
   hud.cutin.querySelector('.portrait').style.backgroundImage = `url(${url})`;
 }

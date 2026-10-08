@@ -22,7 +22,7 @@ export function zapHit(point, s = 1) {
     randUnit(_v2);
     fx.add.emit({ pos: point, vel: _v2.multiplyScalar(rand(5, 14) * s), shape: SHAPE.STREAK, size: 0.04, stretch: 0.03, life: rand(0.1, 0.3), color: [2.5, 3.2, 6], colorEnd: [0.4, 0.6, 2], alphaEnd: 0, drag: 5, gravity: 6 });
   }
-  fx.ring({ pos: point, billboard: true, r0: 0.1, r1: 1.1 * s, w0: 0.08, w1: 0.015, color: [0.8, 1.2, 3], life: 0.14, sharp: 1 });
+  fx.ring({ pos: point, billboard: true, r0: 0.1, r1: 0.8 * s, w0: 0.06, w1: 0.012, color: [0.4, 0.6, 1.5], life: 0.12, sharp: 1 });
   fx.light(point, [0.5, 0.7, 1.4], 2.5, 6, 0.15);
 }
 

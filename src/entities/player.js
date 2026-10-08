@@ -447,9 +447,9 @@ export class DashAction {
     G.audio?.play('dash');
     const fx = G.fx;
     const back = this.dir.clone().negate();
-    if (p.grounded) FXP.dust(p.pos, 0.9, 7, back);
+    if (p.grounded) FXP.dust(p.pos, 0.75, 5, back);
     // burst ring at start
-    fx.ring({ pos: p.pos.clone().setY(p.pos.y + 0.9), normal: this.dir, r0: 0.3, r1: 1.6, w0: 0.15, w1: 0.02, color: [0.8, 1.6, 3], life: 0.22, sharp: 1 });
+    fx.ring({ pos: p.pos.clone().setY(p.pos.y + 0.9).addScaledVector(this.dir, -0.4), normal: this.dir, r0: 0.3, r1: 1.2, w0: 0.08, w1: 0.015, color: [0.35, 0.7, 1.3], life: 0.18, sharp: 1 });
     for (let i = 0; i < 14; i++) {
       cone(back, 0.5, _v);
       fx.add.emit({ pos: p.pos.clone().add(_v2.set(rand(-0.3, 0.3), rand(0.3, 1.6), rand(-0.3, 0.3))), vel: _v.multiplyScalar(rand(6, 14)), shape: SHAPE.STREAK, size: 0.05, stretch: 0.05, life: rand(0.15, 0.3), color: [1.2, 2.4, 4], alphaEnd: 0, drag: 4 });

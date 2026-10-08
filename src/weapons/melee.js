@@ -121,6 +121,15 @@ export class SwingMove {
     const [w0, w1] = s.swing ?? [0, 0];
     const on = t >= w0 - 0.015 && t <= w1 + (s.trailHold ?? 0.05);
     for (const d of this.w.trailDefs ?? []) d.trail.emitting = on && this.usesSide(d.socket);
+    // blade smear: faint afterimages of the weapon along the arc (anime multi-blade smear)
+    if (t >= w0 && t <= w1 + 0.02 && dt > 0 && this.w.modelR && s.smear !== false) {
+      const c = this.w.color ?? [0.5, 1, 2.5];
+      const m = Math.max(c[0], c[1], c[2]) || 1;
+      const rim = [c[0] / m * 2.4, c[1] / m * 2.4, c[2] / m * 2.4];
+      const hand = s.hand ?? 'R';
+      if (hand !== 'L') G.fx.ghost(this.w.modelR, { color: rim.map((x) => x * 0.25), rim, life: 0.09, alpha: 0.55 });
+      if ((hand === 'L' || hand === 'both') && this.w.modelL) G.fx.ghost(this.w.modelL, { color: rim.map((x) => x * 0.25), rim, life: 0.09, alpha: 0.55 });
+    }
     // slash fx at swing start
     if (!this.slashDone && t >= w0 - 0.001 && s.slash !== null) {
       this.slashDone = true;

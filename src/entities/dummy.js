@@ -177,8 +177,12 @@ export class Dummy {
     this.hitstopMax = this.hitstop;
     this.shakeDir.copy(h.dir);
     const light = h.kind === 'bullet' || (h.kb ?? 3) < 1.6;
-    this.flashT = h.flashT ?? (light ? 0.022 : 0.045);
-    this.flashA = light ? 0.5 : 0.78;
+    // rapid streams (minigun, pistols) must not keep the target permanently white
+    if (!light || T - (this.lastFlash ?? -1) > 0.1) {
+      this.flashT = h.flashT ?? (light ? 0.022 : 0.045);
+      this.flashA = light ? 0.5 : 0.78;
+      this.lastFlash = T;
+    }
     this.hurtT = 0.3;
     this.stunEyes = 0.6;
     const frozen = this.status.freeze > 0;

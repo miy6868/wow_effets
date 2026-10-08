@@ -178,7 +178,7 @@ export class Dummy {
     this.shakeDir.copy(h.dir);
     const light = h.kind === 'bullet' || (h.kb ?? 3) < 1.6;
     this.flashT = h.flashT ?? (light ? 0.022 : 0.045);
-    this.flashA = light ? 0.6 : 0.9;
+    this.flashA = light ? 0.5 : 0.78;
     this.hurtT = 0.3;
     this.stunEyes = 0.6;
     const frozen = this.status.freeze > 0;

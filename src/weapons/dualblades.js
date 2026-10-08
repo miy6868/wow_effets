@@ -17,6 +17,7 @@ const CORE = [4, 2.6, 3];
 
 function L(extra = {}) {
   return [
+    { ink: true, width: 0.34, rIn: 0.8, rOut: 1.75, color: [0.05, 0.01, 0.04], alpha: 0.65, tail: 0.7, fade: 0.12, streak: 0.6, cone: 0.1, da0: -0.25 },
     { width: 0.45, tail: 0.9, streak: 0.8, rIn: 0.5, rOut: 1.65, fade: 0.16, ...extra },
     { width: 0.3, rIn: 1.45, rOut: 1.85, color: [2.2, 0.8, 1.2], core: [3, 2.4, 2.6], tail: 0.45, fade: 0.08, cone: 0.04 },
   ];

@@ -270,10 +270,13 @@ export class Player {
     this.runPhase += dt * (Math.hypot(this.vel.x, this.vel.z) / 1.35) * Math.PI;
     const ph = this.runPhase;
     L.lean = 0.28 * s; L.roll = this.leanRoll; L.twist = Math.sin(ph) * 0.18 * s; L.squash = 1;
-    L.hip.set(0, 0.94 - 0.06 * s + Math.abs(Math.cos(ph)) * 0.07 * s + Math.sin(t * 2.2) * 0.008 * (1 - s), 0);
+    // idle: grounded ready stance (feet apart, knees soft, gentle breathing); run: stride cycle
+    const idle = 1 - s;
+    L.hip.set(0, 0.94 - 0.06 * s - 0.04 * idle + Math.abs(Math.cos(ph)) * 0.07 * s + Math.sin(t * 2.0) * 0.012 * idle, 0);
+    L.twist += 0.18 * idle; L.lean += 0.06 * idle;
     const stride = 0.42 * s;
-    L.footR.set(-0.13, Math.max(0, -Math.sin(ph)) * 0.28 * s, Math.cos(ph) * stride + 0.05 * s);
-    L.footL.set(0.13, Math.max(0, Math.sin(ph)) * 0.28 * s, -Math.cos(ph) * stride + 0.05 * s);
+    L.footR.set(-0.13 - 0.06 * idle, Math.max(0, -Math.sin(ph)) * 0.28 * s, Math.cos(ph) * stride + 0.05 * s - 0.12 * idle);
+    L.footL.set(0.13 + 0.05 * idle, Math.max(0, Math.sin(ph)) * 0.28 * s, -Math.cos(ph) * stride + 0.05 * s + 0.1 * idle);
     L.handR.set(-0.34, 0.78 + s * 0.06, 0.06 - Math.cos(ph) * 0.26 * s);
     L.handL.set(0.34, 0.78 + s * 0.06, 0.06 + Math.cos(ph) * 0.26 * s);
     L.headYaw = 0; L.headPitch = 0.05 * s; L.elbowOut = 0; L.flip = 0; L.spin = 0;

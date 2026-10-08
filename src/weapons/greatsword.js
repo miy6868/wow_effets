@@ -20,6 +20,7 @@ const CORE = [3.4, 2.4, 1.2];
 function layers(extra = {}) {
   const sc = extra.scale ?? 1;
   return [
+    { ink: true, rIn: 1.6 * sc, rOut: 2.85 * sc, width: 0.36, color: [0.06, 0.02, 0.02], alpha: 0.7, tail: 0.8, fade: 0.18, streak: 0.6, cone: 0.15, da0: -0.25 },
     { width: 0.5, tail: 1.1, streak: 0.9, fade: 0.28, ...extra },
     { rIn: 2.45 * sc, rOut: 3.0 * sc, width: 0.3, color: [1.6, 0.8, 0.25], core: [2.6, 2, 1.3], tail: 0.5, fade: 0.14, streak: 0.3, cone: 0.06 },
     { rIn: 0.4, rOut: 2.2 * sc, width: 0.9, color: [0.5, 0.08, 0.015], core: [0.9, 0.25, 0.06], alpha: 0.55, tail: 1.6, fade: 0.4, streak: 1 },

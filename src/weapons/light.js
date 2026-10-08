@@ -249,7 +249,7 @@ class BeamAction {
     this.phase = 'fire';
     this.fireT = 0;
     this.fireDur = 0.6 + c * 0.9;
-    this.R = 0.25 + c * 0.3;
+    this.R = 0.22 + c * 0.24;
     this.w.castK = 2;
     this.beams = [
       [G.fx.beamMesh({ color: [1.8, 1.4, 0.6], core: [2.6, 2.4, 2.0], power: 0.8, noise: 0.4, scroll: 40 }), 0.38],
@@ -257,8 +257,8 @@ class BeamAction {
       [G.fx.beamMesh({ color: [0.45, 0.25, 0.06], core: [0.6, 0.4, 0.12], power: 2.2, noise: 1.0, scroll: 14, alpha: 0.5 }), 1.45],
     ];
     for (const [b] of this.beams) G.scene.add(b.mesh);
-    this.splash = G.fx.light(new THREE.Vector3(), [1, 0.8, 0.4], 3, 8, 0);
-    this.srcLight = G.fx.light(new THREE.Vector3(), [1, 0.8, 0.4], 2.5, 6, 0);
+    this.splash = G.fx.light(new THREE.Vector3(), [1, 0.8, 0.4], 1.5, 6, 0);
+    this.srcLight = G.fx.light(new THREE.Vector3(), [1, 0.8, 0.4], 1.4, 5, 0);
     const hp = this.hands();
     const dir = this.aimDir(hp);
     G.fx.add.emit({ pos: hp, shape: SHAPE.STAR, size: 2.6 * c + 0.6, sizeEnd: 0.3, life: 0.16, color: [2.6, 2.2, 1.4], alphaEnd: 0 });

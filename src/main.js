@@ -81,6 +81,11 @@ function globalKeys() {
   if (input.wasPressed('KeyM')) { G.settings.sound = !G.settings.sound; hud.toast(G.settings.sound ? '사운드 ON' : '사운드 OFF'); }
   if (input.wasPressed('KeyN')) { G.settings.damageNumbers = !G.settings.damageNumbers; hud.toast(G.settings.damageNumbers ? '데미지 숫자 ON' : '데미지 숫자 OFF'); }
   if (input.wasPressed('KeyB')) { pipeline.bloomEnabled = !pipeline.bloomEnabled; hud.toast(pipeline.bloomEnabled ? '블룸 ON' : '블룸 OFF'); }
+  if (input.wasPressed('KeyG')) {
+    const u = pipeline.shadow.uniforms.uShadowOn;
+    u.value = u.value > 0.5 ? 0 : 1;
+    hud.toast(u.value ? '그림자 ON' : '그림자 OFF');
+  }
   if (input.wasPressed('KeyV')) { G.settings.shake = G.settings.shake > 0 ? 0 : 1; hud.toast(G.settings.shake ? '화면 흔들림 ON' : '화면 흔들림 OFF'); }
   if (input.wasPressed('Backquote')) { hud.showFps = !hud.showFps; }
 }

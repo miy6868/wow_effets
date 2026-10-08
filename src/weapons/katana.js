@@ -8,6 +8,7 @@ import { FXP, rand, cone } from '../vfx/presets.js';
 import { SHAPE } from '../vfx/particles.js';
 import { bladeQuat } from '../entities/pose.js';
 import { hit } from '../combat/combat.js';
+import { toonMesh } from '../render/toon.js';
 
 const _v = new THREE.Vector3();
 const _v2 = new THREE.Vector3();
@@ -49,6 +50,19 @@ export class Katana extends MeleeWeapon {
     this.core = CORE;
     this.hitSound = 'hitSlash';
     this.modelR = katanaModel(0x7fe8ff);
+    // lacquered scabbard worn at the left hip
+    this.sheath = new THREE.Group();
+    const saya = toonMesh(new THREE.CylinderGeometry(0.032, 0.026, 1.0, 8), { color: 0x2a1f30, spec: 0.6, outlineWidth: 1.4 });
+    saya.scale.set(1, 1, 1.5);
+    saya.position.y = -0.5;
+    this.sheath.add(saya);
+    for (const y of [-0.05, -0.32, -0.97]) {
+      const ring = toonMesh(new THREE.CylinderGeometry(0.037, 0.037, 0.035, 8), { color: 0xd4ad62, spec: 0.9, outline: false });
+      ring.scale.set(1, 1, 1.5); ring.position.y = y;
+      this.sheath.add(ring);
+    }
+    this.sheath.position.set(0.24, 0.02, 0.1);
+    this.sheath.rotation.set(1.12, 0, -0.25);
     this.bladeLen = this.modelR.userData.bladeLen;
     this.trail = new WeaponTrail(G.fx, { color: [0.25, 0.75, 2.6], core: [2.5, 4, 6], maxAge: 0.13, coreWidth: 0.18, noise: 0.08 });
     this.trails = [this.trail];
@@ -126,6 +140,9 @@ export class Katana extends MeleeWeapon {
     ];
     this.airCombo[2].posePost = (P, t) => { if (t > 0.18) { P.hip.y = 0.7; P.footR.set(-0.2, 0, -0.3); P.footL.set(0.2, 0, 0.3); } };
   }
+
+  equip(p) { super.equip(p); p.model.body.add(this.sheath); }
+  unequip(p) { super.unequip(p); this.sheath.parent?.remove(this.sheath); }
 
   restPose(P, p) {
     // blade held low and back, edge down

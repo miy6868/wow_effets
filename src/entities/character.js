@@ -285,8 +285,10 @@ export class Scarf {
         P[i].y -= 9.8 * h * h;
         // gentle flutter
         const t = performance.now() * 0.001;
-        P[i].addScaledVector(back, 3.2 * h * h * (1 + 0.6 * Math.sin(t * 6 + i * 0.9)));
-        P[i].y += 1.8 * h * h;
+        // gentle breeze + flutter; motion of the body does most of the work
+        P[i].addScaledVector(back, 1.1 * h * h * (1 + 0.8 * Math.sin(t * 5 + i * 0.9)));
+        P[i].x += Math.sin(t * 3.3 + i * 1.7) * 0.5 * h * h;
+        P[i].y += 0.6 * h * h;
       }
       for (let it = 0; it < 4; it++) {
         for (let i = 1; i < n; i++) {

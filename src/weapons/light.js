@@ -155,21 +155,21 @@ class BeamAction {
     const hp = this.hands();
     if (this.phase === 'charge') {
       this.charge = Math.min(1, this.t / 1.1);
-      const r = 0.12 + this.charge * 0.32 + Math.sin(G.time * 30) * 0.02;
+      const r = 0.1 + this.charge * 0.18 + Math.sin(G.time * 30) * 0.015;
       this.ballPos.copy(hp); this.ballR = r;
       this.emitT -= dt;
       if (this.emitT <= 0) {
         this.emitT = 0.012;
         const q = hp.clone().add(randUnit(_v).multiplyScalar(rand(1.0, 1.8)));
         fx.add.emit({ pos: q, vel: hp.clone().sub(q).multiplyScalar(1 / 0.2), shape: SHAPE.STREAK, size: 0.035, stretch: 0.04, life: 0.2, color: [2.4, 1.8, 0.8], alpha: 0, alphaEnd: 1 });
-        if (Math.random() < 0.4) fx.add.emit({ pos: hp, shape: SHAPE.GLOW, size: 0.8 + this.charge, sizeEnd: 0.2, life: 0.12, color: [1, 0.75, 0.3], alphaEnd: 0 });
+        if (Math.random() < 0.4) fx.add.emit({ pos: hp, shape: SHAPE.GLOW, size: 0.5 + this.charge * 0.5, sizeEnd: 0.15, life: 0.12, color: [0.8, 0.6, 0.25], alphaEnd: 0 });
       }
       // magic circles appear in front as charge grows
       const dir = this.aimDir(hp);
       const need = this.charge > 0.75 ? 3 : this.charge > 0.4 ? 2 : this.charge > 0.05 ? 1 : 0;
       while (this.circles.length < need) {
         const i = this.circles.length;
-        const c = fx.decal({ pos: new THREE.Vector3(), size: 0.9 + i * 0.35, type: 3, color: [1.8, 1.3, 0.5], life: 99, spin: i % 2 ? -2 : 2, reveal: 0.15, additive: true });
+        const c = fx.decal({ pos: new THREE.Vector3(), size: 0.42 + i * 0.2, type: 3, color: [1.3, 0.95, 0.38], life: 99, spin: i % 2 ? -2 : 2, reveal: 0.15, additive: true });
         c.obj.rotation.set(0, 0, 0);
         this.circles.push(c);
         G.audio?.play('chargeLvl', { pitch: 1 + i * 0.25 });
@@ -237,7 +237,7 @@ class BeamAction {
   placeCircles(hp, dir) {
     _q.setFromUnitVectors(Y, dir);
     this.circles.forEach((c, i) => {
-      c.obj.position.copy(hp).addScaledVector(dir, 0.35 + i * 0.55);
+      c.obj.position.copy(hp).addScaledVector(dir, 0.45 + i * 0.5);
       c.obj.quaternion.copy(_q);
     });
   }

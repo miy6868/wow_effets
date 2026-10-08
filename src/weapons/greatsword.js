@@ -33,7 +33,7 @@ export function groundImpact(pos, s = 1, color = [3, 1.0, 0.25]) {
   const p = pos.clone(); p.y = 0.05;
   fx.decal({ pos: p, size: 3.4 * s, type: 1, color, glow: 1.15, life: 5, reveal: 0.16, glowPow: 2 });
   fx.decal({ pos: p, size: 2.2 * s, type: 0, color, glow: 0.5, life: 5, alpha: 0.55 });
-  fx.ring({ pos: p.clone().setY(0.1), normal: UP, r0: 0.4 * s, r1: 5.0 * s, w0: 0.1, w1: 0.012, color: [1.8, 1.1, 0.5], life: 0.38, sharp: 1 });
+  fx.ring({ pos: p.clone().setY(0.1), normal: UP, r0: 0.4 * s, r1: 5.0 * s, w0: 0.08, w1: 0.01, color: [1.2, 0.68, 0.28], life: 0.34, sharp: 1 });
   fx.ring({ pos: p.clone().setY(0.15), normal: UP, r0: 0.3 * s, r1: 3.2 * s, w0: 0.35, w1: 0.05, color: [0.6, 0.22, 0.06], life: 0.45, noise: 0.25 });
   fx.add.emit({ pos: p.clone().setY(0.6), shape: SHAPE.SPIKES, size: 3.0 * Math.min(s, 1.2), sizeEnd: 4.2 * Math.min(s, 1.2), life: 0.1, color: [1.4, 0.75, 0.28], alphaEnd: 0 });
   fx.add.emit({ pos: p.clone().setY(0.4), shape: SHAPE.GLOW, size: 1.6 * Math.min(s, 1.2), sizeEnd: 2.3 * Math.min(s, 1.2), life: 0.14, color: [0.9, 0.34, 0.08], alpha: 0.75, alphaEnd: 0 });

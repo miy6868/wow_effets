@@ -18,8 +18,14 @@ export const skyFragment = /* glsl */ `
   uniform vec3 uCloudShade;
   uniform float uTime;
   uniform float uWorldDim;
+  uniform float uStars;     // 0 at dusk, 1 at night
   varying vec3 vDir;
 
+  float hash13(vec3 p3) {
+    p3 = fract(p3 * 0.1031);
+    p3 += dot(p3, p3.zyx + 31.32);
+    return fract((p3.x + p3.y) * p3.z);
+  }
   float hash12(vec2 p) {
     vec3 p3 = fract(vec3(p.xyx) * 0.1031);
     p3 += dot(p3, p3.yzx + 33.33);
@@ -55,6 +61,12 @@ export const skyFragment = /* glsl */ `
     col += uSunColor * pow(sd, 5.0) * 0.45 * (1.0 - smoothstep(0.0, 0.6, h));
     col += uSunColor * pow(sd, 90.0) * 1.1;
     float disc = smoothstep(0.9988, 0.9993, sd);
+    // at night the disc is a crescent moon (an offset disc bites into it)
+    if (uStars > 0.0) {
+      vec3 side = normalize(cross(sun, vec3(0.0, 1.0, 0.0)));
+      vec3 bite = normalize(sun + side * 0.021 + vec3(0.0, 0.012, 0.0));
+      disc *= 1.0 - uStars * smoothstep(0.9987, 0.9992, max(dot(d, bite), 0.0));
+    }
     col = mix(col, uSunColor * 4.0, disc);
 
     // towering cumulus banks sitting on the horizon (cel-shaded, 3 tones)
@@ -69,13 +81,13 @@ export const skyFragment = /* glsl */ `
     float lw = fwidth(body - bodyUp) + 0.003;
     float lit = smoothstep(-lw, lw, body - bodyUp - 0.012);          // upper surfaces lit
     float core = smoothstep(cov + 0.12 - cw, cov + 0.12 + cw, body);  // dense interior
-    vec3 cLit = mix(uCloudLit, uSunColor * 1.15, pow(az, 3.0) * 0.6);
+    vec3 cLit = mix(uCloudLit, uSunColor * 1.15, pow(az, 3.0) * 0.6 * (1.0 - uStars * 0.65));
     // shadow side stays close to the sky behind it (atmospheric), lit side warm
     vec3 cShade = mix(uCloudShade, col, 0.35);
     vec3 cc = mix(cShade, cLit, lit);
     // silver lining toward the sun
     float edge = 1.0 - smoothstep(cov, cov + 0.05, body);
-    cc += uSunColor * edge * pow(az, 4.0) * 0.9;
+    cc += uSunColor * edge * pow(az, 4.0) * 0.9 * (1.0 - uStars * 0.55);
     col = mix(col, cc, cloud);
 
     // high cirrus streaks
@@ -84,6 +96,14 @@ export const skyFragment = /* glsl */ `
       float ci = fbm(vec2(u2.x * 0.18 + uTime * 0.004, u2.y * 0.9));
       float cir = smoothstep(0.55, 0.78, ci) * smoothstep(0.12, 0.5, h) * (1.0 - cloud);
       col = mix(col, mix(uCloudLit, uSunColor, 0.35) * 0.9, cir * 0.32);
+    }
+    // stars: sparse cells on the sky sphere, a few brighter ones, slow twinkle
+    if (uStars > 0.0 && h > 0.02) {
+      vec3 q = floor(d * 260.0);
+      float r = hash13(q);
+      float star = step(0.9975, r) * (0.55 + 0.45 * sin(uTime * (1.5 + r * 40.0) + r * 90.0));
+      star += step(0.99965, r) * 1.5;
+      col += vec3(0.8, 0.86, 1.0) * star * uStars * smoothstep(0.02, 0.3, h) * (1.0 - cloud);
     }
     col *= 1.0 - uWorldDim * 0.85;
     gl_FragColor = vec4(col, 1.0);

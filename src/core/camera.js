@@ -76,6 +76,29 @@ export class CameraRig {
     this.right.set(-Math.cos(this.yaw), 0, Math.sin(this.yaw));
     const cam = this.camera;
     _v.copy(this.focus).addScaledVector(this.forward, -this.dist).addScaledVector(this.right, this.shoulder);
+    // don't let the boom pass through pillars / lanterns / gate posts: shorten it
+    // to just before the first prop it would enter (xz circle test along the boom)
+    if (this.colliders) {
+      const fx = this.focus.x, fz = this.focus.z, dx = _v.x - fx, dz = _v.z - fz;
+      const L2 = dx * dx + dz * dz;
+      if (L2 > 1e-6) {
+        let tMin = 1;
+        for (const c of this.colliders) {
+          const ox = fx - c.x, oz = fz - c.z;
+          const b = ox * dx + oz * dz, cc = ox * ox + oz * oz - c.r * c.r;
+          const disc = b * b - L2 * cc;
+          if (disc <= 0) continue;
+          const t = (-b - Math.sqrt(disc)) / L2;
+          if (t > 0 && t < tMin) tMin = t;
+        }
+        // ease in fast (avoid seeing inside the prop), ease back out slowly (no pumping)
+        const kT = tMin < 1 ? Math.max(0.25, tMin - 0.04) : 1;
+        this.boomK = this.boomK ?? 1;
+        this.boomK += (kT - this.boomK) * (1 - Math.exp(-dtReal * (kT < this.boomK ? 30 : 4)));
+        const k = Math.min(this.boomK, kT < 1 ? kT + 0.02 : 1);
+        if (k < 0.999) _v.set(fx + dx * k, _v.y + (this.focus.y - _v.y) * (1 - k) * 0.3, fz + dz * k);
+      }
+    }
     if (_v.y < 0.25) _v.y = 0.25;
     this.lookTarget.copy(_v).addScaledVector(this.forward, 10);
 

@@ -27,6 +27,7 @@ const pipeline = new Pipeline(canvas);
 const scene = new THREE.Scene();
 const rig = new CameraRig(innerWidth / innerHeight);
 const arena = new Arena(scene);
+rig.colliders = arena.colliders;
 const fx = new FX(scene, pipeline, rig.camera);
 const input = new Input(canvas);
 const audio = new Audio();
@@ -35,6 +36,7 @@ const screen = new ScreenFX(pipeline);
 Object.assign(G, { scene, fx, rig, pipeline, input, audio, screen, fxp: FXP, slowmo, time: 0 });
 
 const ambience = new Ambience(fx);
+if (params.has('night')) { arena.setTimeOfDay('night', pipeline); ambience.night = true; }
 const dummies = new DummyManager(scene);
 G.dummies = dummies;
 const player = new Player(scene);
@@ -82,6 +84,12 @@ function globalKeys() {
   if (input.wasPressed('KeyT')) { dummies.reset(); hud.toast('허수아비 리셋'); }
   if (input.wasPressed('KeyH') || input.wasPressed('F1')) hud.help.classList.toggle('on');
   if (input.wasPressed('KeyM')) { G.settings.sound = !G.settings.sound; audio.mute(!G.settings.sound); hud.toast(G.settings.sound ? '사운드 ON' : '사운드 OFF'); }
+  if (input.wasPressed('KeyK')) {
+    const night = arena.time !== 'night';
+    arena.setTimeOfDay(night ? 'night' : 'dusk', pipeline);
+    ambience.night = night;
+    hud.toast(night ? '달밤' : '해질녘');
+  }
   if (input.wasPressed('KeyJ')) { G.settings.music = !G.settings.music; audio.music?.setOn(G.settings.music); hud.toast(G.settings.music ? '음악 ON' : '음악 OFF'); }
   if (input.wasPressed('KeyN')) { G.settings.damageNumbers = !G.settings.damageNumbers; hud.toast(G.settings.damageNumbers ? '데미지 숫자 ON' : '데미지 숫자 OFF'); }
   if (input.wasPressed('KeyB')) { pipeline.bloomEnabled = !pipeline.bloomEnabled; hud.toast(pipeline.bloomEnabled ? '블룸 ON' : '블룸 OFF'); }
@@ -158,7 +166,7 @@ function loop(now) {
 
 // ── test / automation hooks ────────────────────────────────────────────────────
 window.__app = {
-  G, Time, THREE, player, dummies, fx, rig, input, pipeline, weapons, screen, arena,
+  G, Time, THREE, player, dummies, fx, rig, input, pipeline, weapons, screen, arena, ambience,
   step(n = 1, dt = 1 / 60) { for (let i = 0; i < n; i++) frame(dt); },
   run(sec, dt = 1 / 60) { const n = Math.round(sec / dt); for (let i = 0; i < n; i++) frame(dt); },
   tap(code) { input.press(code); frame(1 / 60); input.release(code); },

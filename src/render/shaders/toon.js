@@ -280,7 +280,7 @@ export const groundFragment = /* glsl */ `
     float dIn = length(p - vec2(0.17, 0.18));
     float crw = fwidth(r) + 1e-4;
     float cres = (1.0 - smoothstep(1.18 - crw, 1.18 + crw, r)) * smoothstep(1.06 - crw, 1.06 + crw, dIn);
-    plaza = mix(plaza, vec3(0.5, 0.41, 0.3), cres * 0.75);
+    plaza = mix(plaza, vec3(0.4, 0.34, 0.28), cres * 0.55);
 
     // ── grass outside the plaza ──
     float gN = vnoise(p * 0.11) * 0.7 + vnoise(p * 0.45) * 0.3;
@@ -312,7 +312,7 @@ export const groundFragment = /* glsl */ `
     float fres = pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 4.0);
     vec3 R = reflect(-V, N);
     float glare = pow(max(dot(R, normalize(uSunDir)), 0.0), 18.0);
-    float polish = onPlaza * (1.0 - isGrout * 0.7) * (1.0 - sh * 0.85);
+    float polish = onPlaza * (1.0 - isGrout * 0.7) * (1.0 - sh * 0.85) * (1.0 - cres * 0.6);
     col += uSheen * polish * (fres * 0.22 + glare * (0.12 + fres * 0.55));
     col += toonPointLights(vPosW, N, col * 1.3);
     col *= 1.0 - uWorldDim * 0.8;

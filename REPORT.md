@@ -28,6 +28,8 @@ python3 -m http.server 8080   # → http://localhost:8080/
 node tools/serve.mjs &
 NODE_PATH=$(npm root -g) node tools/shoot.cjs tools/scenarios/gallery.cjs shots 960 540   # 전 무기 주요 프레임 캡처
 NODE_PATH=$(npm root -g) node tools/shoot.cjs tools/scenarios/basic.cjs shots
+# 그 밖에: env.cjs(배경 각도별), night.cjs(달밤), showcase.cjs(README 이미지, HUD 숨김), edge.cjs(카메라 충돌)
+# gallery.cjs / showcase.cjs 는 ONLY=이름1,이름2 로 일부만, showcase는 NIGHT=1 로 달밤 촬영
 ```
 `index.html?test` 로 열면 실시간 루프 대신 `window.__app.step(n)` 으로 1/60초씩 결정론적으로 진행할 수 있습니다(헤드리스 캡처용).
 
@@ -52,6 +54,7 @@ NODE_PATH=$(npm root -g) node tools/shoot.cjs tools/scenarios/basic.cjs shots
 | **H** | 조작법 표시 |
 | **N / V / B / G** | 데미지 숫자(기본 OFF) / 화면 흔들림 / 블룸 / 그림자 토글 |
 | **M / J** | 전체 사운드(바람 포함) / 배경 음악 토글 |
+| **K** | 시간대 토글: 해질녘 ↔ 달밤(별·반딧불·석등 빛) — `?night`로 달밤 시작 |
 | **`** | FPS 표시 |
 
 공격 시 입력 방향(없으면 정면) 150° 안의 가장 가까운 허수아비를 자동으로 향하고, 멀면 거리를 좁히며 들어갑니다(소프트 락온).
@@ -111,6 +114,7 @@ NODE_PATH=$(npm root -g) node tools/shoot.cjs tools/scenarios/basic.cjs shots
   석등 아래 따뜻한 빛 웅덩이, 가끔 하늘을 가로지르는 새 떼, 주인공 코트 자락의 금색 초승달 문장.
 - 필살기 컷인 초상화는 만화 인쇄 톤(잉크 + 망점 스크린톤 + 필살기 색 듀오톤), 데드아이 표식은 대상을 따라다니는 조준 브래킷.
 - 아주 작은 생성형 배경음(고토 5음계 악구 + 드론), 특수기·필살기 기술명 캡션.
+- **K: 달밤 모드** — 달·별·반딧불·차가운 달빛 그림자·밝아진 석등. 어두운 배경이라 이펙트가 가장 돋보이는 모드.
 - 셀 셰이딩(보랏빛 그림자, 림라이트, 스텝 스펙큘러) + 인버티드 헐 외곽선, 분할 톤 그레이딩 + 필름 그레인.
 - 이펙트는 HDR 블룸 + 왜곡(열기·충격파·중력렌즈) + 잉크 레이어(밝은 검기 밑의 어두운 획) 조합.
 - 타이틀 화면은 게임 월드 위 어트랙트 카메라, 필살기는 컷인(극적 조명 초상화) → 시간 정지 → 시네마틱 카메라 → 임팩트 프레임.

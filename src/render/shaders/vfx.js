@@ -408,7 +408,9 @@ export const puffFragment = /* glsl */ `
     float keep = n * 0.75 + ndv * 0.35;
     if (keep < dis) discard;
     if (uOutline > 0.0) {
-      vec3 oc = mode > 0.5 && mode < 1.5 ? vC.rgb * 0.35 : uOutlineColor;
+      // fire: charred version of its deep colour; smoke/mist: a darker shade of
+      // its own shadow tone (a near-black ink line made dust read as cotton balls)
+      vec3 oc = mode > 0.5 && mode < 1.5 ? vC.rgb * 0.35 : mix(uOutlineColor, vC.rgb * 0.5, 0.65);
       gl_FragColor = vec4(oc * (1.0 - uWorldDim * 0.7), 1.0);
       return;
     }

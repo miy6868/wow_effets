@@ -30,6 +30,7 @@ export class Arena {
         uCloudShade: { value: new THREE.Color(0x7d7aa6) },
         uTime: toonGlobals.uTime,
         uWorldDim: toonGlobals.uWorldDim,
+        uStars: { value: 0 },
       },
       vertexShader: skyVertex,
       fragmentShader: skyFragment,
@@ -51,6 +52,7 @@ export class Arena {
     this.ground.renderOrder = -50;
     scene.add(this.ground);
 
+    this.colliders = []; // {x, z, r} vertical props the camera boom must not pass through
     this.buildPillars();
     this.buildHills();
     this.buildGrass();
@@ -175,6 +177,11 @@ export class Arena {
     g.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
     g.rotation.y = Math.PI / 2 - a;
     this.scene.add(g);
+    g.updateMatrixWorld(true);
+    for (const sx of [-1, 1]) {
+      const q = new THREE.Vector3(sx * 2.7, 0, 0).applyMatrix4(g.matrixWorld);
+      this.colliders.push({ x: q.x, z: q.z, r: 0.75 });
+    }
     // stepping stones leading to it
     for (let i = 0; i < 3; i++) {
       const st = toonMesh(new THREE.CylinderGeometry(0.75 - i * 0.05, 0.8 - i * 0.05, 0.12, 9), { color: 0x7c7f93, outlineWidth: 1.8 });
@@ -358,6 +365,7 @@ export class Arena {
       g.rotation.y = -a;
       this.scene.add(g);
       this.lanterns.push(g.position.clone().setY(1.51));
+      this.colliders.push({ x: g.position.x, z: g.position.z, r: 0.75 });
     }
     // warm pools of lantern light on the stone (one additive mesh, gentle flicker)
     const quads = new THREE.BufferGeometry();
@@ -372,20 +380,21 @@ export class Arena {
     quads.setAttribute('seed', new THREE.Float32BufferAttribute(S, 1));
     quads.setIndex(I);
     const pool = new THREE.Mesh(quads, new THREE.ShaderMaterial({
-      uniforms: { uTime: toonGlobals.uTime, uWorldDim: toonGlobals.uWorldDim, uColor: { value: new THREE.Color(1.0, 0.55, 0.22) } },
+      uniforms: { uTime: toonGlobals.uTime, uWorldDim: toonGlobals.uWorldDim, uColor: { value: new THREE.Color(1.0, 0.55, 0.22) }, uGain: { value: 1 } },
       vertexShader: `attribute float seed; varying vec2 vUv; varying float vSeed;
         void main() { vUv = uv; vSeed = seed; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-      fragmentShader: `uniform float uTime; uniform float uWorldDim; uniform vec3 uColor; varying vec2 vUv; varying float vSeed;
+      fragmentShader: `uniform float uTime; uniform float uWorldDim; uniform vec3 uColor; uniform float uGain; varying vec2 vUv; varying float vSeed;
         void main() {
           float r = length(vUv);
           float k = (1.0 - smoothstep(0.0, 1.0, r)); k *= k;
           // two soft cel steps so the pool reads as toon light, not a gradient blob
           float c = k * 0.55 + smoothstep(0.42, 0.46, k) * 0.12;
           float fl = 0.9 + 0.1 * sin(uTime * 7.0 + vSeed) * sin(uTime * 3.3 + vSeed * 2.0);
-          gl_FragColor = vec4(uColor * c * fl * 0.32 * (1.0 - uWorldDim * 0.9), 1.0);
+          gl_FragColor = vec4(uColor * c * fl * 0.32 * uGain * (1.0 - uWorldDim * 0.9), 1.0);
         }`,
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
     }));
+    this.poolMat = pool.material;
     pool.renderOrder = -40;
     pool.frustumCulled = false;
     this.scene.add(pool);
@@ -450,6 +459,7 @@ export class Arena {
         p.add(top);
       }
       p.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+      this.colliders.push({ x: p.position.x, z: p.position.z, r: 1.45 });
       p.rotation.y = -a;
       g.add(p);
     }
@@ -464,6 +474,7 @@ export class Arena {
       { r: 175, h: 30, rough: 1.3, color: 0x5d6390, haze: 0.38, seed: 7.7 },
       { r: 128, h: 16, rough: 1.7, color: 0x434b74, haze: 0.22, seed: 1.9 },
     ];
+    this.ridgeMats = [];
     for (const L of layers) {
       const N = 360;
       const pos = new Float32Array((N + 1) * 2 * 3);
@@ -500,9 +511,58 @@ export class Arena {
       m.frustumCulled = false;
       m.renderOrder = -60;
       this.scene.add(m);
+      this.ridgeMats.push(m.material);
     }
   }
+
+  /** 'dusk' (default) or 'night': swaps sky, light, haze and set-dressing colours. */
+  setTimeOfDay(mode, pipeline) {
+    const P = TIMES[mode] ?? TIMES.dusk;
+    this.time = mode;
+    const L = toonGlobals, S = this.skyMat.uniforms;
+    L.uLightDir.value.set(...P.lightDir).normalize();
+    L.uLightColor.value.setRGB(...P.light);
+    L.uSkyAmb.value.setRGB(...P.skyAmb); L.uGroundAmb.value.setRGB(...P.groundAmb);
+    L.uRimColor.value.setRGB(...P.rim);
+    L.uFogColor.value.set(P.fog); L.uFog.value.set(...P.fogRange);
+    S.uZenith.value.set(P.zenith); S.uMid.value.set(P.mid); S.uHorizon.value.set(P.horizon);
+    S.uSunDir.value.set(...P.sunDir).normalize();
+    S.uSunColor.value.setRGB(...P.sun);
+    S.uCloudLit.value.set(P.cloudLit); S.uCloudShade.value.set(P.cloudShade);
+    S.uStars.value = P.stars;
+    this.ground.material.uniforms.uSheen.value.set(P.sheen).multiplyScalar(P.sheenK);
+    this.ridgeMats.forEach((m, i) => {
+      m.uniforms.uColor.value.set(P.ridges[i]); m.uniforms.uHaze.value.set(P.ridgeHaze); m.uniforms.uRim.value.setRGB(...P.ridgeRim);
+    });
+    if (this.grassMat) {
+      const u = this.grassMat.uniforms;
+      u.uBase.value.set(P.grass[0]); u.uTip.value.set(P.grass[1]); u.uSunTint.value.setRGB(...P.grassTint);
+    }
+    if (this.poolMat) this.poolMat.uniforms.uGain.value = P.pools;
+    if (pipeline) pipeline.u.uSunColor.value.setRGB(...P.rays);
+  }
 }
+
+const TIMES = {
+  dusk: {
+    lightDir: [-0.62, 0.5, 0.62], light: [1.0, 0.88, 0.74], skyAmb: [0.98, 0.98, 1.04], groundAmb: [0.74, 0.76, 0.92], rim: [1.0, 0.72, 0.45],
+    fog: 0xb8978f, fogRange: [55, 240],
+    zenith: 0x13204a, mid: 0x3a5d9c, horizon: 0xf2a274, sunDir: [-0.62, 0.13, 0.77], sun: [1.0, 0.66, 0.36],
+    cloudLit: 0xffd6b0, cloudShade: 0x7d7aa6, stars: 0,
+    sheen: 0xf2a274, sheenK: 0.7,
+    ridges: [0x7d7fa8, 0x5d6390, 0x434b74], ridgeHaze: 0xc39a90, ridgeRim: [1.0, 0.62, 0.32],
+    grass: [0x3f5e3a, 0x86a25a], grassTint: [1.0, 0.7, 0.4], pools: 1, rays: [1.0, 0.7, 0.42],
+  },
+  night: {
+    lightDir: [0.3, 0.62, 0.72], light: [0.46, 0.5, 0.7], skyAmb: [0.6, 0.62, 0.8], groundAmb: [0.38, 0.4, 0.55], rim: [0.5, 0.62, 1.0],
+    fog: 0x1a2038, fogRange: [40, 210],
+    zenith: 0x03050c, mid: 0x0a1229, horizon: 0x1e2a48, sunDir: [0.33, 0.36, 0.87], sun: [0.46, 0.52, 0.72],
+    cloudLit: 0x283350, cloudShade: 0x0d1224, stars: 1,
+    sheen: 0x4a5a86, sheenK: 0.4,
+    ridges: [0x222a44, 0x181f38, 0x10162a], ridgeHaze: 0x1f2742, ridgeRim: [0.2, 0.25, 0.45],
+    grass: [0x1c302e, 0x3c5848], grassTint: [0.45, 0.55, 0.95], pools: 2.8, rays: [0.45, 0.55, 0.85],
+  },
+};
 
 /** Drifting sunlit motes and a few petals around the camera — quiet ambient life. */
 function mulberry(a) {
@@ -519,7 +579,11 @@ export class Ambience {
     const fx = this.fx;
     const a = Math.random() * Math.PI * 2, r = 3 + Math.random() * 16;
     const p = new THREE.Vector3(center.x + Math.cos(a) * r, 0.4 + Math.random() * 4.5, center.z + Math.sin(a) * r);
-    if (Math.random() < 0.75) {
+    if (this.night && Math.random() < 0.6) {
+      // fireflies: slow, low, blinking (fade in and out over a few seconds)
+      p.y = 0.3 + Math.random() * 2.2;
+      fx.add.emit({ pos: p, vel: new THREE.Vector3((Math.random() - 0.5) * 0.5, (Math.random() - 0.3) * 0.25, (Math.random() - 0.5) * 0.5), shape: 0, size: 0.07 + Math.random() * 0.04, sizeEnd: 0.05, life: 2.5 + Math.random() * 2.5, color: [1.1, 1.7, 0.5], alpha: 1.4, alphaEnd: 0, fadeIn: 0.45, drag: 0.2 });
+    } else if (!this.night && Math.random() < 0.75) {
       // dust mote catching the low sun
       fx.add.emit({ pos: p, vel: new THREE.Vector3(0.25 + Math.random() * 0.3, (Math.random() - 0.3) * 0.15, 0.1), shape: 0, size: 0.06 + Math.random() * 0.05, sizeEnd: 0.06, life: 4 + Math.random() * 3, color: [1.5, 1.1, 0.65], alpha: 0.9, alphaEnd: 0, fadeIn: 0.35 });
     } else {

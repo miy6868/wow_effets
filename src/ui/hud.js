@@ -31,7 +31,7 @@ export class HUD {
     this.nums = [];
     this.toastEl = el('div', 'toast', this.root);
     this.status = el('div', 'status', this.root);
-    this.hint = el('div', 'hint', this.root);
+    this.hint = el('div', 'hud-hint', this.root);
     this.hint.innerHTML = '<b>H</b> 조작법 · <b>F</b> 필살기 · <b>Shift</b> 대시 · <b>C</b> 순간이동 · <b>Z</b> 슬로모션 · <b>P</b> 일시정지';
     this.ult = el('div', 'ult', this.root);
     this.ult.innerHTML = '<svg viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="28"/><circle class="fg" cx="32" cy="32" r="28"/></svg><div class="k">F</div><div class="t">ULT</div>';

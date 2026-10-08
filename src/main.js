@@ -19,6 +19,7 @@ import { createWeapons } from './weapons/index.js';
 
 const params = new URLSearchParams(location.search);
 const TEST = params.has('test');
+let attract = false;
 
 const canvas = document.getElementById('c');
 const pipeline = new Pipeline(canvas);
@@ -107,6 +108,7 @@ function frame(dtReal) {
   arena.update(Time.dt, fx, player.pos);
   fx.update(Time.dt);
 
+  attractCam?.();
   const camOpts = { ...(player.weapon?.cameraOpts?.(player) ?? {}), ...(player.action?.cam ?? {}) };
   rig.update(dtReal, player.pos, input, camOpts);
   screen.update(dtReal);
@@ -189,9 +191,29 @@ if (TEST) {
   requestAnimationFrame(loop);
 }
 
-// start overlay
+// start overlay + slow attract-mode camera behind it
 const start = document.getElementById('start');
 if (start) {
   if (TEST) start.remove();
-  else start.addEventListener('click', () => { start.classList.add('hide'); audio.unlock(); canvas.requestPointerLock?.(); setTimeout(() => start.remove(), 600); });
+  else {
+    attract = true;
+    document.body.classList.add('attract');
+    start.addEventListener('click', () => {
+      attract = false;
+      rig.cine = null;
+      document.body.classList.remove('attract');
+      start.classList.add('hide'); audio.unlock(); canvas.requestPointerLock?.();
+      setTimeout(() => start.remove(), 800);
+    });
+  }
+}
+function attractCam() {
+  if (!attract) return;
+  const t = Time.real * 0.06;
+  const c = player.pos;
+  const pos = new THREE.Vector3(c.x + Math.sin(t + 2.4) * 6.4, 1.15, c.z + Math.cos(t + 2.4) * 6.4);
+  const toC = new THREE.Vector3().subVectors(c, pos).setY(0).normalize();
+  const right = new THREE.Vector3(-toC.z, 0, toC.x);
+  const look = c.clone().add(new THREE.Vector3(0, 1.55, 0)).addScaledVector(right, -1.9);
+  rig.cine = { pos, look, fov: 42, w: 1, blendSpeed: 30 };
 }

@@ -367,7 +367,8 @@ export const puffVertex = /* glsl */ `
     p.y *= iD.w;
     vec3 wp = iA.xyz + p * iA.w;
     vN = n;
-    vLocal = p;
+    // detail frequency grows with size so big fireballs don't turn into a few blotches
+    vLocal = p * clamp(sqrt(iA.w * 2.5), 1.0, 2.6);
     vB = iB; vC = iC; vD = iD;
     vPosW = wp;
     vec4 clip = projectionMatrix * viewMatrix * vec4(wp, 1.0);

@@ -282,6 +282,24 @@ export const groundFragment = /* glsl */ `
     float cres = (1.0 - smoothstep(1.18 - crw, 1.18 + crw, r)) * smoothstep(1.06 - crw, 1.06 + crw, dIn);
     plaza = mix(plaza, vec3(0.4, 0.34, 0.28), cres * 0.55);
 
+    // fallen petals on the outer stones (sparse, sized ~8 cm, faded with view
+    // distance so they never shimmer)
+    {
+      vec2 pc = p / 0.42;
+      vec2 pid = floor(pc);
+      float dens = smoothstep(13.0, 25.5, r) * 0.2;
+      // (no branch: derivatives must stay defined across the pixel quad)
+      vec2 q = pc - pid - (vec2(hash12(pid + 3.1), hash12(pid + 7.9)) * 0.6 + 0.2);
+      float an = hash12(pid + 1.3) * 6.2831;
+      q = mat2(cos(an), -sin(an), sin(an), cos(an)) * q;
+      float e = length(q / (vec2(0.2, 0.12) * (0.65 + 0.55 * hash12(pid + 5.5))));
+      float ew = min(fwidth(e), 0.5) + 1e-4;   // clamp: e jumps at cell borders
+      float near = 1.0 - smoothstep(14.0, 26.0, length(cameraPosition - vPosW));
+      float on = step(hash12(pid + 13.7), dens);
+      vec3 petalC = mix(vec3(0.93, 0.58, 0.66), vec3(1.0, 0.8, 0.84), hash12(pid + 9.2));
+      plaza = mix(plaza, petalC, (1.0 - smoothstep(1.0 - ew, 1.0 + ew, e)) * 0.9 * near * on);
+    }
+
     // ── grass outside the plaza ──
     float gN = vnoise(p * 0.11) * 0.7 + vnoise(p * 0.45) * 0.3;
     float gw2 = fwidth(gN) + 1e-4;

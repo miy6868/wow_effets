@@ -166,12 +166,12 @@ export function eruption(pos, s = 1) {
   const fx = G.fx;
   // anticipation: circle flares, ground cracks glow
   fx.decal({ pos, size: 2.2 * s, type: 3, color: [1.6, 0.6, 0.12], life: 1.0, spin: 2.5, additive: true, fadeStart: 0.25 });
-  fx.decal({ pos, size: 3.0 * s, type: 1, color: [3, 1.0, 0.2], glow: 2, life: 4, reveal: 0.15 });
+  fx.decal({ pos, size: 3.0 * s, type: 1, color: [2.4, 0.8, 0.16], glow: 1.3, life: 4, reveal: 0.15 });
   fx.add.emit({ pos: pos.clone().setY(0.3), shape: SHAPE.GLOW, size: 2.0 * s, sizeEnd: 2.6 * s, life: 0.2, color: [0.9, 0.3, 0.06], alpha: 0.7, alphaEnd: 0 });
   G.rig.shake(0.2);
   after(0.12, () => {
     // eruption
-    fx.add.emit({ pos: pos.clone().setY(1.2), shape: SHAPE.STAR, size: 3.2 * s, sizeEnd: 0.6, life: 0.12, color: [2.6, 1.6, 0.7], alphaEnd: 0 });
+    fx.add.emit({ pos: pos.clone().setY(1.2), shape: SHAPE.STAR, size: 2.6 * s, sizeEnd: 0.6, life: 0.1, color: [2.2, 1.3, 0.55], alphaEnd: 0 });
     fx.ring({ pos: pos.clone().setY(0.1), normal: UP, r0: 0.5, r1: 4.5 * s, w0: 0.06, w1: 0.01, color: [1.1, 0.5, 0.18], life: 0.38, sharp: 1 });
     fx.distort({ pos: pos.clone().setY(0.5), r0: 0.5, r1: 7 * s, strength: 0.04, life: 0.4 });
     fx.distort({ pos: pos.clone().setY(3), mode: 'haze', r0: 3.5 * s, r1: 4 * s, strength: 0.035, life: 1.6 });
@@ -183,11 +183,11 @@ export function eruption(pos, s = 1) {
       const q = pos.clone().add(_v.set(Math.cos(a) * r, rand(0, 0.8), Math.sin(a) * r));
       fx.puffs.emit({ pos: q, vel: _v2.set(Math.cos(a) * 0.6, rand(10, 22) * Math.sqrt(s), Math.sin(a) * 0.6), size: rand(0.32, 0.5) * s, sizeEnd: rand(0.1, 0.25) * s, life: rand(0.5, 0.8), mode: PUFF.FIRE, color: FIRE, shade: DEEP, heat: rand(0.85, 1.05), drag: 1.6, rise: 2, dissolveStart: 0.3, stretch: 1.25 });
     }
-    for (let i = 0; i < 34; i++) {
+    for (let i = 0; i < 24; i++) {
       const a = Math.random() * Math.PI * 2, r = (0.7 + Math.random() * 0.6) * s;
       const q = pos.clone().add(_v.set(Math.cos(a) * r, rand(0.2, 1.5), Math.sin(a) * r));
       fx.add.emit({ pos: q, vel: _v2.set(Math.cos(a) * 0.5, rand(8, 16) * Math.sqrt(s), Math.sin(a) * 0.5), shape: SHAPE.FLAME, size: rand(0.8, 1.4) * s, w: 0.5, sizeEnd: rand(0.2, 0.4),
-        life: rand(0.35, 0.6), color: [2.2, 0.95, 0.22], colorEnd: [1.0, 0.16, 0.03], alpha: 1, alphaEnd: 0, fadeIn: 0.06, drag: 1.2, rot: rand(-0.15, 0.15) });
+        life: rand(0.35, 0.6), color: [1.8, 0.75, 0.17], colorEnd: [1.0, 0.16, 0.03], alpha: 1, alphaEnd: 0, fadeIn: 0.06, drag: 1.2, rot: rand(-0.15, 0.15) });
     }
     // base swirl
     for (let i = 0; i < 16; i++) {

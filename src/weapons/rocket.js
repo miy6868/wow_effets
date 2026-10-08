@@ -78,9 +78,9 @@ export class RocketLauncher extends GunWeapon {
     this.modelR.updateWorldMatrix(true, false);
     const tail = this.modelR.userData.back.clone().applyMatrix4(this.modelR.matrixWorld);
     const bdir = tail.clone().sub(back).normalize();
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
       const d = cone(bdir, 0.45, new THREE.Vector3());
-      G.fx.puffs.emit({ pos: tail.clone().addScaledVector(d, 0.2), vel: d.multiplyScalar(rand(5, 10)), size: rand(0.1, 0.15), sizeEnd: rand(0.32, 0.5), life: rand(0.45, 0.7), mode: PUFF.SMOKE, color: [0.66, 0.62, 0.68], shade: [0.38, 0.35, 0.48], drag: 5, rise: 0.8, dissolveStart: 0.15 });
+      G.fx.alpha.emit({ pos: tail.clone().addScaledVector(d, 0.2), vel: d.multiplyScalar(rand(5, 11)), shape: SHAPE.SMOKE, size: rand(0.2, 0.3), sizeEnd: rand(0.7, 1.0), life: rand(0.35, 0.55), color: [0.72, 0.7, 0.76], alpha: 0.75, alphaEnd: 0, drag: 5 });
     }
     G.fx.add.emit({ pos: tail, shape: SHAPE.GLOW, size: 1.0, sizeEnd: 1.4, life: 0.08, color: [2.4, 1.3, 0.4], alpha: 0.8, alphaEnd: 0 });
     G.fx.add.emit({ pos: tail, shape: SHAPE.STAR, size: 1.2, sizeEnd: 0.2, life: 0.08, color: [3, 2, 1], alphaEnd: 0 });

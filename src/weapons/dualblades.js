@@ -1,7 +1,7 @@
 // 쌍검 「홍아」 — crimson twin daggers: fast mirrored combos and a blade storm.
 import * as THREE from 'three';
 import { G } from '../ctx.js';
-import { MeleeWeapon, SwingMove, trailDef } from './melee.js';
+import { MeleeWeapon, SwingMove, trailDef, juggleSet } from './melee.js';
 import { daggerModel } from './models.js';
 import { WeaponTrail } from '../vfx/fx.js';
 import { FXP, rand, cone, randUnit } from '../vfx/presets.js';
@@ -55,9 +55,9 @@ export class DualBlades extends MeleeWeapon {
         slash: L({ width: 0.6, scale: 1.3, rOut: 2.2 }), whoosh: 'whooshBig', whooshPitch: 1.1, cam: { dist: 6.2 } },
     ];
     this.airCombo = [
-      { ...base, hand: 'both', dur: 0.36, cancel: 0.18, swing: [0.05, 0.12], follow: 0.08, antic: 0.3, plane: { roll: -0.9 }, a0: -2.2, a1: 1.3, gravity: 0.06, airLift: 1.2, hits: [H({ t: 0.09, dmg: 100, kb: 1.5, lift: 5.5, yMin: -2.5, yMax: 3.5 })], slash: L() },
+      { ...base, hand: 'both', dur: 0.36, cancel: 0.18, swing: [0.05, 0.12], follow: 0.08, antic: 0.3, plane: { roll: -0.9 }, a0: -2.2, a1: 1.3, gravity: 0.06, airLift: 1.2, hits: [H({ t: 0.09, dmg: 100, kb: 1.5, lift: 5.5, yMin: -2.5, yMax: 4.5, set: juggleSet })], slash: L() },
       { ...base, hand: 'both', dur: 0.46, cancel: 0.28, swing: [0.06, 0.24], follow: 0.08, antic: 0.2, plane: { roll: -0.05 }, a0: -1.2, a1: 1.2, spinTurns: 1, gravity: 0.06, airLift: 1.2,
-        hits: [H({ t: 0.12, arc: 360, dmg: 60, lift: 4, yMin: -2.5, yMax: 3.5 }), H({ t: 0.2, arc: 360, dmg: 60, lift: 4, yMin: -2.5, yMax: 3.5 })],
+        hits: [H({ t: 0.12, arc: 360, dmg: 60, lift: 4, yMin: -2.5, yMax: 4.5, set: juggleSet }), H({ t: 0.2, arc: 360, dmg: 60, lift: 4, yMin: -2.5, yMax: 4.5, set: juggleSet })],
         slash: [{ da0: -0.2, da1: Math.PI * 2 - 2.4 + 0.2, sweep: 0.2, width: 0.4, rIn: 0.6, rOut: 1.9, tail: 0.6, fade: 0.15 }] },
     ];
   }
@@ -130,7 +130,7 @@ class BladeStorm {
     }
     if (this.t >= this.dur - 0.2 && !this.fin) {
       this.fin = true;
-      fx.ring({ pos: c, normal: UP, r0: 0.5, r1: 4.5, w0: 0.1, w1: 0.015, color: [2.2, 0.4, 0.8], life: 0.3, sharp: 1 });
+      fx.ring({ pos: c, normal: UP, r0: 0.5, r1: 4.5, w0: 0.07, w1: 0.012, color: [1.3, 0.22, 0.45], life: 0.28, sharp: 1 });
       fx.distort({ pos: c, r0: 0.5, r1: 5, strength: 0.03, life: 0.3 });
       for (const d of G.dummies.list) {
         const dc = d.center(_v);

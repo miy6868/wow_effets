@@ -58,12 +58,14 @@ resize();
 
 // ── global keys ────────────────────────────────────────────────────────────────
 const WEAPON_KEYS = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'BracketLeft', 'BracketRight', 'Backslash'];
+let wheelCD = 0;
 function globalKeys() {
   WEAPON_KEYS.forEach((k, i) => { if (input.wasPressed(k)) player.equip(i); });
   const n = weapons.length;
   if (input.wasPressed('KeyQ')) player.equip((player.weaponIndex + n - 1) % n);
   if (input.wasPressed('KeyE')) player.equip((player.weaponIndex + 1) % n);
-  if (input.wheel && !(player.weapon?.usesWheel)) player.equip((player.weaponIndex + Math.sign(input.wheel) + n) % n);
+  wheelCD -= Time.dtReal;
+  if (input.wheel && wheelCD <= 0) { wheelCD = 0.14; player.equip((player.weaponIndex + Math.sign(input.wheel) + n) % n); }
   if (input.wasPressed('KeyZ')) {
     Time.userScale = Time.userScale < 1 ? 1 : 0.25;
     G.time_userSlow = Time.userScale < 1;
@@ -109,11 +111,18 @@ function frame(dtReal) {
 }
 
 let last = performance.now();
+let errCount = 0;
 function loop(now) {
+  // schedule first so one bad frame can never freeze the whole game
+  requestAnimationFrame(loop);
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
   last = now;
-  frame(dt);
-  requestAnimationFrame(loop);
+  try {
+    frame(dt);
+  } catch (e) {
+    input.endFrame();
+    if (errCount++ < 5) console.error(e);
+  }
 }
 
 // ── test / automation hooks ────────────────────────────────────────────────────

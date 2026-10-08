@@ -59,7 +59,9 @@ body.test #c { width: auto; height: auto; }
 .toast { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); font-size: 20px; font-weight: 800; padding: 8px 18px;
   background: rgba(14, 16, 32, 0.7); border-radius: 8px; opacity: 0; transition: opacity 0.2s; }
 .toast.on { opacity: 1; }
-.status { position: absolute; left: 16px; top: 14px; font-size: 14px; font-weight: 800; color: var(--hi); text-shadow: 0 1px 2px #000; }
+.hint { position: absolute; left: 16px; top: 12px; font-size: 12px; opacity: 0.75; text-shadow: 0 1px 2px #000; }
+.hint b { color: var(--cy); }
+.status { position: absolute; left: 16px; top: 34px; font-size: 14px; font-weight: 800; color: var(--hi); text-shadow: 0 1px 2px #000; }
 .fps { position: absolute; right: 12px; top: 10px; font-size: 12px; opacity: 0.7; }
 
 .charge { position: absolute; left: 50%; top: 62%; width: 180px; height: 10px; transform: translateX(-50%); background: rgba(0,0,0,0.5);

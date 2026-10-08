@@ -275,7 +275,7 @@ class DragonLunge {
         for (const d of pierced) {
           const c = d.center(new THREE.Vector3());
           thrustFx(c.clone().addScaledVector(this.fwd, -0.6), this.fwd, 1.8);
-          G.fx.ring({ pos: c, billboard: true, r0: 0.3, r1: 2.6, w0: 0.08, w1: 0.01, color: [0.6, 2.2, 1.2], life: 0.25, sharp: 1 });
+          G.fx.ring({ pos: c, billboard: true, r0: 0.3, r1: 1.8, w0: 0.06, w1: 0.01, color: [0.3, 1.2, 0.65], life: 0.22, sharp: 1 });
           hit(d, { dir: this.fwd.clone(), kb: 12, lift: 7, hitstop: 0.12, shake: 0.0, kind: 'none', dmg: 320, sound: null, spin: 1.5 });
         }
         if (pierced.length) { G.rig.shake(0.4); G.screen.flash([0.7, 1, 0.8], 0.12, 0.08); G.slowmo(0.3, 0.1, 0.25); G.audio?.play('hitSlashBig', { pitch: 1.2 }); }

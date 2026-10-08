@@ -213,7 +213,7 @@ export const FXP = {
     fx.sphere({ pos: p, r0: 0.4 * s, r1: 2.4 * s, color: [1.5, 0.9, 0.4], coreColor: [2.2, 1.8, 1.2], life: 0.12, power: 1.4, core: 0.6 });
     // 2. shock rings
     fx.ring({ pos: p.clone().setY(0.08), normal: UP, r0: 0.5 * s, r1: 6.5 * s, w0: 0.06, w1: 0.008, color: [1.1, 0.8, 0.5], life: 0.4, sharp: 1 });
-    fx.ring({ pos: p, billboard: true, r0: 0.5 * s, r1: 4.2 * s, w0: 0.06, w1: 0.01, color: [1.3, 1.0, 0.7], life: 0.26, sharp: 1 });
+    fx.ring({ pos: p, billboard: true, r0: 0.4 * s, r1: 3.0 * s, w0: 0.05, w1: 0.01, color: [0.8, 0.6, 0.42], life: 0.22, sharp: 1 });
     // 3. fireball core (cel fire puffs)
     for (let i = 0; i < 14; i++) {
       randUnit(_v2); _v2.y = Math.abs(_v2.y) * 0.8 + 0.1;
@@ -260,7 +260,7 @@ export const FXP = {
       fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(10, 20)), shape: SHAPE.STREAK, size: 0.035, stretch: 0.02, life: rand(0.05, 0.12), color: [4, 3.2, 1.6], colorEnd: [2.5, 0.8, 0.15], alphaEnd: 0, drag: 6 });
     }
     cone(dir, 0.5, _v2);
-    fx.alpha.emit({ pos: p.clone().addScaledVector(dir, 0.15), vel: _v2.multiplyScalar(rand(0.8, 1.6)).add(_v.set(0, 0.5, 0)), shape: SHAPE.SMOKE, size: 0.16 * s, sizeEnd: 0.45 * s, life: rand(0.35, 0.55), color: [0.78, 0.76, 0.82], alpha: 0.5, alphaEnd: 0, drag: 2.5 });
+    fx.alpha.emit({ pos: p.clone().addScaledVector(dir, 0.15), vel: _v2.multiplyScalar(rand(0.8, 1.6)).add(_v.set(0, 0.5, 0)), shape: SHAPE.SMOKE, size: 0.12 * Math.min(s, 1.4), sizeEnd: 0.34 * Math.min(s, 1.4), life: rand(0.3, 0.45), color: [0.78, 0.76, 0.82], alpha: 0.4, alphaEnd: 0, drag: 2.5 });
     fx.light(p, [1, 0.7, 0.35], 1.3 * s, 3.2, 0.05);
   },
 

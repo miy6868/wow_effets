@@ -103,7 +103,7 @@ export class UltPhantom extends UltBase {
         G.fx.line({ a: from.clone().setY(1.1), b: to.clone().setY(1.1), width: 0.32, color: col, core: [3, 3, 3.4], coreWidth: 0.25, life: 0.5, headFade: 0.1, tailFade: 0.2 });
         p.pos.copy(to);
         p.yaw = Math.atan2(dir.x, dir.z);
-        p.prevPose = null;
+        p.teleported();
         // a quick cut across the target, then freeze it in place
         const c = d.center(new THREE.Vector3());
         const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(rand(-0.6, 0.6), Math.atan2(dir.x, dir.z) + Math.PI / 2, rand(-0.8, 0.8)));

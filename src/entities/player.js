@@ -2,7 +2,7 @@
 // action (attack) playback with hitstop, weapon switching.
 import * as THREE from 'three';
 import { G } from '../ctx.js';
-import { CharacterModel } from './character.js';
+import { CharacterModel, Scarf } from './character.js';
 import { Pose, bladeQuat, easing, clamp01 } from './pose.js';
 import { FXP, rand, cone } from '../vfx/presets.js';
 import { SHAPE } from '../vfx/particles.js';
@@ -25,6 +25,11 @@ export class Player {
   constructor(scene) {
     this.model = new CharacterModel();
     scene.add(this.model.root);
+    this.scarves = [
+      new Scarf({ color: this.model.colors.scarf, flash: this.model.flash, n: 11, seg: 0.105, width: 0.12 }),
+      new Scarf({ color: this.model.colors.scarf, flash: this.model.flash, n: 8, seg: 0.1, width: 0.1 }),
+    ];
+    for (const s of this.scarves) scene.add(s.mesh);
     this.pos = new THREE.Vector3(0, 0, 0);
     this.vel = new THREE.Vector3();
     this.yaw = 0;
@@ -136,6 +141,7 @@ export class Player {
   }
 
   update(dtWorld, input) {
+    if (G.paused) { this.applyVisual(); return; }
     let dt = dtWorld;
     if (this.hitstopT > 0) {
       this.hitstopT -= dtWorld;
@@ -233,6 +239,25 @@ export class Player {
     this.computePose(dt);
     this.applyVisual();
     this.sampleTrails(dt);
+    this.updateScarf(dt);
+  }
+
+  /** Call after an instant position change (blink, phantom dash). */
+  teleported() {
+    this.prevPose = null;
+    for (const s of this.scarves) s.init = false;
+  }
+
+  updateScarf(dt) {
+    const m = this.model;
+    m.torso.updateWorldMatrix(true, false);
+    const back = this.forward(_v).negate();
+    const body = new THREE.Vector3(0, 0.3, 0).applyMatrix4(m.torso.matrixWorld);
+    this.scarves.forEach((s, i) => {
+      const anchor = new THREE.Vector3(i ? 0.07 : -0.05, 0.64, -0.17).applyMatrix4(m.torso.matrixWorld);
+      s.update(dt, anchor, back, body, 0.27);
+      s.mesh.visible = m.root.visible;
+    });
   }
 
   turn(a, b, k) { return a + wrapPi(b - a) * Math.min(1, k); }
@@ -496,7 +521,7 @@ export class BlinkAction {
       this.done = true;
       p.pos.copy(this.to);
       p.invisible = 0;
-      p.prevPose = null;
+      p.teleported();
       this.vanishFX(this.to.clone().setY(this.to.y + 1), false);
       G.fx.ghost(p.model.root, { color: [0.7, 0.4, 1.6], rim: [1.5, 0.9, 4], life: 0.2, alpha: 1 });
       if (p.grounded) FXP.dust(p.pos, 0.6, 5);

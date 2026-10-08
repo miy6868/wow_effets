@@ -29,6 +29,8 @@ export class HUD {
     this.nums = [];
     this.toastEl = el('div', 'toast', this.root);
     this.status = el('div', 'status', this.root);
+    this.hint = el('div', 'hint', this.root);
+    this.hint.innerHTML = '<b>H</b> 조작법 · <b>F</b> 필살기 · <b>Shift</b> 대시 · <b>C</b> 순간이동 · <b>Z</b> 슬로모션 · <b>P</b> 일시정지';
     this.ult = el('div', 'ult', this.root);
     this.ult.innerHTML = '<div class="k">F</div><div class="t">필살기</div><div class="fill"></div>';
     this.charge = el('div', 'charge', this.root);
@@ -65,9 +67,13 @@ export class HUD {
       d = { el: el('div', 'dn', this.dmgLayer) };
       this.nums.push(d);
     }
+    // stack above live numbers near the same spot
+    let near = 0;
+    for (const o of this.nums) if (o.alive && o !== d && o.t < 0.5 && Math.hypot(o.base.x - pos.x, o.base.z - pos.z) < 1.0) near++;
     d.alive = true;
     d.t = 0;
-    d.pos = pos.clone().add(_v.set((Math.random() - 0.5) * 0.6, 0.3 + Math.random() * 0.4, (Math.random() - 0.5) * 0.6));
+    d.base = pos.clone();
+    d.pos = pos.clone().add(_v.set((Math.random() - 0.5) * 0.7, 0.35 + Math.min(near, 6) * 0.28, (Math.random() - 0.5) * 0.7));
     d.vy = 1.5;
     d.el.textContent = n;
     d.el.className = 'dn' + (n >= 200 ? ' big' : '') + (crit ? ' crit' : '');

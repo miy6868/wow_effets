@@ -148,6 +148,7 @@ export function fireBullet(o) {
       o.render?.(pr);
     },
     onHit: (pr, d, point) => {
+      if (o.noHit) { FXP.hitBullet(point, pr.vel.clone().normalize(), o.hitColor, o.fxScale ?? 0.8); o.onHit?.(pr, d, point); return; }
       hit(d, {
         dir: pr.vel.clone().setY(0).normalize(), fxDir: pr.vel.clone().normalize(), point, kb: o.kb ?? 1.4, lift: d.airborne ? (o.airLift ?? 2.6) : (o.lift ?? 0),
         hitstop: o.stop ?? 0.03, atkStop: 0, shake: o.shake ?? 0.03, kick: o.kick ?? 0.15, kind: o.kind ?? 'bullet', color: o.hitColor,

@@ -57,11 +57,11 @@ export class DarkMagic extends MagicWeapon {
   hold(p, btn) { if (btn === 0) this.want = true; }
   tick(p, dt) {
     this.cool -= dt; this.holeCool -= dt;
-    if (this.want && this.cool <= 0 && (!p.action || p.action.cancelable?.('shoot'))) { if (p.action) p.endAction(); this.orb(p); }
+    if (this.want && this.cool <= 0 && (!p.action || p.action.cancelable?.('shoot'))) { if (p.action) p.endAction(); this.voidBolt(p); }
     this.want = false;
   }
 
-  orb(p) {
+  voidBolt(p) {
     this.cool = 0.3; this.aimT = 0.8; this.castK = 1;
     const side = this.side; this.side ^= 1; this.castSide = side;
     const from = this.castPalm(p, side);

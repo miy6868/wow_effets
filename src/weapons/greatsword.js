@@ -65,7 +65,7 @@ function flameRing(pos, s, n = 10) {
     const r = 1.9 * s;
     const q = pos.clone().add(_v.set(Math.cos(a) * r, 0, Math.sin(a) * r));
     for (let k = 0; k < 3; k++) {
-      fx.puffs.emit({ pos: q.clone().setY(0.2 + k * 0.35), vel: _v2.set(Math.cos(a) * 1.2, rand(6, 10), Math.sin(a) * 1.2), size: rand(0.2, 0.3) * s, sizeEnd: rand(0.06, 0.12), life: rand(0.4, 0.6), mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: rand(0.9, 1.15), drag: 3, rise: 3, dissolveStart: 0.35, grow: 'in', stretch: 1.5 });
+      fx.puffs.emit({ pos: q.clone().setY(0.2 + k * 0.35), vel: _v2.set(Math.cos(a) * 1.2, rand(6, 10), Math.sin(a) * 1.2), size: rand(0.2, 0.3) * s, sizeEnd: rand(0.06, 0.12), life: rand(0.4, 0.6), mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: rand(0.8, 1.0), drag: 3, rise: 3, dissolveStart: 0.35, grow: 'in', stretch: 1.5 });
     }
   }
 }
@@ -207,9 +207,9 @@ export class Greatsword extends MeleeWeapon {
         if (level >= 2) {
           G.screen.impact(0.05, true, [1, 0.85, 0.7]);
           G.slowmo(0.15, 0.1, 0.35);
-          G.fx.sphere({ pos: p2.clone().setY(0.5), r0: 0.5, r1: 4.2 * s, color: [1.3, 0.45, 0.1], coreColor: [1.4, 1.0, 0.6], life: 0.3, power: 1.8, core: 0.15, squashY: 0.45 });
+          G.fx.sphere({ pos: p2.clone().setY(0.5), r0: 0.5, r1: 4.2 * s, color: [0.9, 0.3, 0.06], coreColor: [0.6, 0.35, 0.15], life: 0.26, power: 2.4, core: 0.0, squashY: 0.4 });
         }
-        G.screen.flash([1, 0.75, 0.5], 0.18 + level * 0.06, 0.1);
+        G.screen.flash([1, 0.75, 0.5], 0.08 + level * 0.03, 0.08);
         G.screen.chroma(0.01 + level * 0.006, 0.3);
         G.rig.fovPunch(3 + level * 2);
         slamKnock(p2, (3.6 + level * 0.9) * s, 6 + level * 2, 11 + level * 2, 300 + level * 160);
@@ -279,9 +279,9 @@ class ChargeAction {
     if (this.level > prev) {
       G.audio?.play('chargeLvl', { pitch: 0.8 + this.level * 0.2 });
       const c = p.pos.clone().setY(1.0);
-      G.fx.ring({ pos: c, billboard: true, r0: 2.5, r1: 0.3, w0: 0.05, w1: 0.12, color: [3, 1.5, 0.4], life: 0.25, sharp: 1, easing: (k) => k });
-      G.fx.add.emit({ pos: c, shape: SHAPE.STAR, size: 2.5 + this.level, sizeEnd: 0, life: 0.25, color: [4, 2.5, 1], alphaEnd: 0 });
-      G.fx.ring({ pos: p.pos.clone().setY(0.08), normal: UP, r0: 0.5, r1: 3 + this.level, w0: 0.12, w1: 0.02, color: [3, 1.2, 0.3], life: 0.35, sharp: 1 });
+      G.fx.ring({ pos: c, billboard: true, r0: 2.2, r1: 0.3, w0: 0.04, w1: 0.1, color: [1.6, 0.8, 0.2], life: 0.22, sharp: 1, easing: (k) => k });
+      G.fx.add.emit({ pos: c, shape: SHAPE.STAR, size: 1.6 + this.level * 0.6, sizeEnd: 0, life: 0.22, color: [2.6, 1.6, 0.7], alphaEnd: 0 });
+      G.fx.ring({ pos: p.pos.clone().setY(0.08), normal: UP, r0: 0.5, r1: 2.6 + this.level * 0.8, w0: 0.08, w1: 0.015, color: [1.6, 0.6, 0.15], life: 0.32, sharp: 1 });
       G.rig.shake(0.1 + this.level * 0.05);
       if (this.level === 3) this.release();
     }

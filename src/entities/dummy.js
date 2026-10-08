@@ -172,7 +172,9 @@ export class Dummy {
     this.hitstop = Math.max(this.hitstop, h.hitstop ?? 0.06);
     this.hitstopMax = this.hitstop;
     this.shakeDir.copy(h.dir);
-    this.flashT = 0.045;
+    const light = h.kind === 'bullet' || (h.kb ?? 3) < 1.6;
+    this.flashT = h.flashT ?? (light ? 0.022 : 0.045);
+    this.flashA = light ? 0.6 : 0.9;
     this.hurtT = 0.3;
     this.stunEyes = 0.6;
     const frozen = this.status.freeze > 0;
@@ -185,16 +187,18 @@ export class Dummy {
     this.pending = { kb, lift, dir: h.dir.clone(), spin: h.spin ?? 1, pull: h.pull, set: h.set };
     // stagger lean (away from the hit, i.e. backward)
     const lean = Math.min(1.4, 0.25 + kb * 0.06) * (this.heavy ? 0.5 : 1);
-    this.pitchV -= lean * 14;
-    this.rollV += (Math.random() - 0.5) * lean * 10;
-    this.squashV -= 2.6 * (h.squash ?? 1);
+    // impulses are not additive without bound: many simultaneous hits (shotgun pellets,
+    // minigun streams) must not stack into a huge spring kick
+    this.pitchV = Math.max(Math.min(this.pitchV, 0) - lean * 14, -22);
+    this.rollV = THREE.MathUtils.clamp(this.rollV + (Math.random() - 0.5) * lean * 10, -8, 8);
+    this.squashV = Math.max(Math.min(this.squashV, 0) - 2.6 * (h.squash ?? 1), -3.2);
   }
 
   update(dt) {
     const T = G.time;
     this.stateT += dt;
     // flash / hurt tint
-    if (this.flashT > 0) { this.flashT -= dt; this.flash.value.set(1, 0.97, 0.94, 0.9); }
+    if (this.flashT > 0) { this.flashT -= dt; this.flash.value.set(1, 0.97, 0.94, this.flashA ?? 0.9); }
     else if (this.hurtT > 0) { this.hurtT -= dt; this.flash.value.set(1, 0.3, 0.25, (this.hurtT / 0.3) * 0.45); }
     else if (this.status.freeze > 0) this.flash.value.set(0.6, 0.9, 1.2, 0.45);
     else this.flash.value.w = 0;
@@ -215,8 +219,22 @@ export class Dummy {
     if (!(this.status.shock > 0)) this.shakeG.position.set(0, 0, 0);
 
     if (this.status.freeze > 0) {
+      // encased in ice: no reactions, but a block in the air still drops
       this.status.freeze -= dt;
-      if (this.pending) { this.pending = null; }
+      this.pending = null;
+      if (this.pos.y > 0 || this.vel.y > 0) {
+        this.vel.y -= 30 * dt;
+        this.vel.x *= Math.exp(-dt * 2); this.vel.z *= Math.exp(-dt * 2);
+        this.pos.addScaledVector(this.vel, dt);
+        if (this.pos.y <= 0) {
+          this.pos.y = 0;
+          if (this.vel.y < -6) { G.fxp?.bodyLand(this.pos.clone(), -this.vel.y, this.s); G.audio?.play('iceHit', { pos: this.pos, pitch: 0.6 }); }
+          this.vel.set(0, 0, 0);
+        }
+      } else {
+        this.vel.multiplyScalar(Math.exp(-dt * 8));
+        this.pos.addScaledVector(this.vel, dt);
+      }
       this.syncVisual();
       return;
     }
@@ -330,7 +348,8 @@ export class Dummy {
       this.roll *= Math.exp(-dt * 4);
     }
     this.squashV += (1 - this.squash) * 260 * dt; this.squashV *= Math.exp(-dt * 13);
-    this.squash += this.squashV * dt;
+    this.squash = THREE.MathUtils.clamp(this.squash + this.squashV * dt, 0.72, 1.25);
+    if (this.state === 'idle' || this.state === 'stagger') this.pitch = Math.max(this.pitch, -0.9);
     this.syncVisual();
   }
 

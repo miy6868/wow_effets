@@ -423,7 +423,7 @@ export const puffFragment = /* glsl */ `
     } else if (mode < 1.5) {
       // fire: heat bands (white → yellow → orange → red → charcoal)
       float heat = vD.z * (0.45 + 0.55 * ndv) + (n - 0.5) * 0.4 - life * 0.3;
-      vec3 c0 = vec3(2.4, 2.1, 1.5);
+      vec3 c0 = vec3(2.0, 1.75, 1.2);
       vec3 c1 = vB.rgb;          // yellow-orange
       vec3 c2 = vC.rgb;          // deep orange/red
       vec3 c3 = vec3(0.13, 0.08, 0.1);
@@ -431,7 +431,7 @@ export const puffFragment = /* glsl */ `
       col = c3;
       col = mix(col, c2, smoothstep(0.15 - w, 0.15 + w, heat));
       col = mix(col, c1, smoothstep(0.42 - w, 0.42 + w, heat));
-      col = mix(col, c0, smoothstep(0.9 - w, 0.9 + w, heat));
+      col = mix(col, c0, smoothstep(0.98 - w, 0.98 + w, heat));
     } else {
       // magic mist: flat color with bright rim
       float lit = smoothstep(-0.1, 0.1, ndl);

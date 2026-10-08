@@ -293,7 +293,7 @@ export const SFX = {
     A.noise(d, t, 0.12, { type: 'bandpass', f0: 1400 * p, f1: 1500 * p, q: 4, a: 0.02, vol: 0.12, curve: 1.5 });
   },
   steam(A, d, t, p) {
-    A.noise(d, t, 0.9, { type: 'highpass', f0: 4000 * p, f1: 2500, q: 0.5, a: 0.02, vol: 0.5, curve: 2.5 });
+    A.noise(d, t, 0.9, { type: 'highpass', f0: 4000 * p, f1: 2500, q: 0.5, a: 0.02, vol: 0.28, curve: 2.5 });
   },
   holy(A, d, t, p) {
     for (const f of [880, 1320, 1760]) A.tone(d, t, 0.6, { type: 'sine', f0: f * p, f1: f * p, vol: 0.08, a: 0.02, curve: 4 });
@@ -323,7 +323,7 @@ export const SFX = {
     A.noise(d, t, 0.2, { type: 'bandpass', f0: 600 * p, f1: 200, q: 1.5, a: 0.002, vol: 0.6 });
   },
   blackhole(A, d, t, p) {
-    A.tone(d, t, 2.4, { type: 'sine', f0: 40 * p, f1: 70 * p, vol: 1.2, a: 0.3, curve: 1.5 });
+    A.tone(d, t, 2.4, { type: 'sine', f0: 40 * p, f1: 70 * p, vol: 0.65, a: 0.3, curve: 1.5 });
     A.tone(d, t, 2.4, { type: 'sawtooth', f0: 80 * p, f1: 160 * p, vol: 0.05, a: 0.3, curve: 1.5 });
     A.noise(d, t, 2.4, { type: 'bandpass', f0: 300, f1: 1200, q: 2, a: 0.4, vol: 0.4, curve: 1.5 });
   },

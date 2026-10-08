@@ -223,3 +223,106 @@ export class CharacterModel {
 
   setFlash(r, g, b, a) { this.flash.value.set(r, g, b, a); }
 }
+
+// ── Scarf: verlet rope rendered as a flattened cel-shaded tube ─────────────────
+const _a = new THREE.Vector3();
+const _b = new THREE.Vector3();
+const _t = new THREE.Vector3();
+const _n = new THREE.Vector3();
+const _s = new THREE.Vector3();
+const _up = new THREE.Vector3(0, 1, 0);
+
+export class Scarf {
+  constructor({ color = 0xe2333f, flash, n = 10, seg = 0.11, width = 0.13, thick = 0.035, offset = 0 } = {}) {
+    this.n = n; this.seg = seg; this.w = width; this.th = thick; this.offset = offset;
+    this.R = 8;
+    this.p = []; this.q = [];
+    for (let i = 0; i < n; i++) { this.p.push(new THREE.Vector3(0, 1.5 - i * seg, -0.2)); this.q.push(this.p[i].clone()); }
+    const verts = n * this.R;
+    const g = new THREE.BufferGeometry();
+    this.pos = new Float32Array(verts * 3);
+    this.nrm = new Float32Array(verts * 3);
+    g.setAttribute('position', new THREE.BufferAttribute(this.pos, 3).setUsage(THREE.DynamicDrawUsage));
+    g.setAttribute('normal', new THREE.BufferAttribute(this.nrm, 3).setUsage(THREE.DynamicDrawUsage));
+    g.setAttribute('outlineNormal', g.attributes.normal);
+    const idx = [];
+    for (let i = 0; i < n - 1; i++) for (let r = 0; r < this.R; r++) {
+      const a = i * this.R + r, b = i * this.R + (r + 1) % this.R, c = a + this.R, d = b + this.R;
+      idx.push(a, c, b, b, c, d);
+    }
+    g.setIndex(idx);
+    this.geo = g;
+    this.mesh = toonMesh(g, { color, flash, outlineWidth: 1.8, rim: 0.6, side: THREE.DoubleSide });
+    this.mesh.frustumCulled = false;
+    this.mesh.userData.outline.frustumCulled = false;
+    this.init = false;
+  }
+
+  /** anchor: world position of the knot; back: world "behind" direction; body: chest sphere center */
+  update(dt, anchor, back, body, bodyR = 0.3) {
+    const P = this.p, Q = this.q, n = this.n;
+    if (!this.init || dt > 0.2) {
+      this.init = true;
+      for (let i = 0; i < n; i++) { P[i].copy(anchor).addScaledVector(back, i * this.seg * 0.7).y -= i * this.seg * 0.7; Q[i].copy(P[i]); }
+    }
+    const steps = Math.max(1, Math.ceil(dt / (1 / 120)));
+    const h = dt / steps;
+    for (let s = 0; s < steps; s++) {
+      P[0].copy(anchor); Q[0].copy(anchor);
+      for (let i = 1; i < n; i++) {
+        const v = _a.subVectors(P[i], Q[i]).multiplyScalar(0.985);
+        Q[i].copy(P[i]);
+        P[i].add(v);
+        P[i].y -= 9.8 * h * h;
+        // gentle flutter
+        const t = performance.now() * 0.001;
+        P[i].addScaledVector(back, 0.6 * h * h * (1 + Math.sin(t * 7 + i)));
+      }
+      for (let it = 0; it < 4; it++) {
+        for (let i = 1; i < n; i++) {
+          const d = _a.subVectors(P[i], P[i - 1]);
+          const L = d.length() || 1e-5;
+          const k = (L - this.seg) / L;
+          if (i === 1) P[i].addScaledVector(d, -k);
+          else { P[i].addScaledVector(d, -k * 0.5); P[i - 1].addScaledVector(d, k * 0.5); }
+        }
+        P[0].copy(anchor);
+      }
+      for (let i = 1; i < n; i++) {
+        const d = _a.subVectors(P[i], body);
+        const L = d.length();
+        if (L < bodyR) P[i].addScaledVector(d, (bodyR - L) / Math.max(L, 1e-4));
+        if (P[i].y < 0.03) P[i].y = 0.03;
+      }
+    }
+    this.rebuild(back);
+  }
+
+  rebuild(back) {
+    const P = this.p, n = this.n, R = this.R;
+    _n.copy(back).negate();
+    for (let i = 0; i < n; i++) {
+      _t.subVectors(P[Math.min(n - 1, i + 1)], P[Math.max(0, i - 1)]).normalize();
+      // side axis: perpendicular to the tube and roughly horizontal
+      _s.crossVectors(_t, _up);
+      if (_s.lengthSq() < 1e-4) _s.crossVectors(_t, _n);
+      _s.normalize();
+      _b.crossVectors(_s, _t).normalize();
+      const taper = i === n - 1 ? 0.55 : 1;
+      const w = this.w * (0.75 + 0.25 * (i / n)) * taper, th = this.th;
+      for (let r = 0; r < R; r++) {
+        const a = (r / R) * Math.PI * 2;
+        const cs = Math.cos(a), sn = Math.sin(a);
+        const o = (i * R + r) * 3;
+        this.pos[o] = P[i].x + _s.x * cs * w + _b.x * sn * th;
+        this.pos[o + 1] = P[i].y + _s.y * cs * w + _b.y * sn * th;
+        this.pos[o + 2] = P[i].z + _s.z * cs * w + _b.z * sn * th;
+        // ellipse normal
+        _a.copy(_s).multiplyScalar(cs / w).addScaledVector(_b, sn / th).normalize();
+        this.nrm[o] = _a.x; this.nrm[o + 1] = _a.y; this.nrm[o + 2] = _a.z;
+      }
+    }
+    this.geo.attributes.position.needsUpdate = true;
+    this.geo.attributes.normal.needsUpdate = true;
+  }
+}

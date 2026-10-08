@@ -1,7 +1,7 @@
 // 카타나 「청월」 — fast, precise, cyan crescent slashes.
 import * as THREE from 'three';
 import { G } from '../ctx.js';
-import { MeleeWeapon, SwingMove, trailDef } from './melee.js';
+import { MeleeWeapon, SwingMove, trailDef, juggleSet } from './melee.js';
 import { katanaModel } from './models.js';
 import { WeaponTrail } from '../vfx/fx.js';
 import { FXP, rand, cone } from '../vfx/presets.js';
@@ -92,7 +92,7 @@ export class Katana extends MeleeWeapon {
         ],
         whoosh: 'whooshBig',
         onEvent: [
-          { t: 0.14, fn: (m) => { FXP.dust(m.player.pos, 1.0, 8); G.fx.ring({ pos: m.player.pos.clone().setY(0.08), normal: UP, r0: 0.5, r1: 3.6, w0: 0.1, w1: 0.02, color: [0.6, 1.4, 3.2], life: 0.35, sharp: 1 }); } },
+          { t: 0.14, fn: (m) => { FXP.dust(m.player.pos, 1.0, 8); G.fx.ring({ pos: m.player.pos.clone().setY(0.08), normal: UP, r0: 0.5, r1: 3.6, w0: 0.07, w1: 0.012, color: [0.3, 0.75, 1.7], life: 0.32, sharp: 1 }); } },
         ],
       },
     ];
@@ -101,20 +101,20 @@ export class Katana extends MeleeWeapon {
       {
         dur: 0.34, cancel: 0.18, swing: [0.05, 0.12], follow: 0.1, antic: 0.3, plane: { roll: -0.25 }, a0: -2.0, a1: 1.7,
         radius: 0.5, lunge: 0.6, air: true, gravity: 0.06, airLift: 1.2, offHand: [0.42, 1.0, -0.25],
-        hits: [H({ t: 0.09, dmg: 110, kb: 1.8, lift: 5.5, yMin: -2.5, yMax: 3.5 })], slash: slashLayers(),
+        hits: [H({ t: 0.09, dmg: 110, kb: 1.8, lift: 5.5, yMin: -2.5, yMax: 4.5, set: juggleSet })], slash: slashLayers(),
         onEvent: [{ t: 0.06, fn: (m) => sparkleArc(m) }],
       },
       {
         dur: 0.34, cancel: 0.18, swing: [0.05, 0.12], follow: 0.1, antic: 0.3, plane: { roll: 0.8 }, a0: 1.9, a1: -1.6,
         radius: 0.5, lunge: 0.6, air: true, gravity: 0.06, airLift: 1.2, offHand: [0.4, 0.85, 0.1],
-        hits: [H({ t: 0.09, dmg: 118, kb: 1.8, lift: 5.5, yMin: -2.5, yMax: 3.5 })], slash: slashLayers(),
+        hits: [H({ t: 0.09, dmg: 118, kb: 1.8, lift: 5.5, yMin: -2.5, yMax: 4.5, set: juggleSet })], slash: slashLayers(),
         onEvent: [{ t: 0.06, fn: (m) => sparkleArc(m) }],
       },
       { // plunge
         dur: 1.2, cancel: 1.2, dashCancel: 1.2, swing: [0.1, 0.18], follow: 0.12, antic: 0.5,
         plane: { roll: Math.PI / 2 }, a0: 2.4, a1: -1.15, radius: 0.55, lunge: 0.5, air: true, gravity: 0, airLift: 2.5,
         vy: -30, vyUntil: 9, center: [-0.15, 1.25, 0.15], flipTurns: 0,
-        hits: [H({ t: 0.15, dmg: 150, kb: 1, stop: 0.08, yMin: -3.5, yMax: 3.5, set: (d, m) => m.fwd.clone().multiplyScalar(2).setY(-24), shake: 0.2 })],
+        hits: [H({ t: 0.15, dmg: 150, kb: 1, stop: 0.08, yMin: -3.5, yMax: 4.5, set: (d, m) => m.fwd.clone().multiplyScalar(2).setY(-24), shake: 0.2 })],
         slash: slashLayers({ scale: 1.1 }),
         onLand: (m, speed) => {
           const p = m.player;

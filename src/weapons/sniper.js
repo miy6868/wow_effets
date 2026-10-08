@@ -108,7 +108,7 @@ export class Sniper extends GunWeapon {
         G.fx.alpha.emit({ pos: from.clone(), vel: d.multiplyScalar(rand(2, 4)), shape: SHAPE.SMOKE, size: 0.2, sizeEnd: 0.7, life: rand(0.6, 0.9), color: [0.8, 0.78, 0.82], alpha: 0.55, alphaEnd: 0, drag: 3 });
       }
     }
-    G.fx.ring({ pos: from.clone().addScaledVector(dir, 0.4), normal: dir, r0: 0.1, r1: 1.1, w0: 0.1, w1: 0.02, color: [0.6, 0.5, 0.4], life: 0.18, sharp: 1 });
+    G.fx.ring({ pos: from.clone().addScaledVector(dir, 0.4), normal: dir, r0: 0.1, r1: 0.7, w0: 0.08, w1: 0.02, color: [0.35, 0.3, 0.25], life: 0.14, sharp: 1 });
     G.fx.distort({ pos: from.clone().addScaledVector(dir, 0.5), r0: 0.2, r1: 3.0, strength: 0.04, life: 0.3 });
     FXP.dust(p.pos, 0.7, 6);
     // the trail: hot core line that cools and fades, plus vapor rings and lingering smoke

@@ -20,6 +20,17 @@ export function planeQuat(pl = {}) {
   return new THREE.Quaternion().setFromEuler(_e);
 }
 
+/** Air-combo hit velocity: keeps the target hovering just in front of / level with the player. */
+export function juggleSet(d, m) {
+  const p = m.player;
+  const dy = (p.pos.y + 0.15) - d.pos.y;
+  _v.subVectors(d.pos, p.pos).setY(0);
+  const dist = _v.length();
+  _v.normalize();
+  const push = THREE.MathUtils.clamp((1.6 - dist) * 2.5, -2.5, 2.5);
+  return new THREE.Vector3(_v.x * push, THREE.MathUtils.clamp(dy * 5 + 2.6, -4, 7.5), _v.z * push);
+}
+
 /** Reflect a rotation across the body's YZ plane (left/right mirror). */
 export function mirrorQ(q) { return new THREE.Quaternion(q.x, -q.y, -q.z, q.w); }
 

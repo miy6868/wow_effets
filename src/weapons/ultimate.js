@@ -22,6 +22,7 @@ export const ULT_COOLDOWN = 4;
 /** Show the cut-in band and near-freeze time while it plays. */
 export function cutIn(title, sub, accent = '#ffe27a') {
   G.hud.startCutin(title, sub, accent, CUTIN + 0.1);
+  document.body.classList.add('cine');
   G.slowmo(0.02, CUTIN - 0.05, 0.05, 0.01);
   G.screen.dim(0.7);
   G.screen.letterbox(true);
@@ -30,6 +31,7 @@ export function cutIn(title, sub, accent = '#ffe27a') {
 }
 
 function endCinematic() {
+  document.body.classList.remove('cine');
   G.screen.dim(0);
   G.screen.letterbox(false);
   G.rig.cine = null;
@@ -289,7 +291,7 @@ export class UltMeteor extends UltBase {
         const side = new THREE.Vector3(-back.z, 0, back.x);
         this.F = back.clone().negate();
         this.summon();
-        setCine(p.pos.clone().addScaledVector(back, 5).addScaledVector(side, 1.8).add(_v.set(0, 2.2, 0)), this.tgt.clone().addScaledVector(this.F, 5).add(_v.set(0, 7, 0)), 64, 4);
+        setCine(p.pos.clone().addScaledVector(back, 6.5).addScaledVector(side, 2.4).add(_v.set(0, 1.6, 0)), this.tgt.clone().addScaledVector(this.F, 3).add(_v.set(0, 4.5, 0)), 66, 4);
       }
       return;
     }
@@ -307,8 +309,8 @@ export class UltMeteor extends UltBase {
     const pathDir = this.tgt.clone().sub(this.from).normalize();
     const sky = this.from.clone().lerp(this.tgt, 0.62);
     const q = new THREE.Quaternion().setFromUnitVectors(UP, pathDir.clone().negate());
-    this.skyCircle = fx.decal({ pos: sky, y: sky.y, size: 11, type: 3, color: [1.25, 0.42, 0.1], life: 3.4, spin: 0.7, reveal: 0.4, additive: true, fadeStart: 0.8 });
-    this.skyCircle2 = fx.decal({ pos: sky, y: sky.y, size: 7, type: 3, color: [1.3, 0.62, 0.16], life: 3.4, spin: -1.1, reveal: 0.5, additive: true, fadeStart: 0.8 });
+    this.skyCircle = fx.decal({ pos: sky, y: sky.y, size: 11, type: 3, color: [0.75, 0.24, 0.06], life: 3.4, spin: 0.7, reveal: 0.4, additive: true, fadeStart: 0.8 });
+    this.skyCircle2 = fx.decal({ pos: sky, y: sky.y, size: 7, type: 3, color: [0.85, 0.38, 0.1], life: 3.4, spin: -1.1, reveal: 0.5, additive: true, fadeStart: 0.8 });
     this.skyCircle.obj.quaternion.copy(q); this.skyCircle2.obj.quaternion.copy(q);
     this.skyCircle2.obj.position.addScaledVector(pathDir, 0.4);
     fx.add.emit({ pos: sky, shape: SHAPE.STAR, size: 6, sizeEnd: 1, life: 0.3, color: [1.6, 0.8, 0.3], alphaEnd: 0 });
@@ -320,16 +322,16 @@ export class UltMeteor extends UltBase {
   spawnMeteor() {
     const fx = G.fx;
     const g = new THREE.Group();
-    const rock = toonMesh(new THREE.DodecahedronGeometry(1.7, 1), { color: 0x4a2a24, outlineWidth: 2.6, emissive: 0.15 });
+    const rock = toonMesh(new THREE.DodecahedronGeometry(2.6, 1), { color: 0x3e2622, outlineWidth: 3, emissive: 0.1 });
     g.add(rock);
     for (let i = 0; i < 7; i++) {
       const c = toonMesh(new THREE.DodecahedronGeometry(rand(0.5, 0.8), 0), { color: 0x3a221e, outlineWidth: 2 });
-      c.position.copy(randUnit(_v).multiplyScalar(1.5));
+      c.position.copy(randUnit(_v).multiplyScalar(2.3)); c.scale.setScalar(1.4);
       g.add(c);
     }
     G.scene.add(g);
     this.meteor = g;
-    this.glow = fx.sphere({ pos: this.from, r0: 2.6, r1: 2.6, color: [1.8, 0.6, 0.12], coreColor: [2.2, 1.4, 0.5], life: 5, power: 1.6, core: 0.15, noise: 0.6, alphaCurve: () => 1, follow: (m) => m.position.copy(g.position) });
+    this.glow = fx.sphere({ pos: this.from, r0: 3.5, r1: 3.5, color: [1.8, 0.6, 0.12], coreColor: [0.6, 0.25, 0.06], life: 5, power: 2.2, core: 0.0, noise: 0.6, alphaCurve: () => 1, follow: (m) => m.position.copy(g.position) });
     this.haze = fx.distort({ pos: this.from, mode: 'haze', r0: 5, r1: 5, strength: 0.03, life: 5, strengthCurve: () => 1 });
     this.light = fx.light(this.from, [1, 0.5, 0.15], 4, 22, 0);
     this.fallT = 1.35;
@@ -347,7 +349,7 @@ export class UltMeteor extends UltBase {
     const vel = this.tgt.clone().setY(1.2).sub(this.from).normalize();
     // fire trail
     for (let i = 0; i < 5; i++) {
-      fx.puffs.emit({ pos: pos.clone().add(randUnit(_v).multiplyScalar(1.6)), vel: vel.clone().multiplyScalar(-rand(4, 10)).add(randUnit(_v2).multiplyScalar(2)), size: rand(0.7, 1.1), sizeEnd: rand(0.2, 0.4), life: rand(0.5, 0.8), mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: rand(1, 1.2), drag: 2, rise: 1, dissolveStart: 0.3 });
+      fx.puffs.emit({ pos: pos.clone().add(randUnit(_v).multiplyScalar(2.4)), vel: vel.clone().multiplyScalar(-rand(4, 10)).add(randUnit(_v2).multiplyScalar(2)), size: rand(1.0, 1.5), sizeEnd: rand(0.3, 0.5), life: rand(0.5, 0.8), mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: rand(1, 1.2), drag: 2, rise: 1, dissolveStart: 0.3 });
     }
     if (Math.random() < 0.6) fx.puffs.emit({ pos: pos.clone().add(randUnit(_v).multiplyScalar(1.2)), vel: vel.clone().multiplyScalar(-3), size: 0.9, sizeEnd: 1.8, life: 1.4, mode: PUFF.SMOKE, color: [0.36, 0.3, 0.34], shade: [0.16, 0.12, 0.18], drag: 1, rise: 0.5, dissolveStart: 0.3 });
     for (let i = 0; i < 3; i++) fx.add.emit({ pos: pos.clone().add(randUnit(_v).multiplyScalar(1.8)), vel: vel.clone().multiplyScalar(-rand(6, 14)).add(randUnit(_v2).multiplyScalar(3)), shape: SHAPE.STREAK, size: 0.09, stretch: 0.04, life: rand(0.3, 0.6), color: [4, 2, 0.5], colorEnd: [1.6, 0.3, 0.05], alphaEnd: 0, drag: 1 });
@@ -366,7 +368,7 @@ export class UltMeteor extends UltBase {
     G.screen.dim(0);
     G.slowmo(0.18, 0.18, 0.45);
     G.rig.shake(1.0); G.rig.fovPunch(7);
-    FXP.explosion(p, 2.6);
+    FXP.explosion(p, 2.2);
     fx.decal({ pos: p, size: 12, type: 1, color: [3, 1.0, 0.25], glow: 2, life: 8, reveal: 0.25, glowPow: 2 });
     fx.ring({ pos: p.clone().setY(0.1), normal: UP, r0: 1, r1: 22, w0: 0.06, w1: 0.006, color: [1.4, 0.8, 0.4], life: 0.7, sharp: 1 });
     fx.distort({ pos: p, r0: 1, r1: 22, strength: 0.08, life: 0.7, width: 0.08 });

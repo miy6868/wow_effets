@@ -143,3 +143,7 @@ body.attract #hud { opacity: 0; }
 .scope::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; transform: translate(-50%, -50%); border-radius: 50%; border: 1px solid #ff6a4a; }
 body.scoped .scope { opacity: 1; }
 body.scoped .crosshair { opacity: 0 !important; }
+
+/* hide gameplay HUD during ultimate cinematics */
+.wbar, .wtitle, .hud-hint, .ult, .combo { transition: opacity 0.3s; }
+body.cine .wbar, body.cine .wtitle, body.cine .hud-hint, body.cine .ult, body.cine .crosshair { opacity: 0 !important; }

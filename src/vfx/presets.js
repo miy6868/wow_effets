@@ -196,8 +196,8 @@ export const FXP = {
   },
 
   wallSplat(p, normal, speed) {
-    G.fx.ring({ pos: p, normal: normal.clone().negate(), r0: 0.4, r1: 2.4, w0: 0.15, w1: 0.03, color: [2, 2, 2.2], life: 0.25, sharp: 1 });
-    G.fx.add.emit({ pos: p, shape: SHAPE.SPIKES, size: 3, sizeEnd: 4, life: 0.12, color: [3, 3, 3], alphaEnd: 0 });
+    G.fx.ring({ pos: p, normal: normal.clone().negate(), r0: 0.4, r1: 2.2, w0: 0.1, w1: 0.02, color: [1.1, 1.1, 1.2], life: 0.22, sharp: 1 });
+    G.fx.add.emit({ pos: p, shape: SHAPE.SPIKES, size: 2.4, sizeEnd: 3.2, life: 0.1, color: [1.4, 1.4, 1.5], alphaEnd: 0 });
     FXP.dust(p.clone().setY(0.2), 1.2, 6, normal.clone().negate());
     G.rig?.shake(0.25);
     G.audio?.play('thud', { pos: p, vol: 1 });
@@ -219,11 +219,12 @@ export const FXP = {
     const fx = G.fx;
     const fire = opts.fire ?? [1.7, 0.85, 0.18];
     const deep = opts.deep ?? [0.95, 0.22, 0.04];
-    // 1. flash core (tight, very short)
-    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 3.6 * s, sizeEnd: 0.5, life: 0.12, color: [4, 3.4, 2.4], alphaEnd: 0, rot: Math.random() });
-    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 2.6 * s, sizeEnd: 3.6 * s, life: 0.12, color: [1.8, 1.2, 0.6], alpha: 0.85, alphaEnd: 0 });
-    fx.add.emit({ pos: p, shape: SHAPE.SPIKES, size: 4.2 * s, sizeEnd: 5.6 * s, life: 0.1, color: [1.8, 1.3, 0.7], alphaEnd: 0, rot: Math.random() * 6 });
-    fx.sphere({ pos: p, r0: 0.4 * s, r1: 2.4 * s, color: [1.5, 0.9, 0.4], coreColor: [2.2, 1.8, 1.2], life: 0.12, power: 1.4, core: 0.6 });
+    // 1. flash core (tight, very short) — flash size saturates so huge blasts don't white out
+    const sf = Math.min(s, 1.3);
+    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 3.6 * sf, sizeEnd: 0.5, life: 0.12, color: [4, 3.4, 2.4], alphaEnd: 0, rot: Math.random() });
+    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 2.6 * sf, sizeEnd: 3.6 * sf, life: 0.12, color: [1.8, 1.2, 0.6], alpha: 0.85, alphaEnd: 0 });
+    fx.add.emit({ pos: p, shape: SHAPE.SPIKES, size: 4.2 * sf, sizeEnd: 5.6 * sf, life: 0.1, color: [1.8, 1.3, 0.7], alphaEnd: 0, rot: Math.random() * 6 });
+    fx.sphere({ pos: p, r0: 0.4 * s, r1: 2.4 * s, color: [1.5, 0.9, 0.4].map((x) => x / Math.max(1, s * 0.8)), coreColor: [2.2, 1.8, 1.2].map((x) => x / Math.max(1, s)), life: 0.12, power: 1.4, core: 0.6 });
     // 2. shock rings
     fx.ring({ pos: p.clone().setY(0.08), normal: UP, r0: 0.5 * s, r1: 6.0 * s, w0: 0.05, w1: 0.008, color: [0.7, 0.48, 0.28], life: 0.38, sharp: 1 });
     fx.ring({ pos: p, billboard: true, r0: 0.4 * s, r1: 3.0 * s, w0: 0.05, w1: 0.01, color: [0.8, 0.6, 0.42], life: 0.22, sharp: 1 });

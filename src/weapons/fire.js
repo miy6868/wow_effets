@@ -114,13 +114,13 @@ class PillarCharge {
   start() {
     const w = this.w;
     this.pos = w.aimPoint.clone(); this.pos.y = 0.03;
-    this.circle = G.fx.decal({ pos: this.pos, size: 1.6, type: 3, color: [2.2, 0.8, 0.15], life: 99, spin: 0.8, reveal: 0.25, additive: true });
-    this.circle2 = G.fx.decal({ pos: this.pos, size: 1.0, type: 3, color: [1.6, 0.5, 0.1], life: 99, spin: -1.4, reveal: 0.25, additive: true });
-    this.glow = G.fx.decal({ pos: this.pos, size: 1.6, type: 4, color: [0.8, 0.25, 0.05], life: 99, additive: true });
+    this.circle = G.fx.decal({ pos: this.pos, size: 1.6, type: 3, color: [1.5, 0.55, 0.1], life: 99, spin: 0.8, reveal: 0.25, additive: true });
+    this.circle2 = G.fx.decal({ pos: this.pos, size: 1.0, type: 3, color: [1.1, 0.36, 0.07], life: 99, spin: -1.4, reveal: 0.25, additive: true });
+    this.glow = G.fx.decal({ pos: this.pos, size: 1.6, type: 4, color: [0.45, 0.13, 0.03], life: 99, additive: true });
     G.audio?.play('charge', { pitch: 0.7 });
     this.emitT = 0;
   }
-  get size() { return 1.6 + Math.min(1, this.t / 1.1) * 2.2; }
+  get size() { return 1.4 + Math.min(1, this.t / 1.1) * 1.6; }
   update(dt) {
     const w = this.w, p = this.player;
     w.aimT = 0.5;
@@ -153,7 +153,7 @@ class PillarCharge {
     const pos = this.pos.clone(), s = this.size;
     this.end();
     p.action = null;
-    eruption(pos, s / 2.2);
+    eruption(pos, s / 2.0);
     this.w.castK = 1;
   }
   end() {
@@ -164,18 +164,18 @@ class PillarCharge {
 export function eruption(pos, s = 1) {
   const fx = G.fx;
   // anticipation: circle flares, ground cracks glow
-  fx.decal({ pos, size: 3.4 * s, type: 3, color: [3, 1.2, 0.25], life: 1.2, spin: 2.5, additive: true, fadeStart: 0.3 });
+  fx.decal({ pos, size: 2.2 * s, type: 3, color: [1.6, 0.6, 0.12], life: 1.0, spin: 2.5, additive: true, fadeStart: 0.25 });
   fx.decal({ pos, size: 3.0 * s, type: 1, color: [3, 1.0, 0.2], glow: 2, life: 4, reveal: 0.15 });
-  fx.add.emit({ pos: pos.clone().setY(0.3), shape: SHAPE.GLOW, size: 3 * s, sizeEnd: 4 * s, life: 0.25, color: [1.4, 0.5, 0.1], alpha: 0.8, alphaEnd: 0 });
+  fx.add.emit({ pos: pos.clone().setY(0.3), shape: SHAPE.GLOW, size: 2.0 * s, sizeEnd: 2.6 * s, life: 0.2, color: [0.9, 0.3, 0.06], alpha: 0.7, alphaEnd: 0 });
   G.rig.shake(0.2);
   after(0.12, () => {
     // eruption
-    fx.add.emit({ pos: pos.clone().setY(1.2), shape: SHAPE.STAR, size: 5 * s, sizeEnd: 1, life: 0.14, color: [3.5, 2.4, 1.2], alphaEnd: 0 });
-    fx.ring({ pos: pos.clone().setY(0.1), normal: UP, r0: 0.5, r1: 5.5 * s, w0: 0.08, w1: 0.01, color: [1.6, 0.8, 0.3], life: 0.4, sharp: 1 });
+    fx.add.emit({ pos: pos.clone().setY(1.2), shape: SHAPE.STAR, size: 3.2 * s, sizeEnd: 0.6, life: 0.12, color: [2.6, 1.6, 0.7], alphaEnd: 0 });
+    fx.ring({ pos: pos.clone().setY(0.1), normal: UP, r0: 0.5, r1: 4.5 * s, w0: 0.06, w1: 0.01, color: [1.1, 0.5, 0.18], life: 0.38, sharp: 1 });
     fx.distort({ pos: pos.clone().setY(0.5), r0: 0.5, r1: 7 * s, strength: 0.04, life: 0.4 });
     fx.distort({ pos: pos.clone().setY(3), mode: 'haze', r0: 3.5 * s, r1: 4 * s, strength: 0.035, life: 1.6 });
     // the column: a fresnel cylinder of light + stacked fire puffs shooting up
-    fx.sphere({ pos: pos.clone().setY(3.5), r0: 0.5 * s, r1: 1.3 * s, color: [1.5, 0.5, 0.1], coreColor: [2.2, 1.6, 0.9], life: 0.8, power: 1.8, core: 0.6, squashY: 4.2, alphaCurve: (k) => (1 - k) * (1 - k) });
+    fx.sphere({ pos: pos.clone().setY(3.5), r0: 0.5 * s, r1: 1.2 * s, color: [1.0, 0.32, 0.06], coreColor: [0.6, 0.3, 0.1], life: 0.7, power: 2.6, core: 0.0, squashY: 4.2, alphaCurve: (k) => (1 - k) * (1 - k) });
     // column: a dense core of cel fire puffs wrapped in licking flame tongues
     for (let i = 0; i < 26; i++) {
       const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * 0.8 * s;
@@ -196,9 +196,9 @@ export function eruption(pos, s = 1) {
     for (let i = 0; i < 40; i++) {
       fx.add.emit({ pos: pos.clone().add(_v.set(rand(-1, 1) * s, rand(0, 4), rand(-1, 1) * s)), vel: _v2.set(rand(-3, 3), rand(8, 20), rand(-3, 3)), shape: SHAPE.STREAK, size: 0.06, stretch: 0.03, life: rand(0.4, 0.9), color: [4, 2, 0.5], colorEnd: [1.6, 0.3, 0.04], alphaEnd: 0, drag: 1.5, gravity: 8 });
     }
-    fx.light(pos.clone().setY(2), [1, 0.5, 0.15], 4, 12 * s, 0.9);
+    fx.light(pos.clone().setY(2), [1, 0.5, 0.15], 2.6, 10 * s, 0.9);
     G.rig.shake(0.45); G.rig.fovPunch(2.5);
-    G.screen.flash([1, 0.7, 0.4], 0.12, 0.08);
+    G.screen.flash([1, 0.7, 0.4], 0.06, 0.07);
     G.audio?.play('pillar', { pos });
     // hits: launch up, then two more ticks while airborne
     for (const [dt, lift, dmg] of [[0, 15, 220], [0.22, 5, 90], [0.44, 5, 90]]) {

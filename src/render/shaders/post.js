@@ -111,6 +111,8 @@ export const compositeFrag = /* glsl */ `
   uniform float uDesat;
   uniform float uDim;         // darken the world, keep bright effects
   uniform vec3 uGrade;        // color multiplier
+  uniform vec3 uSun;          // xy: sun position in uv, z: visibility
+  uniform vec3 uSunColor;
   varying vec2 vUv;
 
   float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
@@ -178,6 +180,20 @@ export const compositeFrag = /* glsl */ `
     }
     vec3 bloom = texture2D(tBloom, uv).rgb;
     col += bloom * uBloom;
+    // god rays: march the bloom buffer toward the sun
+    if (uSun.z > 0.001) {
+      vec2 dv = (uSun.xy - vUv) / 20.0;
+      vec2 sp = vUv;
+      float decay = 1.0, acc = 0.0;
+      for (int i = 0; i < 20; i++) {
+        sp += dv;
+        vec3 b = texture2D(tBloom, sp).rgb;
+        acc += dot(b, vec3(0.3, 0.5, 0.2)) * decay;
+        decay *= 0.94;
+      }
+      float fall = 1.0 - smoothstep(0.0, 0.9, length((vUv - uSun.xy) * vec2(uResolution.x / uResolution.y, 1.0)));
+      col += uSunColor * acc * 0.035 * uSun.z * fall;
+    }
 
     col = tonemap(col);
 

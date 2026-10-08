@@ -270,7 +270,7 @@ export class Player {
     this.runPhase += dt * (Math.hypot(this.vel.x, this.vel.z) / 1.35) * Math.PI;
     const ph = this.runPhase;
     L.lean = 0.28 * s; L.roll = this.leanRoll; L.twist = Math.sin(ph) * 0.18 * s; L.squash = 1;
-    L.hip.set(0, 0.86 - 0.05 * s + Math.abs(Math.cos(ph)) * 0.07 * s + Math.sin(t * 2.2) * 0.008 * (1 - s), 0);
+    L.hip.set(0, 0.94 - 0.06 * s + Math.abs(Math.cos(ph)) * 0.07 * s + Math.sin(t * 2.2) * 0.008 * (1 - s), 0);
     const stride = 0.42 * s;
     L.footR.set(-0.13, Math.max(0, -Math.sin(ph)) * 0.28 * s, Math.cos(ph) * stride + 0.05 * s);
     L.footL.set(0.13, Math.max(0, Math.sin(ph)) * 0.28 * s, -Math.cos(ph) * stride + 0.05 * s);
@@ -283,7 +283,7 @@ export class Player {
       const up = this.vel.y > 0 ? 1 : 0;
       L.footR.set(-0.14, 0.32 + up * 0.08, 0.18);
       L.footL.set(0.14, 0.18 + up * 0.1, -0.14);
-      L.hip.y = 0.88;
+      L.hip.y = 0.96;
       L.lean = 0.12 + Math.max(-0.2, Math.min(0.2, -this.vel.y * 0.015));
       L.handR.set(-0.42, 0.95, 0.0); L.handL.set(0.42, 0.95, 0.0);
     }

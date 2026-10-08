@@ -1,7 +1,8 @@
 // HDR render pipeline: scene → (MSAA HDR target) → bloom mip chain → composite.
 import * as THREE from 'three';
 import { fsVertex, downsampleFrag, upsampleFrag, compositeFrag } from './shaders/post.js';
-import { toonGlobals } from './shaders/toon.js';
+import { toonGlobals, shadowUniforms } from './shaders/toon.js';
+import { SunShadow } from './shadow.js';
 
 const BLOOM_LEVELS = 6;
 
@@ -61,10 +62,15 @@ export class Pipeline {
         uDesat: { value: 0 },
         uDim: { value: 0 },
         uGrade: { value: new THREE.Color(1, 1, 1) },
+        uSun: { value: new THREE.Vector3(0.5, 0.5, 0) },
+        uSunColor: { value: new THREE.Color(1.0, 0.7, 0.42) },
       },
       vertexShader: fsVertex, fragmentShader: compositeFrag, depthTest: false, depthWrite: false,
     });
 
+    this.shadow = new SunShadow(2048, 22);
+    Object.assign(shadowUniforms, this.shadow.uniforms);
+    this.shadowCenter = new THREE.Vector3();
     this.distortScene = new THREE.Scene();
     this.overlayScene = new THREE.Scene();
     this.overlayCam = new THREE.OrthographicCamera(-1, 1, 1, -1, -10, 10);
@@ -123,6 +129,8 @@ export class Pipeline {
 
   render(scene, camera, time, target = null) {
     const r = this.renderer;
+    // 0. sun shadow map
+    if (this.shadow && this.shadow.uniforms.uShadowOn.value > 0.5) this.shadow.render(r, scene, this.shadowCenter, toonGlobals.uLightDir.value);
     // 1. scene
     r.setRenderTarget(this.sceneRT);
     r.setClearColor(this.clearColor ?? 0x000000, 1);

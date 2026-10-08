@@ -3,7 +3,7 @@ import * as THREE from 'three';
 
 export class Pose {
   constructor() {
-    this.hip = new THREE.Vector3(0, 0.86, 0);
+    this.hip = new THREE.Vector3(0, 0.94, 0);
     this.lean = 0;       // forward pitch (rad)
     this.roll = 0;       // sideways tilt
     this.twist = 0;      // torso yaw vs hips

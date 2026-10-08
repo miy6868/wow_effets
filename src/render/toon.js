@@ -38,6 +38,7 @@ export function computeOutlineNormals(geo) {
 export function toonMesh(geo, opts = {}) {
   const mat = makeToonMaterial(opts);
   const mesh = new THREE.Mesh(geo, mat);
+  if (opts.castShadow !== false) mesh.layers.enable(1);
   if (opts.outline !== false) {
     computeOutlineNormals(geo);
     const om = makeOutlineMaterial({

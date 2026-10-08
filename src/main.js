@@ -108,6 +108,8 @@ function frame(dtReal) {
 
   toonGlobals.uTime.value = Time.real;
   arena.sky.position.copy(rig.camera.position);
+  arena.updateSun(rig.camera, pipeline);
+  pipeline.shadowCenter.copy(player.pos).addScaledVector(rig.flatForward(new THREE.Vector3()), 8);
   pipeline.render(scene, rig.camera, Time.real);
   input.endFrame();
 }

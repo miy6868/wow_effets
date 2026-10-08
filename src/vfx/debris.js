@@ -20,6 +20,7 @@ export class DebrisPool {
     this.mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(max * 3).fill(1), 3);
     this.mesh.count = 0;
     this.mesh.frustumCulled = false;
+    this.mesh.layers.enable(1);
     this.group = new THREE.Group();
     this.group.add(this.mesh);
     if (outline) {

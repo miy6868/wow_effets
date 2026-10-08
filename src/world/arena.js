@@ -46,11 +46,23 @@ export class Arena {
     const groundGeo = new THREE.CircleGeometry(220, 96);
     groundGeo.rotateX(-Math.PI / 2);
     this.ground = new THREE.Mesh(groundGeo, makeGroundMaterial({ arenaR: ARENA_R }));
+    this.ground.material.uniforms.uTime = toonGlobals.uTime;
     this.ground.renderOrder = -50;
     scene.add(this.ground);
 
     this.buildPillars();
     this.buildHills();
+  }
+
+  /** Project the sun into screen space for the god-ray pass. */
+  updateSun(camera, pipeline) {
+    const d = this.skyMat.uniforms.uSunDir.value;
+    const p = camera.position.clone().addScaledVector(d, 200);
+    const fwd = camera.getWorldDirection(new THREE.Vector3());
+    const facing = Math.max(0, fwd.dot(d));
+    p.project(camera);
+    const vis = facing > 0 ? Math.pow(facing, 3) * (1 - Math.min(1, Math.max(0, Math.abs(p.x) - 1) * 2)) : 0;
+    pipeline.u.uSun.value.set(p.x * 0.5 + 0.5, p.y * 0.5 + 0.5, Math.max(0, vis));
   }
 
   buildPillars() {

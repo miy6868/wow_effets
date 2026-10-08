@@ -13,6 +13,7 @@
 //  All math is done in linear HDR space; the post pipeline tone maps.
 // ─────────────────────────────────────────────────────────────────────────────
 import * as THREE from 'three';
+import { shadowChunk } from '../shadow.js';
 
 export const MAX_PLIGHTS = 8;
 
@@ -198,12 +199,14 @@ export const groundVertex = /* glsl */ `
 
 export const groundFragment = /* glsl */ `
   ${lightingChunk}
+  ${shadowChunk}
   uniform vec3 uStoneA;
   uniform vec3 uStoneB;
   uniform vec3 uGrout;
   uniform vec3 uGrass;
   uniform vec3 uGrassDark;
   uniform float uArenaR;
+  uniform float uTime;
   varying vec3 vPosW;
   varying vec3 vNormalW;
 
@@ -268,10 +271,18 @@ export const groundFragment = /* glsl */ `
     col = mix(grass, plaza, onPlaza);
     col = mix(col, uStoneB * 0.8, border * 0.85);
 
-    // lighting: ground is mostly lit, shadows come from blob decals
+    // lighting: ground is mostly lit; slow drifting cloud shadows with soft cel edges
     vec3 L = normalize(uLightDir);
     float ndl = dot(N, L);
     col *= mix(uGroundAmb, uSkyAmb, 0.85) * uLightColor * (0.85 + 0.15 * ndl);
+    vec2 cp = p * 0.035 + vec2(uTime * 0.012, uTime * 0.004);
+    float cs = vnoise(cp) * 0.65 + vnoise(cp * 2.3 + 5.0) * 0.35;
+    float cw = fwidth(cs) * 2.0 + 0.02;
+    float shadowK = smoothstep(0.55 - cw, 0.55 + cw, cs);
+    col *= mix(vec3(1.0), vec3(0.72, 0.76, 0.92), shadowK * 0.8);
+    // cast shadows from characters / props: cool violet, cel-soft edge
+    float sh = sunShadow(vPosW);
+    col *= mix(vec3(1.0), vec3(0.54, 0.58, 0.82), sh * (1.0 - shadowK * 0.45));
     col += toonPointLights(vPosW, N, col * 1.3);
     col *= 1.0 - uWorldDim * 0.8;
     col = applyFog(col, vPosW);
@@ -343,10 +354,13 @@ export function makeOutlineMaterial(opts = {}) {
   return mat;
 }
 
+export const shadowUniforms = {};
+
 export function makeGroundMaterial(opts = {}) {
   return new THREE.ShaderMaterial({
     uniforms: {
       ...toonGlobals,
+      ...shadowUniforms,
       uStoneA: { value: new THREE.Color(opts.stoneA ?? 0x737889) },
       uStoneB: { value: new THREE.Color(opts.stoneB ?? 0x676c7e) },
       uGrout: { value: new THREE.Color(opts.grout ?? 0x4b4e60) },

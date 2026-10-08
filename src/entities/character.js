@@ -60,10 +60,12 @@ export class CharacterModel {
     chest.scale.set(1.08, 1, 0.82);
     this.torso.add(chest);
     // coat tails (gives a sense of facing from behind)
-    const tail = T(new THREE.ConeGeometry(0.26, 0.55, 10, 1, true), c.coat, { side: THREE.DoubleSide });
-    tail.position.set(0, 0.0, -0.02);
-    tail.rotation.x = Math.PI; // open downward
-    tail.scale.set(1.0, 1, 0.85);
+    // long coat skirt, split at the front so the legs read clearly
+    const tailGeo = new THREE.CylinderGeometry(0.215, 0.31, 0.62, 16, 1, true, Math.PI - 2.2, 4.4);
+    tailGeo.translate(0, -0.31, 0);
+    const tail = T(tailGeo, c.coat, { side: THREE.DoubleSide, outlineWidth: 1.8 });
+    tail.position.set(0, 0.06, -0.01);
+    tail.scale.set(1.0, 1, 0.9);
     this.body.add(tail);
     this.coatTail = tail;
     const belt = T(new THREE.CylinderGeometry(0.205, 0.205, 0.07, 14), c.coatTrim, { spec: 0.4 });
@@ -73,7 +75,8 @@ export class CharacterModel {
 
     // head
     this.head = new THREE.Group();
-    this.head.position.y = 0.86;
+    this.head.position.y = 0.84;
+    this.head.scale.setScalar(0.86);
     this.torso.add(this.head);
     const headM = T(new THREE.SphereGeometry(0.235, 18, 14), c.skin);
     this.head.add(headM);
@@ -159,7 +162,7 @@ export class CharacterModel {
     this.inner.add(this.sockR, this.sockL);
 
     this.upperLen = 0.29; this.foreLen = 0.29;
-    this.thighLen = 0.43; this.shinLen = 0.43;
+    this.thighLen = 0.47; this.shinLen = 0.47;
     this._poleR = new THREE.Vector3();
     this._poleL = new THREE.Vector3();
     this.shoulderR = new THREE.Vector3();
@@ -177,7 +180,7 @@ export class CharacterModel {
     b.scale.set(1 / Math.sqrt(pose.squash), pose.squash, 1 / Math.sqrt(pose.squash));
     this.torso.rotation.set(pose.lean * 0.65, pose.twist, pose.roll * 0.5, 'YXZ');
     this.head.rotation.set(pose.headPitch - pose.lean * 0.5, pose.headYaw - pose.twist * 0.5, -pose.roll * 0.4, 'YXZ');
-    this.coatTail.rotation.x = Math.PI - Math.max(-0.4, Math.min(0.5, pose.lean * 0.6));
+    this.coatTail.rotation.x = -Math.max(-0.3, Math.min(0.6, pose.lean * 0.7 + (pose.coatFlare ?? 0)));
 
     b.updateMatrix();
     this.torso.updateMatrix();

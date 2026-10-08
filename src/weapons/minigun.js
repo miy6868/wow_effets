@@ -100,7 +100,7 @@ export class Minigun extends GunWeapon {
     const dir = _v.subVectors(this.aimPoint, m).normalize().clone();
     for (let i = 0; i < 10; i++) {
       const d = cone(UP.clone().addScaledVector(dir, 0.6), 0.5, new THREE.Vector3());
-      G.fx.alpha.emit({ pos: m.clone().addScaledVector(dir, -0.4 + Math.random() * 0.4), vel: d.multiplyScalar(rand(1.5, 4)), shape: SHAPE.SMOKE, size: rand(0.12, 0.2), sizeEnd: rand(0.5, 0.75), life: rand(0.6, 1.0), color: [0.92, 0.93, 0.98], alpha: 0.6, alphaEnd: 0, drag: 3 });
+      G.fx.alpha.emit({ pos: m.clone().addScaledVector(dir, -0.4 + Math.random() * 0.4), vel: d.multiplyScalar(rand(1.5, 4)), shape: SHAPE.SMOKE, size: rand(0.12, 0.2), sizeEnd: rand(0.5, 0.75), life: rand(0.6, 1.0), color: [0.8, 0.72, 0.7], colorEnd: [0.55, 0.52, 0.62], alpha: 0.45, alphaEnd: 0, drag: 3 });
     }
     G.audio?.play('steam', { pos: m });
   }

@@ -57,6 +57,87 @@ export class Arena {
     this.buildLanterns();
     this.buildTorii();
     this.buildTrees();
+    this.buildBirds();
+    this.buildPagoda();
+  }
+
+  /** A five-storey pagoda far out on the plain: a hazy silhouette that gives the
+   *  shrine grounds a place in a larger world (fog does the aerial perspective). */
+  buildPagoda() {
+    const g = new THREE.Group();
+    // colours are pre-hazed toward the fog: at ~100 m the global fog alone is too thin
+    const T = (geo, color) => toonMesh(geo, { color, outlineWidth: 1.0, outlineColor: 0x4a3f52, rim: 0.3, castShadow: false });
+    const base = T(new THREE.BoxGeometry(9, 1.2, 9), 0x8c7f88); base.position.y = 0.6; g.add(base);
+    let y = 1.2;
+    const widths = [6.2, 5.4, 4.6, 3.8, 3.0];
+    widths.forEach((w, i) => {
+      const h = i === 0 ? 3.0 : 2.3;
+      const body = T(new THREE.BoxGeometry(w * 0.72, h, w * 0.72), 0x9a625c); body.position.y = y + h / 2; g.add(body);
+      y += h;
+      // flared eaves: a flat four-sided cone, corners slightly upturned by the outline
+      const roof = T(new THREE.ConeGeometry(w * 0.86, 1.25, 4, 1), 0x5f5566);
+      roof.rotation.y = Math.PI / 4; roof.position.y = y + 0.35; roof.scale.y = 0.8;
+      g.add(roof);
+      y += 0.6;
+    });
+    const spire = T(new THREE.CylinderGeometry(0.12, 0.2, 4.2, 6), 0xa08a68); spire.position.y = y + 2.0; g.add(spire);
+    for (let k = 0; k < 5; k++) {
+      const ring = T(new THREE.TorusGeometry(0.32, 0.07, 5, 10), 0xa08a68);
+      ring.rotation.x = Math.PI / 2; ring.position.y = y + 0.8 + k * 0.55; g.add(ring);
+    }
+    const a = 1.18, r = 96;
+    g.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+    g.rotation.y = 0.4;
+    this.scene.add(g);
+  }
+
+  /** A small flock that crosses the sunset sky every so often (pure ambience). */
+  buildBirds() {
+    const g = new THREE.BufferGeometry();
+    // a flat "V": two wings sweeping back from the body; flapping = animated Y scale
+    g.setAttribute('position', new THREE.Float32BufferAttribute([
+      0, 0, 0.25, -1, 0.35, -0.25, 0, 0, -0.15,
+      0, 0, 0.25, 0, 0, -0.15, 1, 0.35, -0.25,
+    ], 3));
+    const mat = new THREE.MeshBasicMaterial({ color: 0x3b3252, side: THREE.DoubleSide, transparent: true, opacity: 0.85, depthWrite: false });
+    this.birdN = 9;
+    this.birds = new THREE.InstancedMesh(g, mat, this.birdN);
+    this.birds.frustumCulled = false;
+    this.birds.renderOrder = -60;
+    this.scene.add(this.birds);
+    this.birdT = 8; // first pass soon after start
+    this.birdM = new THREE.Matrix4();
+  }
+
+  updateBirds(dt) {
+    if (!this.birds) return;
+    this.birdT -= dt;
+    const T = 26; // seconds to cross
+    if (this.birdT < -T) {
+      this.birdT = 25 + Math.random() * 30;
+      const a = Math.random() * Math.PI * 2;
+      this.birdPath = { a, h: 38 + Math.random() * 18, r: 110 + Math.random() * 20, dir: Math.random() < 0.5 ? 1 : -1 };
+    }
+    this.birdPath ??= { a: 2.0, h: 44, r: 115, dir: 1 };
+    const live = this.birdT < 0;
+    this.birds.visible = live;
+    if (!live) return;
+    const k = -this.birdT / T;
+    const P = this.birdPath;
+    const ang = P.a + P.dir * (k - 0.5) * 1.6;
+    const head = new THREE.Vector3(Math.cos(ang) * P.r, P.h + Math.sin(k * 3) * 2, Math.sin(ang) * P.r);
+    const fwd = new THREE.Vector3(-Math.sin(ang) * P.dir, 0, Math.cos(ang) * P.dir);
+    const side = new THREE.Vector3(fwd.z, 0, -fwd.x);
+    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), fwd);
+    const t = (this.birdClock = (this.birdClock ?? 0) + dt);
+    for (let i = 0; i < this.birdN; i++) {
+      const row = Math.ceil(i / 2), s = i % 2 ? 1 : -1;
+      const p = head.clone().addScaledVector(fwd, -row * 2.2).addScaledVector(side, i ? s * row * 2.0 : 0).add(new THREE.Vector3(0, Math.sin(t * 0.7 + i) * 0.4, 0));
+      const flap = Math.sin(t * 7 + i * 1.3);
+      this.birdM.compose(p, q, new THREE.Vector3(1.1, 1.1 * flap, 1.1));
+      this.birds.setMatrixAt(i, this.birdM);
+    }
+    this.birds.instanceMatrix.needsUpdate = true;
   }
 
   /** A vermilion torii just outside the pillar ring, backlit by the low sun. */
@@ -107,7 +188,7 @@ export class Arena {
   buildTrees() {
     const rnd = mulberry(7);
     const trunkGeo = new THREE.CylinderGeometry(0.7, 1, 1, 7, 1); trunkGeo.translate(0, 0.5, 0);
-    const blobGeo = new THREE.IcosahedronGeometry(1, 3);
+    const blobGeo = new THREE.IcosahedronGeometry(1, 2);
     {
       const pos = blobGeo.attributes.position, v = new THREE.Vector3();
       for (let i = 0; i < pos.count; i++) {
@@ -126,7 +207,7 @@ export class Arena {
       trunks.push(m.clone().compose(a, q, sc.set(r, d.length(), r)));
     };
     const spots = [0.55, 1.05, 1.72, 2.42, 3.25, 3.95, 4.6, 5.3, 5.95];
-    for (const ang of spots) {
+    spots.forEach((ang, ti) => {
       const a = ang + (rnd() - 0.5) * 0.2;
       const r = ARENA_R + 7 + rnd() * 6;
       const base = new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r);
@@ -141,14 +222,14 @@ export class Arena {
         const ba = rnd() * Math.PI * 2;
         const tip = mid.clone().add(new THREE.Vector3(Math.cos(ba) * (1.4 + rnd()), H * 0.35 + rnd() * 0.8, Math.sin(ba) * (1.4 + rnd())));
         seg(mid, tip, 0.12);
-        blobs.push([tip.clone().add(new THREE.Vector3(0, 0.3, 0)), 1.3 + rnd() * 0.5]);
+        blobs.push([tip.clone().add(new THREE.Vector3(0, 0.3, 0)), 1.3 + rnd() * 0.5, ti]);
       }
-      blobs.push([crown.clone().add(new THREE.Vector3(0, 0.5, 0)), 2.0 + rnd() * 0.4]);
+      blobs.push([crown.clone().add(new THREE.Vector3(0, 0.5, 0)), 2.0 + rnd() * 0.4, ti]);
       for (let k = 0; k < 4; k++) {
         const ba = rnd() * Math.PI * 2;
-        blobs.push([crown.clone().add(new THREE.Vector3(Math.cos(ba) * 1.5, rnd() * 0.8 - 0.2, Math.sin(ba) * 1.5)), 1.2 + rnd() * 0.5]);
+        blobs.push([crown.clone().add(new THREE.Vector3(Math.cos(ba) * 1.5, rnd() * 0.8 - 0.2, Math.sin(ba) * 1.5)), 1.2 + rnd() * 0.5, ti]);
       }
-    }
+    });
     const inst = (geo, mats, color, o) => {
       computeOutlineNormals(geo);
       const mesh = new THREE.InstancedMesh(geo, makeToonMaterial({ color, ...o }), mats.length);
@@ -156,18 +237,52 @@ export class Arena {
       ol.renderOrder = -1;
       mats.forEach((mm, i) => { mesh.setMatrixAt(i, mm); ol.setMatrixAt(i, mm); });
       if (o.tints) { mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(o.tints), 3); }
-      mesh.layers.enable(1);
       this.scene.add(mesh, ol);
     };
     inst(trunkGeo, trunks, 0x4a3a44, { outlineColor: 0x1c1420, outlineWidth: 2.0, rim: 0.4 });
-    const bm = [], tints = [];
-    for (const [p, s] of blobs) {
-      q.setFromEuler(new THREE.Euler(rnd() * 6, rnd() * 6, rnd() * 6));
-      bm.push(new THREE.Matrix4().compose(p, q, sc.set(s * 1.1, s * 0.85, s * 1.1)));
-      const k = 0.92 + rnd() * 0.14;
-      tints.push(k, k * (0.96 + rnd() * 0.06), k);
+    // canopies: every blob and blossom cluster of a tree is merged into one mesh
+    // whose normals are bent toward "away from the crown centre", so each crown
+    // shades as one soft volume while its silhouette stays lumpy (stylised-tree trick)
+    const centers = [];
+    for (const [p, s, t] of blobs) {
+      const c = (centers[t] ??= { v: new THREE.Vector3(), w: 0 });
+      c.v.addScaledVector(p, s); c.w += s;
     }
-    inst(blobGeo, bm, 0xf5b2c9, { outlineColor: 0x6e3354, outlineWidth: 2.2, rim: 1.0, emissive: 0.06, tints });
+    for (const c of centers) c.v.multiplyScalar(1 / c.w);
+    const P = [], N = [];
+    const v = new THREE.Vector3(), nn = new THREE.Vector3(), d = new THREE.Vector3(), nm = new THREE.Matrix3();
+    const addPart = (geo, mat, C) => {
+      const pa = geo.attributes.position, na = geo.attributes.normal;
+      nm.getNormalMatrix(mat);
+      for (let i = 0; i < pa.count; i++) {
+        v.fromBufferAttribute(pa, i).applyMatrix4(mat);
+        nn.fromBufferAttribute(na, i).applyMatrix3(nm).normalize();
+        d.subVectors(v, C); d.y *= 1.3; d.normalize();
+        nn.multiplyScalar(0.3).addScaledVector(d, 0.7).normalize();
+        P.push(v.x, v.y, v.z); N.push(nn.x, nn.y, nn.z);
+      }
+    };
+    const clusterGeo = new THREE.IcosahedronGeometry(1, 1);
+    const nrm = new THREE.Vector3();
+    for (const [p, s, t] of blobs) {
+      const C = centers[t].v;
+      q.setFromEuler(new THREE.Euler(rnd() * 6, rnd() * 6, rnd() * 6));
+      addPart(blobGeo, new THREE.Matrix4().compose(p, q, sc.set(s * 1.1, s * 0.85, s * 1.1)), C);
+      // small blossom clusters half-buried in the blob: scalloped silhouette
+      for (let k = 0; k < 5; k++) {
+        nrm.set(rnd() * 2 - 1, rnd() * 1.6 - 0.35, rnd() * 2 - 1).normalize();
+        const pos = p.clone().add(new THREE.Vector3(nrm.x * s * 0.98, nrm.y * s * 0.8, nrm.z * s * 0.98));
+        const r = s * (0.22 + rnd() * 0.12);
+        q.setFromEuler(new THREE.Euler(rnd() * 6, rnd() * 6, rnd() * 6));
+        addPart(clusterGeo, new THREE.Matrix4().compose(pos, q, sc.set(r, r * 0.85, r)), C);
+      }
+    }
+    const canopy = new THREE.BufferGeometry();
+    canopy.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+    canopy.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+    // (trees stand outside the ±22 m shadow range, so they skip the shadow pass)
+    const canopyMesh = toonMesh(canopy, { color: 0xf5b4ca, outlineColor: 0x6e3354, outlineWidth: 2.0, rim: 1.0, emissive: 0.06, castShadow: false });
+    this.scene.add(canopyMesh);
     this.treeTops = blobs.map(([p]) => p);
   }
 
@@ -244,11 +359,42 @@ export class Arena {
       this.scene.add(g);
       this.lanterns.push(g.position.clone().setY(1.51));
     }
+    // warm pools of lantern light on the stone (one additive mesh, gentle flicker)
+    const quads = new THREE.BufferGeometry();
+    const P = [], U = [], S = [], I = [];
+    this.lanterns.forEach((lp, i) => {
+      const R = 2.6, b = i * 4;
+      for (const [u, v] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { P.push(lp.x + u * R, 0.025, lp.z + v * R); U.push(u, v); S.push(i * 1.7); }
+      I.push(b, b + 2, b + 1, b, b + 3, b + 2);
+    });
+    quads.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+    quads.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+    quads.setAttribute('seed', new THREE.Float32BufferAttribute(S, 1));
+    quads.setIndex(I);
+    const pool = new THREE.Mesh(quads, new THREE.ShaderMaterial({
+      uniforms: { uTime: toonGlobals.uTime, uWorldDim: toonGlobals.uWorldDim, uColor: { value: new THREE.Color(1.0, 0.55, 0.22) } },
+      vertexShader: `attribute float seed; varying vec2 vUv; varying float vSeed;
+        void main() { vUv = uv; vSeed = seed; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: `uniform float uTime; uniform float uWorldDim; uniform vec3 uColor; varying vec2 vUv; varying float vSeed;
+        void main() {
+          float r = length(vUv);
+          float k = (1.0 - smoothstep(0.0, 1.0, r)); k *= k;
+          // two soft cel steps so the pool reads as toon light, not a gradient blob
+          float c = k * 0.55 + smoothstep(0.42, 0.46, k) * 0.12;
+          float fl = 0.9 + 0.1 * sin(uTime * 7.0 + vSeed) * sin(uTime * 3.3 + vSeed * 2.0);
+          gl_FragColor = vec4(uColor * c * fl * 0.32 * (1.0 - uWorldDim * 0.9), 1.0);
+        }`,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    }));
+    pool.renderOrder = -40;
+    pool.frustumCulled = false;
+    this.scene.add(pool);
   }
 
   /** Lantern glow motes. */
   update(dt, fx, playerPos) {
     if (this.grassMat) this.grassMat.uniforms.uPlayer.value.copy(playerPos);
+    this.updateBirds(dt);
     if (!fx || dt <= 0) return;
     this._lt = (this._lt ?? 0) - dt;
     if (this._lt > 0) return;

@@ -271,6 +271,16 @@ export const groundFragment = /* glsl */ `
     ringLine = min(ringLine, abs(r - 5.6));
     float lw = fwidth(r);
     plaza = mix(plaza, uGrout * 1.25, 1.0 - smoothstep(0.035 - lw, 0.035 + lw, ringLine));
+    // engraved centre emblem: a notched inner ring and an inlaid crescent mon
+    // (the same crescent as the hero's coat crest)
+    float spokeA = mod(ang + 0.3927, 0.7854) - 0.3927;
+    float eng = abs(r - 4.25);
+    eng = min(eng, max(abs(spokeA) * r, max(4.25 - r, r - 4.75)));
+    plaza = mix(plaza, uGrout * 1.1, 1.0 - smoothstep(0.03 - lw, 0.03 + lw, eng));
+    float dIn = length(p - vec2(0.17, 0.18));
+    float crw = fwidth(r) + 1e-4;
+    float cres = (1.0 - smoothstep(1.18 - crw, 1.18 + crw, r)) * smoothstep(1.06 - crw, 1.06 + crw, dIn);
+    plaza = mix(plaza, vec3(0.5, 0.41, 0.3), cres * 0.75);
 
     // ── grass outside the plaza ──
     float gN = vnoise(p * 0.11) * 0.7 + vnoise(p * 0.45) * 0.3;

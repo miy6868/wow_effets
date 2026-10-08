@@ -107,7 +107,7 @@ export const FXP = {
     }
     for (let i = 0; i < 3; i++) {
       cone(dir, 1.3, _v2);
-      fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, 0.3), vel: _v2.multiplyScalar(rand(3, 5)), size: rand(0.12, 0.2) * s, sizeEnd: rand(0.3, 0.45) * s, life: rand(0.3, 0.45), mode: PUFF.SMOKE, color: [0.66, 0.62, 0.68], shade: [0.38, 0.35, 0.48], drag: 6, rise: 1.2, dissolveStart: 0.1 });
+      fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, 0.3), vel: _v2.multiplyScalar(rand(3, 5)), size: rand(0.12, 0.2) * s, sizeEnd: rand(0.3, 0.45) * s, life: rand(0.3, 0.45), mode: PUFF.SMOKE, color: [0.58, 0.52, 0.52], shade: [0.33, 0.3, 0.42], drag: 6, rise: 1.2, dissolveStart: 0.1 });
     }
     inkShards(p, dir, dir, s * 1.2, 7);
     fx.light(p, color, 2.5, 5 * s, 0.16);
@@ -133,8 +133,8 @@ export const FXP = {
   /** Bullet hitting a body: small, fast, readable. */
   hitBullet(p, dir, color = COL.hot, s = 1) {
     const fx = G.fx;
-    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 0.9 * s, sizeEnd: 0.05, life: 0.07, color: mul(COL.white, 5), alphaEnd: 0, rot: Math.random() });
-    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 0.5 * s, sizeEnd: 0.7 * s, life: 0.06, color: mul(color, 1.4), alphaEnd: 0 });
+    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 0.75 * s, sizeEnd: 0.05, life: 0.06, color: mul(COL.white, 3.2), alphaEnd: 0, rot: Math.random() });
+    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 0.42 * s, sizeEnd: 0.6 * s, life: 0.05, color: mul(color, 1.1), alphaEnd: 0 });
     _v.copy(dir).negate();
     for (let i = 0; i < 7; i++) {
       cone(_v, 0.9, _v2);
@@ -151,14 +151,14 @@ export const FXP = {
   /** Bullet hitting the ground/environment. */
   hitGround(p, dir, s = 1) {
     const fx = G.fx;
-    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 0.6 * s, sizeEnd: 0.05, life: 0.06, color: [5, 4.5, 3.5], alphaEnd: 0 });
+    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 0.55 * s, sizeEnd: 0.05, life: 0.06, color: [3.4, 3, 2.3], alphaEnd: 0 });
     for (let i = 0; i < 5; i++) {
       cone(UP, 0.7, _v2);
       fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(4, 10)), shape: SHAPE.STREAK, size: 0.04, stretch: 0.025, life: rand(0.08, 0.2), color: [5, 4, 2.5], colorEnd: [2, 0.6, 0.1], alphaEnd: 0, drag: 4, gravity: 18 });
     }
     for (let i = 0; i < 2; i++) {
       cone(UP, 0.6, _v2);
-      fx.alpha.emit({ pos: p, vel: _v2.multiplyScalar(rand(0.8, 2)), shape: SHAPE.SMOKE, size: rand(0.3, 0.5) * s, sizeEnd: rand(0.8, 1.1) * s, life: rand(0.4, 0.7), color: [0.78, 0.76, 0.82], alpha: 0.9, alphaEnd: 0, drag: 3 });
+      fx.alpha.emit({ pos: p, vel: _v2.multiplyScalar(rand(0.8, 2)), shape: SHAPE.SMOKE, size: rand(0.3, 0.5) * s, sizeEnd: rand(0.8, 1.1) * s, life: rand(0.4, 0.7), color: [0.72, 0.65, 0.63], colorEnd: [0.5, 0.47, 0.57], alpha: 0.75, alphaEnd: 0, drag: 3 });
     }
     for (let i = 0; i < 2; i++) {
       cone(UP, 0.9, _v2);
@@ -176,13 +176,13 @@ export const FXP = {
       if (dirBias) _v2.addScaledVector(dirBias, 1.0);
       _v2.normalize().multiplyScalar(rand(2.5, 5) * s);
       const r = rand(0.25, 0.45) * s;
-      fx.puffs.emit({ pos: p.clone().add(_v.set(Math.cos(a) * r, 0.1, Math.sin(a) * r)), vel: _v2, size: rand(0.1, 0.17) * s, sizeEnd: rand(0.26, 0.38) * s, life: rand(0.32, 0.5), mode: PUFF.SMOKE, color: [0.6, 0.57, 0.62], shade: [0.34, 0.32, 0.44], drag: 6, rise: 0.9, dissolveStart: 0.08, stretch: 0.75 });
+      fx.puffs.emit({ pos: p.clone().add(_v.set(Math.cos(a) * r, 0.1, Math.sin(a) * r)), vel: _v2, size: rand(0.1, 0.17) * s, sizeEnd: rand(0.26, 0.38) * s, life: rand(0.32, 0.5), mode: PUFF.SMOKE, color: [0.54, 0.48, 0.47], shade: [0.3, 0.28, 0.38], drag: 6, rise: 0.9, dissolveStart: 0.08, stretch: 0.75 });
     }
   },
 
   slideDust(p, vel, s = 1) {
     _v.copy(vel).setY(0).normalize().negate();
-    G.fx.puffs.emit({ pos: p.clone().setY(0.12), vel: _v.multiplyScalar(rand(0.5, 1.5)).setY(rand(0.5, 1.2)), size: rand(0.1, 0.16) * s, sizeEnd: rand(0.25, 0.36) * s, life: rand(0.3, 0.45), mode: PUFF.SMOKE, color: [0.6, 0.57, 0.62], shade: [0.34, 0.32, 0.44], drag: 4, rise: 0.6, dissolveStart: 0.08, stretch: 0.75 });
+    G.fx.puffs.emit({ pos: p.clone().setY(0.12), vel: _v.multiplyScalar(rand(0.5, 1.5)).setY(rand(0.5, 1.2)), size: rand(0.1, 0.16) * s, sizeEnd: rand(0.25, 0.36) * s, life: rand(0.3, 0.45), mode: PUFF.SMOKE, color: [0.54, 0.48, 0.47], shade: [0.3, 0.28, 0.38], drag: 4, rise: 0.6, dissolveStart: 0.08, stretch: 0.75 });
   },
 
   bodyLand(p, speed, s = 1) {
@@ -276,7 +276,7 @@ export const FXP = {
       fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(10, 20)), shape: SHAPE.STREAK, size: 0.035, stretch: 0.02, life: rand(0.05, 0.12), color: [4, 3.2, 1.6], colorEnd: [2.5, 0.8, 0.15], alphaEnd: 0, drag: 6 });
     }
     cone(dir, 0.5, _v2);
-    fx.alpha.emit({ pos: p.clone().addScaledVector(dir, 0.15), vel: _v2.multiplyScalar(rand(0.8, 1.6)).add(_v.set(0, 0.5, 0)), shape: SHAPE.SMOKE, size: 0.12 * Math.min(s, 1.4), sizeEnd: 0.34 * Math.min(s, 1.4), life: rand(0.3, 0.45), color: [0.78, 0.76, 0.82], alpha: 0.4, alphaEnd: 0, drag: 2.5 });
+    fx.alpha.emit({ pos: p.clone().addScaledVector(dir, 0.15), vel: _v2.multiplyScalar(rand(0.8, 1.6)).add(_v.set(0, 0.5, 0)), shape: SHAPE.SMOKE, size: 0.12 * Math.min(s, 1.4), sizeEnd: 0.34 * Math.min(s, 1.4), life: rand(0.3, 0.45), color: [0.76, 0.68, 0.66], alpha: 0.35, alphaEnd: 0, drag: 2.5 });
     fx.light(p, [1, 0.7, 0.35], 1.3 * s, 3.2, 0.05);
   },
 

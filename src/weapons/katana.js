@@ -177,14 +177,14 @@ export function landingImpact(pos, s = 1, color = [0.6, 1.4, 3.2]) {
   const p = pos.clone().setY(0.06);
   fx.ring({ pos: p, normal: UP, r0: 0.4, r1: 4.2 * s, w0: 0.1, w1: 0.015, color: [color[0] * 0.7, color[1] * 0.7, color[2] * 0.7], life: 0.38, sharp: 1 });
   fx.ring({ pos: p.clone().setY(0.1), normal: UP, r0: 0.2, r1: 2.6 * s, w0: 0.3, w1: 0.05, color: [color[0] * 0.25, color[1] * 0.25, color[2] * 0.25], life: 0.45, noise: 0.2 });
-  fx.decal({ pos: p, size: 2.4 * s, type: 1, color: [color[0] * 2, color[1] * 2, color[2] * 2], glow: 1.2, life: 3.5, reveal: 0.12 });
+  fx.decal({ pos: p, size: 2.4 * s, type: 1, color: [color[0] * 1.3, color[1] * 1.3, color[2] * 1.3], glow: 0.85, life: 3.5, reveal: 0.12 });
   FXP.dust(p, 1.2 * s, 10);
-  fx.add.emit({ pos: p.clone().setY(0.5), shape: SHAPE.SPIKES, size: 3.2 * s, sizeEnd: 4.4 * s, life: 0.12, color: [color[0] * 0.7, color[1] * 0.7, color[2] * 0.7], alphaEnd: 0 });
+  fx.add.emit({ pos: p.clone().setY(0.5), shape: SHAPE.SPIKES, size: 3.0 * s, sizeEnd: 4.2 * s, life: 0.1, color: [color[0] * 0.55, color[1] * 0.55, color[2] * 0.55], alphaEnd: 0 });
   for (let i = 0; i < 10 * s; i++) {
     const a = Math.random() * Math.PI * 2;
     fx.debris.rock.emit({ pos: p.clone().setY(0.15), vel: new THREE.Vector3(Math.cos(a) * rand(2, 5), rand(4, 8), Math.sin(a) * rand(2, 5)), scale: rand(0.06, 0.14), life: rand(1, 1.6) });
   }
-  fx.light(p.clone().setY(1), color, 2.2, 6 * s, 0.22);
+  fx.light(p.clone().setY(1), color, 1.6, 5.5 * s, 0.2);
   G.rig.shake(0.35 * s);
   G.audio?.play('slam', { pos: p, vol: 0.8 });
   // knock nearby grounded dummies

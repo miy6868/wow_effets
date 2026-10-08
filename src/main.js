@@ -15,6 +15,7 @@ import { Player } from './entities/player.js';
 import { DummyManager } from './entities/dummy.js';
 import { Projectiles } from './combat/projectiles.js';
 import { HUD } from './ui/hud.js';
+import { Portrait } from './ui/portrait.js';
 import { createWeapons } from './weapons/index.js';
 
 const params = new URLSearchParams(location.search);
@@ -157,7 +158,7 @@ function loop(now) {
 
 // ── test / automation hooks ────────────────────────────────────────────────────
 window.__app = {
-  G, Time, THREE, player, dummies, fx, rig, input, pipeline, weapons, screen,
+  G, Time, THREE, player, dummies, fx, rig, input, pipeline, weapons, screen, arena,
   step(n = 1, dt = 1 / 60) { for (let i = 0; i < n; i++) frame(dt); },
   run(sec, dt = 1 / 60) { const n = Math.round(sec / dt); for (let i = 0; i < n; i++) frame(dt); },
   tap(code) { input.press(code); frame(1 / 60); input.release(code); },
@@ -171,7 +172,7 @@ function makePortrait() {
   const fwd = player.forward(new THREE.Vector3());
   const right = player.right(new THREE.Vector3());
   const eyes = head.clone().add(new THREE.Vector3(0, 0.01, 0)).addScaledVector(fwd, 0.15);
-  cam.position.copy(eyes).addScaledVector(fwd, 0.95).addScaledVector(right, -0.28).add(new THREE.Vector3(0, -0.02, 0));
+  cam.position.copy(eyes).addScaledVector(fwd, 1.15).addScaledVector(right, -0.34).add(new THREE.Vector3(0, -0.06, 0));
   cam.lookAt(eyes.clone().add(new THREE.Vector3(0, -0.03, 0)));
   cam.rotateZ(-0.12); // dutch angle
   const hidden = [];
@@ -179,21 +180,22 @@ function makePortrait() {
   // dramatic lighting for the still: hard side key, strong cool rim, dark ambient
   const L = toonGlobals;
   const saved = { dir: L.uLightDir.value.clone(), col: L.uLightColor.value.clone(), sky: L.uSkyAmb.value.clone(), gnd: L.uGroundAmb.value.clone(), rim: L.uRimColor.value.clone() };
-  L.uLightDir.value.copy(right).multiplyScalar(-1).addScaledVector(fwd, 0.05).add(new THREE.Vector3(0, 0.3, 0)).normalize();
+  // key from behind-left: most of the face falls into screen-tone, a lit rim carves the profile
+  L.uLightDir.value.copy(right).multiplyScalar(-1).addScaledVector(fwd, -0.3).add(new THREE.Vector3(0, 0.35, 0)).normalize();
   L.uLightColor.value.setRGB(1.15, 0.98, 0.85);
-  L.uSkyAmb.value.setRGB(0.8, 0.82, 0.95); L.uGroundAmb.value.setRGB(0.6, 0.62, 0.8);
+  L.uSkyAmb.value.setRGB(0.64, 0.66, 0.78); L.uGroundAmb.value.setRGB(0.5, 0.52, 0.66);
   L.uRimColor.value.setRGB(0.6, 0.85, 1.6);
   const prevClear = pipeline.clearColor;
   pipeline.clearColor = 0x0c0818;
   const vig = pipeline.u.uVignette.value; pipeline.u.uVignette.value = 0.4;
   const shOn = pipeline.shadow.uniforms.uShadowOn.value; pipeline.shadow.uniforms.uShadowOn.value = 0;
-  const url = pipeline.snapshot(scene, cam, 512, 512);
+  const shot = pipeline.snapshot(scene, cam, 512, 512, true);
   pipeline.shadow.uniforms.uShadowOn.value = shOn;
   pipeline.u.uVignette.value = vig;
   pipeline.clearColor = prevClear;
   L.uLightDir.value.copy(saved.dir); L.uLightColor.value.copy(saved.col); L.uSkyAmb.value.copy(saved.sky); L.uGroundAmb.value.copy(saved.gnd); L.uRimColor.value.copy(saved.rim);
   for (const o of hidden) o.visible = true;
-  hud.cutin.querySelector('.portrait').style.backgroundImage = `url(${url})`;
+  hud.portrait = new Portrait(shot);
 }
 function isChildOf(o, root) { while (o) { if (o === root) return true; o = o.parent; } return false; }
 
@@ -235,5 +237,5 @@ function attractCam() {
   const toC = new THREE.Vector3().subVectors(c, pos).setY(0).normalize();
   const right = new THREE.Vector3(-toC.z, 0, toC.x);
   const look = c.clone().add(new THREE.Vector3(0, 1.55, 0)).addScaledVector(right, -1.9);
-  rig.cine = { pos, look, fov: 42, w: 1, blendSpeed: 30 };
+  rig.cine = { pos, look, fov: 42, w: 1, blendSpeed: 30, blendOut: 2.4 };
 }

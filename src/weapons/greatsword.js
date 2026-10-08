@@ -31,21 +31,21 @@ function layers(extra = {}) {
 export function groundImpact(pos, s = 1, color = [3, 1.0, 0.25]) {
   const fx = G.fx;
   const p = pos.clone(); p.y = 0.05;
-  fx.decal({ pos: p, size: 3.4 * s, type: 1, color, glow: 1.6, life: 5, reveal: 0.16, glowPow: 2 });
+  fx.decal({ pos: p, size: 3.4 * s, type: 1, color, glow: 1.15, life: 5, reveal: 0.16, glowPow: 2 });
   fx.decal({ pos: p, size: 2.2 * s, type: 0, color, glow: 0.5, life: 5, alpha: 0.55 });
   fx.ring({ pos: p.clone().setY(0.1), normal: UP, r0: 0.4 * s, r1: 5.0 * s, w0: 0.1, w1: 0.012, color: [1.8, 1.1, 0.5], life: 0.38, sharp: 1 });
   fx.ring({ pos: p.clone().setY(0.15), normal: UP, r0: 0.3 * s, r1: 3.2 * s, w0: 0.35, w1: 0.05, color: [0.6, 0.22, 0.06], life: 0.45, noise: 0.25 });
-  fx.add.emit({ pos: p.clone().setY(0.6), shape: SHAPE.SPIKES, size: 3.4 * s, sizeEnd: 4.6 * s, life: 0.12, color: [1.6, 0.9, 0.35], alphaEnd: 0 });
-  fx.add.emit({ pos: p.clone().setY(0.4), shape: SHAPE.GLOW, size: 1.8 * s, sizeEnd: 2.6 * s, life: 0.16, color: [1.0, 0.4, 0.1], alpha: 0.8, alphaEnd: 0 });
+  fx.add.emit({ pos: p.clone().setY(0.6), shape: SHAPE.SPIKES, size: 3.0 * Math.min(s, 1.2), sizeEnd: 4.2 * Math.min(s, 1.2), life: 0.1, color: [1.4, 0.75, 0.28], alphaEnd: 0 });
+  fx.add.emit({ pos: p.clone().setY(0.4), shape: SHAPE.GLOW, size: 1.6 * Math.min(s, 1.2), sizeEnd: 2.3 * Math.min(s, 1.2), life: 0.14, color: [0.9, 0.34, 0.08], alpha: 0.75, alphaEnd: 0 });
   // erupting rock shards
   for (let i = 0; i < 16 * s; i++) {
     const a = Math.random() * Math.PI * 2, r = rand(0.3, 1.6) * s;
     fx.debris.rock.emit({ pos: p.clone().add(_v.set(Math.cos(a) * r, 0.2, Math.sin(a) * r)), vel: _v2.set(Math.cos(a) * rand(2, 6), rand(6, 13), Math.sin(a) * rand(2, 6)), scale: rand(0.08, 0.2) * s, life: rand(1.2, 2.0) });
   }
   // dust ring rolling outward
-  for (let i = 0; i < 10; i++) {
-    const a = (i / 10) * Math.PI * 2 + rand(-0.1, 0.1);
-    fx.puffs.emit({ pos: p.clone().add(_v.set(Math.cos(a) * 0.9 * s, 0.2, Math.sin(a) * 0.9 * s)), vel: _v2.set(Math.cos(a) * rand(6, 9) * s, rand(0.5, 1.5), Math.sin(a) * rand(6, 9) * s), size: rand(0.14, 0.22) * s, sizeEnd: rand(0.38, 0.55) * s, life: rand(0.45, 0.7), mode: PUFF.SMOKE, color: [0.5, 0.47, 0.52], shade: [0.3, 0.28, 0.38], drag: 5, rise: 0.8, dissolveStart: 0.1, stretch: 0.75 });
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + rand(-0.1, 0.1);
+    fx.puffs.emit({ pos: p.clone().add(_v.set(Math.cos(a) * 0.9 * s, 0.2, Math.sin(a) * 0.9 * s)), vel: _v2.set(Math.cos(a) * rand(6, 9) * s, rand(0.5, 1.5), Math.sin(a) * rand(6, 9) * s), size: rand(0.12, 0.2) * s, sizeEnd: rand(0.32, 0.46) * s, life: rand(0.4, 0.6), mode: PUFF.SMOKE, color: [0.5, 0.47, 0.52], shade: [0.3, 0.28, 0.38], drag: 5, rise: 0.8, dissolveStart: 0.05, stretch: 0.75 });
   }
   // embers
   for (let i = 0; i < 26 * s; i++) {
@@ -66,13 +66,14 @@ function flameRing(pos, s, n = 10) {
     const r = 1.9 * s;
     const q = pos.clone().add(_v.set(Math.cos(a) * r, 0, Math.sin(a) * r));
     // flame tongues: teardrop cel flames licking upward, staggered
-    for (let k = 0; k < 3; k++) {
+    const tongues = n > 14 ? 2 : 3;
+    for (let k = 0; k < tongues; k++) {
       fx.add.emit({ pos: q.clone().setY(0.25 + k * 0.28), vel: _v2.set(Math.cos(a) * 0.6, rand(3.5, 6.5), Math.sin(a) * 0.6), shape: SHAPE.FLAME,
         size: rand(0.7, 1.1) * s * (1 - k * 0.2), w: 0.55, sizeEnd: rand(0.15, 0.3), life: rand(0.32, 0.5) + k * 0.06,
-        color: [2.2, 0.95, 0.22], colorEnd: [1.1, 0.18, 0.03], alpha: 1, alphaEnd: 0.0, fadeIn: 0.08, drag: 2.5, rot: rand(-0.2, 0.2), sizeCurve: CURVE.LINEAR });
+        color: [1.8, 0.75, 0.17], colorEnd: [1.0, 0.16, 0.03], alpha: 1, alphaEnd: 0.0, fadeIn: 0.08, drag: 2.5, rot: rand(-0.2, 0.2), sizeCurve: CURVE.LINEAR });
     }
     if (i % 2 === 0) fx.add.emit({ pos: q.clone().setY(0.3), vel: _v2.set(0, rand(4, 7), 0), shape: SHAPE.STREAK, size: 0.05, stretch: 0.04, life: rand(0.4, 0.7), color: [3.2, 1.6, 0.4], colorEnd: [1.5, 0.3, 0.05], alphaEnd: 0, drag: 1, gravity: -2 });
-    if (i % 3 === 0) fx.puffs.emit({ pos: q.clone().setY(0.5), vel: _v2.set(0, rand(1.5, 2.5), 0), size: 0.22 * s, sizeEnd: 0.5 * s, life: rand(0.8, 1.1), mode: PUFF.SMOKE, color: [0.36, 0.32, 0.36], shade: [0.18, 0.15, 0.22], drag: 2, rise: 1.2, dissolveStart: 0.25 });
+    if (i % 4 === 0) fx.puffs.emit({ pos: q.clone().setY(0.5), vel: _v2.set(0, rand(1.5, 2.5), 0), size: 0.16 * s, sizeEnd: 0.36 * s, life: rand(0.6, 0.8), mode: PUFF.SMOKE, color: [0.3, 0.26, 0.28], shade: [0.16, 0.13, 0.19], drag: 2, rise: 1.2, dissolveStart: 0.12 });
   }
 }
 
@@ -193,7 +194,7 @@ export class Greatsword extends MeleeWeapon {
       lunge: 4.5 + level * 0.8, minLunge: 2, maxLunge: 6 + level, stopDist: 1.0, lungeWin: [0.05, 0.5], lockRange: 11,
       center: [-0.05, 1.35, 0.1], lean: 0.5, stance: 'air', cam: { dist: 7.2 + level * 0.6 },
       hits: [],
-      slash: layers({ scale: 1.1 + level * 0.06, alpha: 0.8 }),
+      slash: layers({ scale: 1.1 + level * 0.06, alpha: 0.62 }),
       whoosh: 'whooshBig', whooshPitch: 0.65,
       onStart: (m) => {
         m.player.vel.y = 13; m.player.grounded = false; m.player.gravityScale = 1.15;
@@ -214,9 +215,9 @@ export class Greatsword extends MeleeWeapon {
         if (level >= 2) {
           G.screen.impact(0.05, true, [1, 0.85, 0.7]);
           G.slowmo(0.15, 0.1, 0.35);
-          G.fx.sphere({ pos: p2.clone().setY(0.5), r0: 0.5, r1: 4.2 * s, color: [0.9, 0.3, 0.06], coreColor: [0.6, 0.35, 0.15], life: 0.26, power: 2.4, core: 0.0, squashY: 0.4 });
+          G.fx.sphere({ pos: p2.clone().setY(0.4), r0: 0.5, r1: 3.0 * s, color: [0.5, 0.15, 0.03], coreColor: [0.4, 0.2, 0.08], life: 0.18, power: 3.0, core: 0.0, squashY: 0.35 });
         }
-        G.screen.flash([1, 0.75, 0.5], 0.08 + level * 0.03, 0.08);
+        G.screen.flash([1, 0.75, 0.5], 0.06 + level * 0.025, 0.07);
         G.screen.chroma(0.01 + level * 0.006, 0.3);
         G.rig.fovPunch(3 + level * 2);
         slamKnock(p2, (3.6 + level * 0.9) * s, 6 + level * 2, 11 + level * 2, 300 + level * 160);

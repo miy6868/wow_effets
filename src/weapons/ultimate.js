@@ -239,9 +239,9 @@ export class UltDeadEye extends UltBase {
         G.fx.add.emit({ pos: pr.pos, shape: SHAPE.GLOW, size: 0.25, life: 1 / 50, color: [1.4, 0.45, 0.2], alpha: 1, alphaEnd: 1 });
       },
       onHit: (pr, dd, point) => {
-        if (mark) mark.t = mark.life;
+        mark?.kill();
         hit(dd, { dir: pr.vel.clone().setY(0).normalize(), fxDir: pr.vel.clone().normalize(), point, kb: 15, lift: 7, hitstop: 0.12, shake: 0.25, kind: 'pierce', color: [1, 0.5, 0.3], fxScale: 1.0, dmg: 777, crit: true, sound: 'hitPierce', spin: 1.8 });
-        G.fx.ring({ pos: point, billboard: true, r0: 0.2, r1: 1.5, w0: 0.05, w1: 0.01, color: [1.2, 0.35, 0.25], life: 0.25, sharp: 1 });
+        G.fx.ring({ pos: point, billboard: true, r0: 0.2, r1: 1.1, w0: 0.04, w1: 0.008, color: [1.0, 0.3, 0.2], life: 0.2, sharp: 1 });
       },
     });
   }
@@ -254,14 +254,13 @@ export class UltDeadEye extends UltBase {
     if (w.modelL) w.aimPose(P, p, 'RL', 1); else if (w.aimPose2H) w.aimPose2H(P, p, 0, 0.3, w.id === 'rocket');
     w.aimPoint.copy(old);
   }
-  end() { endCinematic(); for (const m of this.marks ?? []) m.t = m.life; }
+  end() { endCinematic(); for (const m of this.marks ?? []) m.kill(); }
 }
 
 function markTarget(d) {
-  const fx = G.fx;
   const c = d.center(new THREE.Vector3());
-  fx.add.emit({ pos: c, shape: SHAPE.CROSS, size: 1.3, sizeEnd: 0.8, life: 0.15, color: [3, 0.6, 0.4], alphaEnd: 0.6 });
-  return fx.ring({ pos: c, billboard: true, r0: 1.1, r1: 0.5, w0: 0.06, w1: 0.07, color: [2.2, 0.35, 0.25], life: 6, sharp: 1, easing: (k) => Math.min(1, k * 40), alpha: 1 });
+  G.fx.add.emit({ pos: c, shape: SHAPE.CROSS, size: 0.9, sizeEnd: 0.5, life: 0.12, color: [2.4, 0.6, 0.4], alphaEnd: 0 });
+  return G.hud.mark(d);
 }
 
 // ── Magic: 메테오 ─────────────────────────────────────────────────────────────

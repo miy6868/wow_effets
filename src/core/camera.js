@@ -90,11 +90,15 @@ export class CameraRig {
     this.fovPunchV *= Math.exp(-dtReal * 9);
 
     // cinematic blend
+    // (when a cinematic ends, ease back out of its last framing instead of snapping)
+    if (this.cine) this.lastCine = this.cine;
     const cineTarget = this.cine ? (this.cine.w ?? 1) : 0;
-    this.cineW += (cineTarget - this.cineW) * (1 - Math.exp(-dtReal * (this.cine?.blendSpeed ?? 10)));
-    if (this.cine) {
-      _v.lerp(this.cine.pos, this.cineW);
-      this.lookTarget.lerp(this.cine.look, this.cineW);
+    const speed = this.cine ? (this.cine.blendSpeed ?? 10) : (this.lastCine?.blendOut ?? 10);
+    this.cineW += (cineTarget - this.cineW) * (1 - Math.exp(-dtReal * speed));
+    const cine = this.cine ?? (this.cineW > 0.002 ? this.lastCine : null);
+    if (cine) {
+      _v.lerp(cine.pos, this.cineW);
+      this.lookTarget.lerp(cine.look, this.cineW);
     }
 
     cam.position.copy(_v).add(this.kickPos);
@@ -119,7 +123,7 @@ export class CameraRig {
     cam.rotateY(vnoise(ht, 12) * 0.0035);
 
     let fov = this.baseFov + this.fovOffset + this.fovPunchV;
-    if (this.cine && this.cine.fov) fov = fov + (this.cine.fov - fov) * this.cineW;
+    if (cine && cine.fov) fov = fov + (cine.fov - fov) * this.cineW;
     if (Math.abs(cam.fov - fov) > 0.01) { cam.fov = fov; cam.updateProjectionMatrix(); }
   }
 

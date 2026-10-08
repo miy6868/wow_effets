@@ -98,7 +98,7 @@ export class Pipeline {
   }
 
   /** Render a still through the full pipeline and return it as a data URL. */
-  snapshot(scene, camera, w, h) {
+  snapshot(scene, camera, w, h, asCanvas = false) {
     const pw = this.cssW, ph = this.cssH, pr = this.pixelRatio;
     this.pixelRatio = 1;
     this.setSize(w, h);
@@ -118,7 +118,7 @@ export class Pipeline {
     const img = ctx.createImageData(w, h);
     for (let y = 0; y < h; y++) img.data.set(buf.subarray((h - 1 - y) * w * 4, (h - y) * w * 4), y * w * 4);
     ctx.putImageData(img, 0, 0);
-    return c.toDataURL('image/png');
+    return asCanvas ? c : c.toDataURL('image/png');
   }
 
   pass(mat, target) {

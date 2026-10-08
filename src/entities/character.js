@@ -68,6 +68,29 @@ export class CharacterModel {
     tail.scale.set(1.0, 1, 0.9);
     this.body.add(tail);
     this.coatTail = tail;
+    // crescent crest on the back of the coat skirt (below the scarf, which
+    // covers the upper back); wrapped onto the flared skirt so it moves with it
+    {
+      const crest = new THREE.Shape();
+      const a1 = 0.3 * Math.PI, R = 0.065, cx = 0.028, r2 = Math.hypot(R * Math.cos(a1) - cx, R * Math.sin(a1));
+      const b1 = Math.atan2(R * Math.sin(a1), R * Math.cos(a1) - cx);
+      crest.absarc(0, 0, R, a1, 2 * Math.PI - a1, false);
+      crest.absarc(cx, 0, r2, -b1, b1, true);
+      const yc = -0.2;
+      const wrap = (geo) => {
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          // tilt the crescent so it reads as a moon, not a letter
+          const x0 = pos.getX(i), y0 = pos.getY(i), ct = Math.cos(1.05), st = Math.sin(1.05);
+          const x = -(x0 * ct - y0 * st), y = x0 * st + y0 * ct + yc;
+          const r = 0.215 + 0.095 * (-y / 0.62) + 0.005;
+          pos.setXYZ(i, x, y, -Math.sqrt(Math.max(0, r * r - x * x)));
+        }
+        geo.computeVertexNormals();
+        return geo;
+      };
+      tail.add(T(wrap(new THREE.ShapeGeometry(crest, 16)), c.coatTrim, { outline: false, spec: 0.5, emissive: 0.12, castShadow: false }));
+    }
     const belt = T(new THREE.CylinderGeometry(0.205, 0.205, 0.07, 14), c.coatTrim, { spec: 0.4 });
     belt.position.y = 0.12;
     belt.scale.set(1.08, 1, 0.85);

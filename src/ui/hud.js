@@ -97,6 +97,7 @@ export class HUD {
     el.style.setProperty('--accent', accent);
     el.querySelector('.title').textContent = title;
     el.querySelector('.sub').textContent = sub;
+    if (this.portrait) el.querySelector('.portrait').style.backgroundImage = `url(${this.portrait.url(accent)})`;
     el.classList.add('on');
     this.cut = { t: 0, dur };
     this.updateCutin(0);
@@ -123,12 +124,36 @@ export class HUD {
     el.style.setProperty('--fade', k < 0.12 ? k / 0.12 : k > 0.85 ? (1 - k) / 0.15 : 1);
   }
 
+  /** Dead-eye style lock-on reticle that tracks a target on screen. */
+  mark(target) {
+    const e = el('div', 'dmark in', this.root);
+    e.innerHTML = '<svg viewBox="0 0 44 44"><path d="M2 13V2h11M31 2h11v11M42 31v11H31M13 42H2V31"/><path class="x" d="M17 17l10 10M27 17L17 27"/></svg>';
+    const m = { el: e, target, dead: false };
+    m.kill = () => {
+      if (m.dead) return;
+      m.dead = true;
+      e.classList.remove('in'); void e.offsetWidth; e.classList.add('hit');
+      setTimeout(() => { e.remove(); m.gone = true; }, 260);
+    };
+    (this.marks ??= []).push(m);
+    this.placeMark(m);
+    return m;
+  }
+  placeMark(m) {
+    m.target.center(_v).project(G.rig.camera);
+    m.el.style.left = `${(_v.x * 0.5 + 0.5) * window.innerWidth}px`;
+    m.el.style.top = `${(-_v.y * 0.5 + 0.5) * window.innerHeight}px`;
+    m.el.style.visibility = _v.z > 1 ? 'hidden' : 'visible';
+  }
+
   /** Skill name call-out for special moves (anime-style caption). */
   skill(name, sub = '') {
     const e = this.skillEl;
     e.innerHTML = `<div class="nm">${name}</div>${sub ? `<div class="sb">${sub}</div>` : ''}`;
     e.classList.remove('on'); void e.offsetWidth; e.classList.add('on');
     this.skillT = 1.3;
+    // the move's name takes over from the weapon card
+    this.titleT = 0; this.wtitle.classList.remove('show');
   }
 
   toast(text, dur = 1.2) {
@@ -147,6 +172,10 @@ export class HUD {
 
   update(dtReal) {
     this.updateCutin(dtReal);
+    if (this.marks?.length) {
+      this.marks = this.marks.filter((m) => !m.gone);
+      for (const m of this.marks) this.placeMark(m);
+    }
     if (this.skillT > 0) { this.skillT -= dtReal; if (this.skillT <= 0) this.skillEl.classList.remove('on'); }
     if (this.comboT > 0) {
       this.comboT -= dtReal;

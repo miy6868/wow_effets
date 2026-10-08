@@ -39,7 +39,7 @@ body.test #c { width: auto; height: auto; }
 .wtitle.show { opacity: 1; transform: translate(-50%, 0); transition: opacity 0.2s, transform 0.35s cubic-bezier(.2,.9,.3,1); }
 .wtitle .cat { font-size: 10px; letter-spacing: 5px; font-weight: 500; opacity: 0.75; }
 .wtitle[data-cat="melee"] .cat { color: var(--melee); } .wtitle[data-cat="gun"] .cat { color: var(--gun); } .wtitle[data-cat="magic"] .cat { color: var(--magic); }
-.wtitle .wname { font-family: var(--serif); font-size: 26px; font-weight: 900; letter-spacing: 2px; margin: 2px 0 6px;
+.wtitle .wname { font-family: var(--serif); font-size: clamp(18px, 2.1vw, 30px); font-weight: 900; letter-spacing: 2px; margin: 2px 0 6px;
   text-shadow: 0 2px 12px rgba(0,0,0,0.65); }
 .wtitle .wdesc { font-size: 12px; font-weight: 300; opacity: 0.88; letter-spacing: 0.3px; text-shadow: 0 1px 3px #000; padding-top: 6px;
   border-top: 1px solid rgba(255,255,255,0.18); }
@@ -48,7 +48,7 @@ body.test #c { width: auto; height: auto; }
 /* ── combo ───────────────────────────────────────────────────────────────── */
 .combo { position: absolute; right: 56px; top: 30%; text-align: right; opacity: 0; transition: opacity 0.35s; }
 .combo.on { opacity: 1; transition: opacity 0.08s; }
-.combo .n { font-family: var(--serif); font-size: 56px; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -1px;
+.combo .n { font-family: var(--serif); font-size: clamp(36px, 4.4vw, 64px); font-weight: 900; color: #fff; line-height: 1; letter-spacing: -1px;
   text-shadow: 0 2px 16px rgba(0,0,0,0.5); }
 .combo .n.pop { animation: cpop 0.16s ease-out; }
 @keyframes cpop { from { transform: translateX(-6px) scale(1.18); opacity: 0.6; } to { transform: none; opacity: 1; } }
@@ -130,9 +130,9 @@ body.attract #hud { opacity: 0; }
 @keyframes lines { to { transform: translateX(-150px); } }
 #cutin .portrait { position: absolute; left: 9%; top: -18%; width: 36%; height: 136%; background-size: cover; background-position: 50% 30%; transform: skewY(6deg);
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 70%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 70%, transparent 100%); }
-#cutin .title { position: absolute; right: 18%; top: 22%; font-family: var(--serif); font-size: 70px; font-weight: 900; letter-spacing: 8px; color: #fff; white-space: nowrap;
+#cutin .title { position: absolute; right: 18%; top: 22%; font-family: var(--serif); font-size: clamp(34px, 5.5vw, 76px); font-weight: 900; letter-spacing: 8px; color: #fff; white-space: nowrap;
   text-shadow: 0 0 24px var(--accent), 0 3px 0 rgba(0,0,0,0.6); transform: skewY(6deg); }
-#cutin .sub { position: absolute; right: 18%; top: 66%; font-size: 13px; font-weight: 500; letter-spacing: 12px; color: var(--accent); transform: skewY(6deg); }
+#cutin .sub { position: absolute; right: 18%; top: 66%; font-size: clamp(9px, 1vw, 14px); font-weight: 500; letter-spacing: 12px; color: var(--accent); transform: skewY(6deg); }
 #cutin.on::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55)); opacity: var(--fade, 1); }
 
 /* sniper scope */
@@ -155,6 +155,16 @@ body.photo .wbar, body.photo .wtitle, body.photo .hud-hint, body.photo .ult, bod
 /* special move caption */
 .skill { position: absolute; right: 9%; top: 58%; text-align: right; opacity: 0; transform: translateX(14px); transition: opacity 0.45s, transform 0.45s; pointer-events: none; }
 .skill.on { opacity: 1; transform: none; transition: opacity 0.08s, transform 0.25s cubic-bezier(.2,.9,.3,1); }
-.skill .nm { font-family: var(--serif); font-size: 30px; font-weight: 900; letter-spacing: 6px; text-shadow: 0 2px 14px rgba(0,0,0,0.7); }
+.skill .nm { font-family: var(--serif); font-size: clamp(20px, 2.4vw, 34px); font-weight: 900; letter-spacing: 6px; text-shadow: 0 2px 14px rgba(0,0,0,0.7); }
 .skill .sb { font-size: 10px; letter-spacing: 6px; color: var(--hi); margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(243,217,164,0.5); display: inline-block; }
 body.cine .skill, body.photo .skill { opacity: 0 !important; }
+
+/* dead-eye lock-on reticles */
+.dmark { --s: clamp(28px, 3.3vw, 50px); position: absolute; left: 0; top: 0; width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); pointer-events: none; }
+.dmark svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 4px rgba(255, 90, 50, 0.85)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.8)); }
+.dmark path { stroke: #ff6a48; stroke-width: 2.4; fill: none; stroke-linecap: square; }
+.dmark path.x { stroke: #fff4ec; stroke-width: 1.6; }
+.dmark.in { animation: dmIn 0.2s cubic-bezier(.2,.9,.3,1); }
+.dmark.hit { animation: dmHit 0.26s ease-out forwards; }
+@keyframes dmIn { from { transform: scale(2.4) rotate(45deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes dmHit { 0% { transform: scale(1); } 25% { transform: scale(0.72); filter: brightness(2.5); } 100% { transform: scale(1.7) rotate(-20deg); opacity: 0; } }

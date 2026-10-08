@@ -80,7 +80,7 @@ export class RocketLauncher extends GunWeapon {
     const bdir = tail.clone().sub(back).normalize();
     for (let i = 0; i < 6; i++) {
       const d = cone(bdir, 0.45, new THREE.Vector3());
-      G.fx.alpha.emit({ pos: tail.clone().addScaledVector(d, 0.2), vel: d.multiplyScalar(rand(5, 11)), shape: SHAPE.SMOKE, size: rand(0.2, 0.3), sizeEnd: rand(0.7, 1.0), life: rand(0.35, 0.55), color: [0.72, 0.7, 0.76], alpha: 0.75, alphaEnd: 0, drag: 5 });
+      G.fx.alpha.emit({ pos: tail.clone().addScaledVector(d, 0.2), vel: d.multiplyScalar(rand(5, 11)), shape: SHAPE.SMOKE, size: rand(0.2, 0.3), sizeEnd: rand(0.7, 1.0), life: rand(0.35, 0.55), color: [0.78, 0.68, 0.64], colorEnd: [0.5, 0.47, 0.58], alpha: 0.7, alphaEnd: 0, drag: 5 });
     }
     G.fx.add.emit({ pos: tail, shape: SHAPE.GLOW, size: 1.0, sizeEnd: 1.4, life: 0.08, color: [2.4, 1.3, 0.4], alpha: 0.8, alphaEnd: 0 });
     G.fx.add.emit({ pos: tail, shape: SHAPE.STAR, size: 1.2, sizeEnd: 0.2, life: 0.08, color: [3, 2, 1], alphaEnd: 0 });
@@ -164,7 +164,7 @@ export class RocketLauncher extends GunWeapon {
         const n = Math.ceil(pr.vel.length() * dt / (0.18 * o.scale));
         for (let i = 0; i < n; i++) {
           const q = back.clone().addScaledVector(pr.vel, -dt * (i / n));
-          G.fx.alpha.emit({ pos: q.add(_v2.set(rand(-0.03, 0.03), rand(-0.03, 0.03), rand(-0.03, 0.03))), vel: randUnit(_v2).multiplyScalar(0.4).add(_v.set(0, 0.25, 0)), shape: SHAPE.SMOKE, size: 0.24 * o.scale, sizeEnd: rand(0.65, 0.95) * o.scale, life: rand(0.9, 1.5) * (o.scale < 1 ? 0.7 : 1), color: [0.88, 0.86, 0.9], colorEnd: [0.7, 0.68, 0.74], alpha: 0.8, alphaEnd: 0, drag: 1.5 });
+          G.fx.alpha.emit({ pos: q.add(_v2.set(rand(-0.03, 0.03), rand(-0.03, 0.03), rand(-0.03, 0.03))), vel: randUnit(_v2).multiplyScalar(0.4).add(_v.set(0, 0.25, 0)), shape: SHAPE.SMOKE, size: 0.24 * o.scale, sizeEnd: rand(0.65, 0.95) * o.scale, life: rand(0.9, 1.5) * (o.scale < 1 ? 0.7 : 1), color: [0.84, 0.74, 0.68], colorEnd: [0.52, 0.49, 0.6], alpha: 0.72, alphaEnd: 0, drag: 1.5 });
         }
         if (Math.random() < 0.5) G.fx.add.emit({ pos: back, vel: randUnit(_v2).multiplyScalar(2).addScaledVector(pr.vel, -0.1), shape: SHAPE.STREAK, size: 0.04, stretch: 0.03, life: rand(0.1, 0.25), color: [4, 2.5, 0.8], colorEnd: [2, 0.4, 0.05], alphaEnd: 0, gravity: 8 });
       },

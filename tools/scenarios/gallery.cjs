@@ -22,6 +22,9 @@ const S = [
   ['dark_orb', 13, [0, 0, 0], [0.8, 0.25], [0, 1.0, 6.5], [[0, 'Mouse0'], [20, 'Mouse0']], [8, 16, 26, 34, 42, 55]],
   ['dark_hole', 13, [0, -2, 0], [0.5, 0.28], [0, 1.0, 8], [[0, 'Mouse2']], [15, 40, 80, 130, 160, 175]],
   ['chain', 11, [0, 1, 0], [0.0, 0.22], [0, 1.0, 6.5], [[0, 'Mouse0']], [3, 6, 10, 16]],
+  ['ult_blade', 0, [0, 0, 0], [0.4, 0.28], null, [[0, 'KeyF']], [20, 60, 100, 140, 175, 200, 215, 240]],
+  ['ult_gun', 4, [0, 0, 0], [0.4, 0.28], null, [[0, 'KeyF']], [20, 60, 100, 140, 175, 200, 215, 240]],
+  ['ult_meteor', 9, [0, -2, 0], [0.4, 0.28], null, [[0, 'KeyF']], [20, 60, 100, 140, 175, 200, 215, 240]],
 ];
 const fs = require('fs');
 module.exports = async ({ shot, ev, step }) => {
@@ -31,7 +34,7 @@ module.exports = async ({ shot, ev, step }) => {
     await ev((app, W, pl, cam, aim) => {
       app.fx.clearAll(); app.G.projectiles.clear(); app.dummies.reset();
       if (app.player.action) app.player.endAction();
-      app.G.rig.cine = null; app.G.ultCooldown = 0;
+      app.G.rig.cine = null; app.G.rig.cineW = 0; app.G.ultCooldown = 0;
       app.player.equip(W);
       app.player.pos.set(pl[0], 0, pl[1]); app.player.vel.set(0, 0, 0); app.player.yaw = pl[2];
       app.rig.yaw = cam[0]; app.rig.pitch = cam[1]; app.rig.focus.set(pl[0], 1.4, pl[1]); app.rig.trauma = 0;

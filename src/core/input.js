@@ -7,6 +7,7 @@ export class Input {
     this.released = new Set();
     this.mouseDX = 0; this.mouseDY = 0; this.wheel = 0;
     this.locked = false;
+    this.lockT = -1e9;
     this.sensitivity = 0.0022;
     this.enabled = true;
 
@@ -29,6 +30,8 @@ export class Input {
     window.addEventListener('mouseup', (e) => this._release('Mouse' + e.button));
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     window.addEventListener('mousemove', (e) => {
+      // right after pointer lock engages browsers can report one huge warp delta
+      if (performance.now() - this.lockT < 150 || Math.abs(e.movementX) > 300 || Math.abs(e.movementY) > 300) return;
       if (this.locked || this.down.has('Mouse0') || this.down.has('Mouse2') || this.dragLook) {
         this.mouseDX += e.movementX; this.mouseDY += e.movementY;
       }
@@ -36,6 +39,7 @@ export class Input {
     window.addEventListener('wheel', (e) => { this.wheel += Math.sign(e.deltaY); }, { passive: true });
     document.addEventListener('pointerlockchange', () => {
       this.locked = document.pointerLockElement === canvas;
+      this.lockT = performance.now();
     });
   }
 

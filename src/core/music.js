@@ -14,7 +14,7 @@ export class Music {
     this.send = ctx.createGain();
     this.send.gain.value = 0.9;
     this.bus.connect(this.send).connect(verb);
-    this.level = 0.5;
+    this.level = 0.8;
     this.on = true;
     this.next = ctx.currentTime + 1.5;
     this.idx = 5;

@@ -70,7 +70,7 @@ export const FXP = {
     const ang = screenAngle(p, tangent);
     // tight flash core
     fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 1.5 * s, sizeEnd: 0.1, life: 0.1, color: mul(hot, 4), alphaEnd: 0, rot: ang + Math.PI / 4 });
-    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 0.9 * s, sizeEnd: 1.3 * s, life: 0.09, color: mul(color, 1.4), alpha: 0.8, alphaEnd: 0 });
+    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 0.5 * s, sizeEnd: 0.7 * s, life: 0.07, color: mul(color, 1.2), alpha: 0.5, alphaEnd: 0 });
     fx.add.emit({ pos: p, shape: SHAPE.FLARE, size: 2.6 * s, w: 1, sizeEnd: 1.2 * s, life: 0.09, color: mul(hot, 2.2), alphaEnd: 0, rot: ang });
     // cut line across the target
     const len = 1.6 * s;

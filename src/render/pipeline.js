@@ -59,6 +59,7 @@ export class Pipeline {
         uSpeedCenter: { value: new THREE.Vector2(0.5, 0.5) },
         uLetterbox: { value: 0 },
         uDesat: { value: 0 },
+        uDim: { value: 0 },
         uGrade: { value: new THREE.Color(1, 1, 1) },
       },
       vertexShader: fsVertex, fragmentShader: compositeFrag, depthTest: false, depthWrite: false,
@@ -75,6 +76,7 @@ export class Pipeline {
   get u() { return this.compMat.uniforms; }
 
   setSize(w, h) {
+    this.cssW = w; this.cssH = h;
     const pr = this.pixelRatio;
     this.renderer.setSize(w, h, false);
     this.renderer.setPixelRatio(pr);
@@ -89,17 +91,41 @@ export class Pipeline {
     this.overlayCam.left = -w / h; this.overlayCam.right = w / h; this.overlayCam.updateProjectionMatrix();
   }
 
+  /** Render a still through the full pipeline and return it as a data URL. */
+  snapshot(scene, camera, w, h) {
+    const pw = this.cssW, ph = this.cssH, pr = this.pixelRatio;
+    this.pixelRatio = 1;
+    this.setSize(w, h);
+    const rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.UnsignedByteType });
+    const asp = camera.aspect;
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    this.render(scene, camera, 0, rt);
+    const buf = new Uint8Array(w * h * 4);
+    this.renderer.readRenderTargetPixels(rt, 0, 0, w, h, buf);
+    rt.dispose();
+    camera.aspect = asp; camera.updateProjectionMatrix();
+    this.pixelRatio = pr;
+    this.setSize(pw, ph);
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    const img = ctx.createImageData(w, h);
+    for (let y = 0; y < h; y++) img.data.set(buf.subarray((h - 1 - y) * w * 4, (h - y) * w * 4), y * w * 4);
+    ctx.putImageData(img, 0, 0);
+    return c.toDataURL('image/png');
+  }
+
   pass(mat, target) {
     this.fsMesh.material = mat;
     this.renderer.setRenderTarget(target);
     this.renderer.render(this.fsScene, this.fsCam);
   }
 
-  render(scene, camera, time) {
+  render(scene, camera, time, target = null) {
     const r = this.renderer;
     // 1. scene
     r.setRenderTarget(this.sceneRT);
-    r.setClearColor(0x000000, 1);
+    r.setClearColor(this.clearColor ?? 0x000000, 1);
     r.clear(true, true, false);
     r.render(scene, camera);
 
@@ -138,13 +164,13 @@ export class Pipeline {
 
     // 4. composite to screen
     this.u.uTime.value = time;
-    r.setRenderTarget(null);
+    r.setRenderTarget(target);
     r.setClearColor(0x000000, 1);
     r.clear(true, true, false);
-    this.pass(this.compMat, null);
+    this.pass(this.compMat, target);
 
     // 5. overlay (cut-ins)
-    if (this.overlayScene.children.length) {
+    if (!target && this.overlayScene.children.length) {
       r.clear(false, true, false);
       r.render(this.overlayScene, this.overlayCam);
     }

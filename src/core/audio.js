@@ -288,6 +288,73 @@ export const SFX = {
     for (let i = 0; i < 4; i++) A.tone(d, t + i * 0.03, 0.2, { type: 'sine', f0: (2400 + Math.random() * 2400) * p, f1: 2000 * p, vol: 0.1, curve: 4 });
     A.tone(d, t, 0.2, { type: 'triangle', f0: 200 * p, f1: 70, vol: 0.7 });
   },
+  whirr(A, d, t, p) {
+    A.tone(d, t, 0.12, { type: 'sawtooth', f0: 180 * p, f1: 185 * p, vol: 0.06, a: 0.02, curve: 1.5 });
+    A.noise(d, t, 0.12, { type: 'bandpass', f0: 1400 * p, f1: 1500 * p, q: 4, a: 0.02, vol: 0.12, curve: 1.5 });
+  },
+  steam(A, d, t, p) {
+    A.noise(d, t, 0.9, { type: 'highpass', f0: 4000 * p, f1: 2500, q: 0.5, a: 0.02, vol: 0.5, curve: 2.5 });
+  },
+  holy(A, d, t, p) {
+    for (const f of [880, 1320, 1760]) A.tone(d, t, 0.6, { type: 'sine', f0: f * p, f1: f * p, vol: 0.08, a: 0.02, curve: 4 });
+    A.noise(d, t, 0.4, { type: 'highpass', f0: 5000, f1: 7000, q: 0.7, a: 0.02, vol: 0.2 });
+  },
+  lance(A, d, t, p) {
+    A.noise(d, t, 0.18, { type: 'bandpass', f0: 2500 * p, f1: 900, q: 1.2, a: 0.005, vol: 0.5 });
+    A.tone(d, t, 0.15, { type: 'sine', f0: 1600 * p, f1: 900 * p, vol: 0.1 });
+  },
+  lanceHit(A, d, t, p) {
+    A.noise(d, t, 0.1, { type: 'highpass', f0: 3000 * p, f1: 2000, q: 1, a: 0.001, vol: 0.6 });
+    A.tone(d, t, 0.4, { type: 'sine', f0: 1760 * p, f1: 1700 * p, vol: 0.12, curve: 4 });
+    A.tone(d, t, 0.12, { type: 'triangle', f0: 260 * p, f1: 90, vol: 0.5 });
+  },
+  beam(A, d, t, p) {
+    A.noise(d, t, 1.6, { type: 'bandpass', f0: 700 * p, f1: 400, q: 0.7, a: 0.03, vol: 0.9, curve: 2 });
+    A.tone(d, t, 1.4, { type: 'sawtooth', f0: 110 * p, f1: 90 * p, vol: 0.12, a: 0.04, curve: 2 });
+    A.tone(d, t, 1.4, { type: 'sine', f0: 55 * p, f1: 50, vol: 0.8, a: 0.03, curve: 2 });
+    A.noise(d, t, 0.1, { type: 'lowpass', f0: 4000, f1: 1500, q: 0.5, a: 0.001, vol: 1 });
+  },
+  void(A, d, t, p) {
+    A.tone(d, t, 0.3, { type: 'sine', f0: 300 * p, f1: 120 * p, vol: 0.3 });
+    A.noise(d, t, 0.25, { type: 'lowpass', f0: 900 * p, f1: 300, q: 2, a: 0.02, vol: 0.4 });
+  },
+  voidHit(A, d, t, p) {
+    A.tone(d, t, 0.25, { type: 'sine', f0: 200 * p, f1: 60, vol: 0.8 });
+    A.noise(d, t, 0.2, { type: 'bandpass', f0: 600 * p, f1: 200, q: 1.5, a: 0.002, vol: 0.6 });
+  },
+  blackhole(A, d, t, p) {
+    A.tone(d, t, 2.4, { type: 'sine', f0: 40 * p, f1: 70 * p, vol: 1.2, a: 0.3, curve: 1.5 });
+    A.tone(d, t, 2.4, { type: 'sawtooth', f0: 80 * p, f1: 160 * p, vol: 0.05, a: 0.3, curve: 1.5 });
+    A.noise(d, t, 2.4, { type: 'bandpass', f0: 300, f1: 1200, q: 2, a: 0.4, vol: 0.4, curve: 1.5 });
+  },
+  voidBoom(A, d, t, p) {
+    A.noise(d, t, 0.1, { type: 'highpass', f0: 1500, f1: 3000, q: 0.5, a: 0.001, vol: 1 });
+    A.noise(d, t, 1.6, { type: 'lowpass', f0: 1200 * p, f1: 50, q: 0.8, a: 0.004, vol: 1.4, curve: 4 });
+    A.tone(d, t, 1.0, { type: 'sine', f0: 50 * p, f1: 20, vol: 2.0 });
+    A.tone(d, t, 0.6, { type: 'sine', f0: 600 * p, f1: 80, vol: 0.2 });
+  },
+  ult(A, d, t, p) {
+    A.noise(d, t, 0.5, { type: 'bandpass', f0: 400, f1: 4000, q: 1.2, a: 0.02, vol: 0.8, curve: 2 });
+    A.tone(d, t, 0.9, { type: 'sawtooth', f0: 220, f1: 880, vol: 0.08, a: 0.02, curve: 3 });
+    A.tone(d, t + 0.05, 1.0, { type: 'sine', f0: 110, f1: 55, vol: 0.9, curve: 3 });
+    A.noise(d, t + 0.1, 0.1, { type: 'highpass', f0: 5000, f1: 8000, q: 1, a: 0.002, vol: 0.4 });
+  },
+  ultBoom(A, d, t, p) {
+    A.noise(d, t, 2.2, { type: 'lowpass', f0: 1600 * p, f1: 40, q: 0.7, a: 0.003, vol: 1.5, curve: 4 });
+    A.tone(d, t, 1.4, { type: 'sine', f0: 48 * p, f1: 18, vol: 2.2 });
+  },
+  sheath(A, d, t, p) {
+    A.noise(d, t, 0.06, { type: 'bandpass', f0: 3000 * p, f1: 2000, q: 4, a: 0.002, vol: 0.5 });
+    A.tone(d, t + 0.05, 0.4, { type: 'sine', f0: 3400 * p, f1: 3300 * p, vol: 0.12, curve: 5 });
+  },
+  tick(A, d, t, p) {
+    A.tone(d, t, 0.08, { type: 'square', f0: 1800 * p, f1: 1800 * p, vol: 0.12, curve: 3 });
+    A.tone(d, t, 0.12, { type: 'sine', f0: 900 * p, f1: 600, vol: 0.2 });
+  },
+  meteor(A, d, t, p) {
+    A.noise(d, t, 1.4, { type: 'bandpass', f0: 200 * p, f1: 900, q: 0.8, a: 1.0, vol: 1.0, curve: 1.2 });
+    A.tone(d, t, 1.4, { type: 'sine', f0: 60 * p, f1: 120, vol: 0.8, a: 1.0, curve: 1.2 });
+  },
   charge(A, d, t, p) {
     A.tone(d, t, 0.3, { type: 'sawtooth', f0: 200 * p, f1: 600 * p, vol: 0.08, a: 0.05 });
     A.noise(d, t, 0.3, { type: 'bandpass', f0: 800 * p, f1: 2400 * p, q: 3, a: 0.05, vol: 0.2 });

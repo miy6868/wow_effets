@@ -109,6 +109,7 @@ export const compositeFrag = /* glsl */ `
   uniform vec2 uSpeedCenter;
   uniform float uLetterbox;
   uniform float uDesat;
+  uniform float uDim;         // darken the world, keep bright effects
   uniform vec3 uGrade;        // color multiplier
   varying vec2 vUv;
 
@@ -170,6 +171,10 @@ export const compositeFrag = /* glsl */ `
       col /= tot;
     } else {
       col = sampleScene(uv);
+    }
+    if (uDim > 0.001) {
+      float br = max(col.r, max(col.g, col.b));
+      col *= 1.0 - uDim * 0.82 * (1.0 - smoothstep(1.3, 2.8, br));
     }
     vec3 bloom = texture2D(tBloom, uv).rgb;
     col += bloom * uBloom;

@@ -7,6 +7,7 @@ import { Pose, bladeQuat, easing, clamp01 } from './pose.js';
 import { FXP, rand, cone } from '../vfx/presets.js';
 import { SHAPE } from '../vfx/particles.js';
 import { ARENA_R } from '../world/arena.js';
+import { triggerUltimate } from '../weapons/ultimate.js';
 
 const _v = new THREE.Vector3();
 const _v2 = new THREE.Vector3();
@@ -69,6 +70,7 @@ export class Player {
   setWeapons(list) { this.weapons = list; }
   equip(i) {
     if (i < 0 || i >= this.weapons.length) return;
+    if (this.action?.isUlt) return;
     if (this.weapon && this.weapons[i] === this.weapon) return;
     if (this.action) this.endAction();
     if (this.weapon) this.weapon.unequip(this);
@@ -152,7 +154,7 @@ export class Player {
       if (input.wasPressed('Mouse2')) w.press?.(this, 1);
       if (input.isDown('Mouse2')) w.hold?.(this, 1, dtWorld);
       if (input.wasReleased('Mouse2')) w.release?.(this, 1);
-      if (input.wasPressed('KeyF')) w.ultimate?.(this);
+      if (input.wasPressed('KeyF')) triggerUltimate(this, w);
     }
     if (!this.inCine) {
       if (input.wasPressed('ShiftLeft')) this.tryDash();
@@ -177,7 +179,8 @@ export class Player {
 
     // ── movement ──
     const wish = this.wishDir;
-    const tgtX = wish.x * MOVE.run * moveScale, tgtZ = wish.z * MOVE.run * moveScale;
+    const mm = moveScale * (this.moveMul ?? 1);
+    const tgtX = wish.x * MOVE.run * mm, tgtZ = wish.z * MOVE.run * mm;
     const acc = (this.grounded ? MOVE.accel : MOVE.airAccel) * dt;
     if (!(a && a.ownsVelocity)) {
       const dx = tgtX - this.vel.x, dz = tgtZ - this.vel.z;

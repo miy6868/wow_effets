@@ -20,6 +20,9 @@ export function planeQuat(pl = {}) {
   return new THREE.Quaternion().setFromEuler(_e);
 }
 
+/** Reflect a rotation across the body's YZ plane (left/right mirror). */
+export function mirrorQ(q) { return new THREE.Quaternion(q.x, -q.y, -q.z, q.w); }
+
 // swing easing: very fast start, soft end (anime snap)
 export const snapEase = (t) => 1 - Math.pow(1 - t, 3.2);
 
@@ -106,7 +109,7 @@ export class SwingMove {
     // trail window
     const [w0, w1] = s.swing ?? [0, 0];
     const on = t >= w0 - 0.015 && t <= w1 + (s.trailHold ?? 0.05);
-    for (const tr of this.w.trails ?? []) tr.emitting = on;
+    for (const d of this.w.trailDefs ?? []) d.trail.emitting = on && this.usesSide(d.socket);
     // slash fx at swing start
     if (!this.slashDone && t >= w0 - 0.001 && s.slash !== null) {
       this.slashDone = true;
@@ -120,6 +123,13 @@ export class SwingMove {
       }
     }
     s.update?.(this, dt);
+  }
+
+  usesSide(side) {
+    const h = this.s.hand ?? 'R';
+    if (h === 'both') return true;
+    if (side === 'R') return h === 'R';
+    return h === 'L' || (this.s.twoHanded && false);
   }
 
   /** Arc angle at time t. */
@@ -157,11 +167,13 @@ export class SwingMove {
   }
 
   sampleSocket(t, side) {
-    if (side !== 'R' && !this.s.twoHanded && !this.s.dual) return null;
+    const h = this.s.hand ?? 'R';
+    if (side === 'L' && h === 'R' && !this.s.twoHanded) return null;
+    if (side === 'R' && h === 'L') return null;
     const res = this.socketAt(t);
     if (side === 'L') {
-      if (this.s.dual) return null;
-      res.p.addScaledVector(res.blade, -0.2);
+      if (h === 'L' || h === 'both') { res.p.x = -res.p.x; res.q = mirrorQ(res.q); }
+      else res.p.addScaledVector(res.blade, -0.2);
     }
     // pose flip/spin at time t
     const P = this._tmpPose ?? (this._tmpPose = { flip: 0, spin: 0 });
@@ -179,9 +191,22 @@ export class SwingMove {
     const sk = this.socketAt(t);
     // windup blend from rest → swing
     const inK = easing.outCubic(clamp01(t / Math.max(w0 * 0.7, 0.02)));
-    P.handR.lerp(sk.p, inK);
-    P.wR.slerp(sk.q, inK);
-    if (s.twoHanded) {
+    const hand = s.hand ?? 'R';
+    if (hand === 'L' || hand === 'both') {
+      const mp = sk.p.clone(); mp.x = -mp.x;
+      P.handL.lerp(mp, inK);
+      P.wL.slerp(mirrorQ(sk.q), inK);
+    }
+    if (hand === 'R' || hand === 'both') {
+      P.handR.lerp(sk.p, inK);
+      P.wR.slerp(sk.q, inK);
+    } else if (s.offHand) {
+      const oh = s.offHand;
+      P.handR.lerp(_v.set(-oh[0], oh[1], oh[2]), clamp01((t - w0 * 0.5) / 0.08));
+    }
+    if (hand !== 'R') {
+      // mirrored torso twist handled below via sign
+    } else if (s.twoHanded) {
       P.handL.copy(sk.p).addScaledVector(sk.blade, -0.2);
       P.wL.copy(sk.q);
     } else if (s.offHand) {
@@ -191,7 +216,8 @@ export class SwingMove {
     }
     // torso follows the blade's horizontal direction
     const hz = Math.atan2(sk.radial.x, Math.max(0.2, sk.radial.z + 0.6));
-    P.twist = THREE.MathUtils.clamp(hz * (s.twistAmt ?? 0.45), -0.9, 0.9);
+    const tw = hand === 'L' ? -1 : hand === 'both' ? 0.3 : 1;
+    P.twist = THREE.MathUtils.clamp(hz * (s.twistAmt ?? 0.45) * tw, -0.9, 0.9);
     const swingK = clamp01((t - w0) / (w1 - w0 + 1e-3));
     P.lean = t < w0 ? -0.12 * inK + (s.windLean ?? 0) : (s.lean ?? 0.3) * easing.outCubic(swingK);
     P.roll = (s.roll ?? 0) * swingK;
@@ -239,16 +265,21 @@ export class SwingMove {
     const r = s.radius ?? 0.5;
     const rootQ = _q.setFromAxisAngle(UP, p.yaw).clone();
     const baseColor = this.w.color ?? [0.5, 1.2, 3];
-    for (const sl of list) {
-      const center = new THREE.Vector3(c[0], c[1], c[2]);
+    const hand = s.hand ?? 'R';
+    const sides = hand === 'both' ? [1, -1] : hand === 'L' ? [-1] : [1];
+    for (const mir of sides) for (const sl of list) {
+      const center = new THREE.Vector3(c[0] * mir, c[1], c[2]);
       const world = center.applyQuaternion(rootQ).add(pos);
-      if (sl.offset) world.add(new THREE.Vector3(...sl.offset).applyQuaternion(rootQ));
-      const q = rootQ.clone().multiply(this.planeQ);
-      if (sl.extraRot) q.multiply(planeQuat(sl.extraRot));
+      if (sl.offset) world.add(new THREE.Vector3(sl.offset[0] * mir, sl.offset[1], sl.offset[2]).applyQuaternion(rootQ));
+      let pq = this.planeQ.clone();
+      if (sl.extraRot) pq.multiply(planeQuat(sl.extraRot));
+      if (mir < 0) pq = mirrorQ(pq);
+      const q = rootQ.clone().multiply(pq);
       const bl = this.w.bladeLen ?? 1.0;
+      const A0 = s.a0 + (sl.da0 ?? -0.15) * this.dir, A1 = s.a1 + (sl.da1 ?? (s.over ?? 0.2)) * this.dir;
       G.fx.slash({
         pos: world, quat: q,
-        a0: s.a0 + (sl.da0 ?? -0.15) * this.dir, a1: s.a1 + (sl.da1 ?? (s.over ?? 0.2)) * this.dir,
+        a0: A0 * mir, a1: A1 * mir,
         rIn: (sl.rIn ?? r + 0.1) * (sl.scale ?? 1), rOut: (sl.rOut ?? r + bl + 0.45) * (sl.scale ?? 1),
         sweep: sl.sweep ?? (w1 - w0) * 1.05, hold: sl.hold ?? 0.03, fade: sl.fade ?? 0.2,
         color: sl.color ?? baseColor, core: sl.core ?? this.w.core ?? [4, 4.5, 5],
@@ -300,7 +331,7 @@ export class SwingMove {
   onLand(speed) { this.s.onLand?.(this, speed); }
 
   end() {
-    for (const tr of this.w.trails ?? []) tr.emitting = false;
+    for (const d of this.w.trailDefs ?? []) d.trail.emitting = false;
     this.player.gravityScale = 1;
     this.w.lastMoveEnd = G.time;
     this.w.lastMove = this;

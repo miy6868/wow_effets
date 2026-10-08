@@ -7,7 +7,7 @@ import { DebrisPool } from './debris.js';
 import { toonGlobals, MAX_PLIGHTS } from '../render/shaders/toon.js';
 import {
   basicVertex, slashVertex, slashFragment, ringFragment, fresnelFragment,
-  ribbonVertex, ribbonFragment, decalFragment, ghostVertex, ghostFragment, distortVertex, distortFragment,
+  ribbonVertex, ribbonFragment, decalFragment, ghostVertex, ghostFragment, distortVertex, distortFragment, beamFragment, diskFragment,
 } from '../render/shaders/vfx.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -418,7 +418,7 @@ export class FX {
         uGlow: { value: o.glow ?? 1 }, uSeed: { value: Math.random() * 10 }, uTime: { value: 0 },
         uSpin: { value: o.spin ?? 0 }, uReveal: { value: o.reveal ? 0 : 1 },
       },
-      vertexShader: basicVertex, fragmentShader: decalFragment,
+      vertexShader: basicVertex, fragmentShader: decalFragment, side: THREE.DoubleSide,
       polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
     }));
     if (o.additive) additive(mat);
@@ -467,6 +467,37 @@ export class FX {
       if (o.billboard !== false && !o.normal) m.quaternion.copy(this.camera.quaternion);
       if (o.follow) o.follow(m, k);
     }, this.pipeline.distortScene);
+  }
+
+  /** Persistent beam material + mesh (caller animates). Returns {mesh, u}. */
+  beamMesh(o = {}) {
+    const mat = additive(new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: col3(o.color ?? [2, 1.4, 0.4]) }, uCore: { value: col3(o.core ?? [4, 4, 3.5]) },
+        uAlpha: { value: o.alpha ?? 1 }, uTime: { value: 0 }, uScroll: { value: o.scroll ?? 30 },
+        uNoise: { value: o.noise ?? 0.7 }, uLen: { value: 10 }, uPower: { value: o.power ?? 1.5 },
+      },
+      vertexShader: basicVertex, fragmentShader: beamFragment, side: THREE.DoubleSide,
+    }));
+    const m = new THREE.Mesh(geo('cyl'), mat);
+    m.frustumCulled = false;
+    m.renderOrder = o.renderOrder ?? 16;
+    return { mesh: m, u: mat.uniforms };
+  }
+
+  /** Swirling disk (accretion ring). Returns {mesh, u}. */
+  diskMesh(o = {}) {
+    const mat = additive(new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: col3(o.color ?? [1.2, 0.3, 2.2]) }, uHot: { value: col3(o.hot ?? [3, 2, 4]) },
+        uAlpha: { value: o.alpha ?? 1 }, uTime: { value: 0 }, uIn: { value: o.inner ?? 0.3 }, uOut: { value: o.outer ?? 1.0 },
+      },
+      vertexShader: basicVertex, fragmentShader: diskFragment, side: THREE.DoubleSide,
+    }));
+    const m = new THREE.Mesh(geo('quad'), mat);
+    m.frustumCulled = false;
+    m.renderOrder = o.renderOrder ?? 14;
+    return { mesh: m, u: mat.uniforms };
   }
 
   /** Afterimage of a character model. */

@@ -55,6 +55,6 @@ export class ScreenFX {
     this.letterboxV += (this.letterboxT - this.letterboxV) * Math.min(1, dtReal * 8);
     u.uLetterbox.value = this.letterboxV;
     this.dimV += (this.dimT - this.dimV) * Math.min(1, dtReal * 10);
-    toonGlobals.uWorldDim.value = this.dimV;
+    u.uDim.value = this.dimV;
   }
 }

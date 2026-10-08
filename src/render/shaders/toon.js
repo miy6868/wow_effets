@@ -283,17 +283,13 @@ export const groundFragment = /* glsl */ `
 const _c = new THREE.Color();
 const _hsl = { h: 0, s: 0, l: 0 };
 
-/** Shadow color: darker, hue nudged toward blue-violet, slightly more saturated. */
+/** Shadow color: darker and cooler (multiplied toward violet), a bit more saturated. */
 export function deriveShade(color, amount = 1) {
   const c = new THREE.Color(color);
+  const k = amount;
+  c.r *= 1 - 0.36 * k; c.g *= 1 - 0.42 * k; c.b *= 1 - 0.24 * k;
   c.getHSL(_hsl);
-  // shift hue toward ~0.7 (violet) a little
-  let dh = 0.7 - _hsl.h;
-  if (dh > 0.5) dh -= 1; if (dh < -0.5) dh += 1;
-  const h = (_hsl.h + dh * 0.12 * amount + 1) % 1;
-  const s = Math.min(1, _hsl.s * 1.15 + 0.05);
-  const l = _hsl.l * (1 - 0.42 * amount);
-  return _c.setHSL(h, s, l).clone();
+  return _c.setHSL(_hsl.h, Math.min(1, _hsl.s * 1.12 + 0.03), _hsl.l).clone();
 }
 
 export function deriveOutline(color) {

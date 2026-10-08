@@ -87,6 +87,8 @@ function frame(dtReal) {
   tickTime(dtReal);
   G.time = Time.game;
   G.timeScale = Time.scale;
+  G.realTime = Time.real;
+  if (!player.action?.isUlt) G.ultCooldown = Math.max(0, (G.ultCooldown ?? 0) - dtReal);
   globalKeys();
   if (input.pressed.size) audio.unlock();
 
@@ -122,11 +124,35 @@ window.__app = {
   tap(code) { input.press(code); frame(1 / 60); input.release(code); },
 };
 
+// cut-in portrait: render the hero's face once through the toon pipeline
+function makePortrait() {
+  const cam = new THREE.PerspectiveCamera(30, 1, 0.05, 50);
+  const head = player.model.head.getWorldPosition(new THREE.Vector3());
+  const fwd = player.forward(new THREE.Vector3());
+  const right = player.right(new THREE.Vector3());
+  cam.position.copy(head).addScaledVector(fwd, 1.6).addScaledVector(right, -0.45).add(new THREE.Vector3(0, 0.05, 0));
+  cam.lookAt(head.clone().add(new THREE.Vector3(0, -0.08, 0)));
+  const hidden = [];
+  scene.traverse((o) => { if (o.isMesh && o.visible && !isChildOf(o, player.model.root)) { o.visible = false; hidden.push(o); } });
+  const prevClear = pipeline.clearColor;
+  pipeline.clearColor = 0x150c2a;
+  const vig = pipeline.u.uVignette.value; pipeline.u.uVignette.value = 0;
+  const url = pipeline.snapshot(scene, cam, 512, 512);
+  pipeline.u.uVignette.value = vig;
+  pipeline.clearColor = prevClear;
+  for (const o of hidden) o.visible = true;
+  hud.cutin.querySelector('.portrait').style.backgroundImage = `url(${url})`;
+}
+function isChildOf(o, root) { while (o) { if (o === root) return true; o = o.parent; } return false; }
+
 if (TEST) {
   input.noLock = true;
   document.body.classList.add('test');
   frame(1 / 60);
+  makePortrait();
 } else {
+  frame(1 / 60);
+  makePortrait();
   requestAnimationFrame(loop);
 }
 

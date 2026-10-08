@@ -12,13 +12,14 @@ body.test #c { width: auto; height: auto; }
 #hud { position: fixed; inset: 0; pointer-events: none; color: #fff; }
 
 /* weapon bar */
-.wbar { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; pointer-events: auto; }
-.slot { position: relative; width: 62px; height: 66px; background: rgba(14, 16, 32, 0.62); border: 2px solid rgba(255,255,255,0.18);
+.wbar { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: clamp(2px, 0.4vw, 6px); pointer-events: auto; }
+.slot.gun:first-of-type, .slot.melee + .slot.gun, .slot.gun + .slot.magic { margin-left: clamp(4px, 0.8vw, 12px); }
+.slot { position: relative; width: clamp(38px, 4.6vw, 62px); height: clamp(52px, 5.2vw, 66px); background: rgba(14, 16, 32, 0.62); border: 2px solid rgba(255,255,255,0.18);
   border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;
   transform: skewX(-8deg); transition: transform 0.12s, border-color 0.12s, background 0.12s; }
 .slot > * { transform: skewX(8deg); }
 .slot .key { position: absolute; top: 2px; left: 6px; font-size: 11px; font-weight: 800; opacity: 0.7; }
-.slot .icon { font-size: 24px; line-height: 1; margin-top: 6px; font-weight: 900; text-shadow: 0 2px 0 var(--ink); }
+.slot .icon { font-size: clamp(16px, 1.9vw, 24px); line-height: 1; margin-top: 6px; font-weight: 900; text-shadow: 0 2px 0 var(--ink); }
 .slot .nm { font-size: 10px; margin-top: 4px; opacity: 0.85; white-space: nowrap; }
 .slot.melee .icon { color: #9fe9ff; }
 .slot.gun .icon { color: #ffd27a; }
@@ -89,15 +90,38 @@ body.test #c { width: auto; height: auto; }
 /* ultimate cut-in */
 #cutin { position: fixed; inset: 0; pointer-events: none; z-index: 4; display: none; overflow: hidden; }
 #cutin.on { display: block; }
+#cutin { --accent: #ffe27a; }
 #cutin .band { position: absolute; left: -10%; right: -10%; top: 30%; height: 34%; transform: skewY(-7deg) translateX(-110%);
-  background: linear-gradient(90deg, rgba(10,10,30,0.95), rgba(30,24,70,0.95) 60%, rgba(10,10,30,0.9)); overflow: hidden;
-  border-top: 5px solid var(--hi); border-bottom: 5px solid var(--hi); }
-#cutin.on .band { animation: bandIn 1.15s cubic-bezier(.15,.9,.25,1) forwards; }
+  background: linear-gradient(90deg, rgba(10,8,26,0.97), rgba(26,16,56,0.97) 55%, rgba(10,8,26,0.92)); overflow: hidden;
+  border-top: 6px solid var(--accent); border-bottom: 6px solid var(--accent); box-shadow: 0 0 40px var(--accent); }
+
 @keyframes bandIn { 0% { transform: skewY(-7deg) translateX(-110%); } 22% { transform: skewY(-7deg) translateX(0); } 80% { transform: skewY(-7deg) translateX(2%); } 100% { transform: skewY(-7deg) translateX(115%); } }
 #cutin .lines { position: absolute; inset: -20%; background: repeating-linear-gradient(90deg, rgba(255,255,255,0.0) 0 40px, rgba(255,255,255,0.12) 40px 44px, rgba(255,255,255,0) 44px 110px);
   animation: lines 0.25s linear infinite; }
 @keyframes lines { to { transform: translateX(-110px); } }
-#cutin .portrait { position: absolute; left: 6%; top: -10%; width: 42%; height: 120%; background-size: cover; background-position: center; }
-#cutin .title { position: absolute; right: 12%; top: 18%; font-size: 72px; font-weight: 900; font-style: italic; color: #fff; white-space: nowrap;
-  text-shadow: 0 0 3px #000, 5px 6px 0 #e2333f, 0 0 30px rgba(255,200,120,0.7); transform: skewY(7deg); }
-#cutin .sub { position: absolute; right: 12%; top: 62%; font-size: 20px; font-weight: 800; letter-spacing: 8px; color: var(--hi); transform: skewY(7deg); }
+#cutin .portrait { position: absolute; left: 9%; top: -18%; width: 36%; height: 136%; background-size: cover; background-position: 50% 30%; transform: skewY(7deg);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 70%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 70%, transparent 100%); }
+#cutin .title { position: absolute; right: 19%; top: 16%; font-size: 76px; font-weight: 900; font-style: italic; color: #fff; white-space: nowrap;
+  text-shadow: 0 0 3px #000, 5px 6px 0 var(--accent), 0 0 30px var(--accent); transform: skewY(7deg); }
+#cutin .sub { position: absolute; right: 19%; top: 64%; font-size: 22px; font-weight: 900; letter-spacing: 10px; color: var(--accent); transform: skewY(7deg); text-shadow: 0 2px 0 #000; }
+#cutin.on::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55)); opacity: var(--fade, 1); }
+
+/* ultimate gauge */
+.ult { position: absolute; right: 24px; bottom: 24px; width: 64px; height: 64px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.35);
+  background: rgba(14,16,32,0.6); overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ult .fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: linear-gradient(0deg, rgba(255,120,60,0.55), rgba(255,226,122,0.35)); z-index: 0; }
+.ult .k, .ult .t { position: relative; z-index: 1; }
+.ult .k { font-size: 24px; font-weight: 900; line-height: 1; }
+.ult .t { font-size: 10px; font-weight: 800; opacity: 0.9; }
+.ult.ready { border-color: var(--hi); box-shadow: 0 0 16px rgba(255,226,122,0.7); animation: ultPulse 1.2s infinite; }
+@keyframes ultPulse { 50% { box-shadow: 0 0 26px rgba(255,160,80,0.9); } }
+
+/* sniper scope */
+.scope { position: absolute; inset: 0; opacity: 0; transition: opacity 0.12s; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0, rgba(0,0,0,0) 33vh, rgba(5,6,12,0.92) 34vh, rgba(5,6,12,0.97) 100%); }
+.scope::before { content: ""; position: absolute; left: 50%; top: 50%; width: 66vh; height: 66vh; transform: translate(-50%, -50%); border-radius: 50%;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.6), 0 0 0 2px rgba(0,0,0,0.9);
+  background: linear-gradient(rgba(10,10,20,0.85), rgba(10,10,20,0.85)) center/1px 100% no-repeat, linear-gradient(90deg, rgba(10,10,20,0.85), rgba(10,10,20,0.85)) center/100% 1px no-repeat; }
+.scope::after { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid #ff4a3a; }
+body.scoped .scope { opacity: 1; }
+body.scoped .crosshair { opacity: 0 !important; }

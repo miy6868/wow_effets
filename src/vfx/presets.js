@@ -104,17 +104,17 @@ export const FXP = {
   hitPierce(p, dir, color = COL.gold, s = 1) {
     const fx = G.fx;
     const hot = mix(color, COL.white, 0.6);
-    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 1.8 * s, sizeEnd: 0.1, life: 0.1, color: mul(hot, 6), alphaEnd: 0 });
-    fx.add.emit({ pos: p, shape: SHAPE.FLARE, size: 3.0 * s, w: 1, sizeEnd: 0.5, life: 0.12, color: mul(color, 3), alphaEnd: 0, rot: screenAngle(p, dir) + Math.PI / 2 });
+    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 1.2 * s, sizeEnd: 0.1, life: 0.09, color: mul(hot, 3.2), alphaEnd: 0 });
+    fx.add.emit({ pos: p, shape: SHAPE.FLARE, size: 2.0 * s, w: 1, sizeEnd: 0.4, life: 0.1, color: mul(color, 1.8), alphaEnd: 0, rot: screenAngle(p, dir) + Math.PI / 2 });
     // exit spray behind the target
     for (let i = 0; i < 14; i++) {
       cone(dir, 0.45, _v2);
-      fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(10, 26) * s), shape: SHAPE.STREAK, size: 0.06 * s, stretch: 0.03, life: rand(0.1, 0.25), color: mul(hot, 5), colorEnd: mul(color, 2), alphaEnd: 0, drag: 4, gravity: 10 });
+      fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(10, 26) * s), shape: SHAPE.STREAK, size: 0.05 * s, stretch: 0.03, life: rand(0.1, 0.25), color: mul(hot, 3.5), colorEnd: mul(color, 1.5), alphaEnd: 0, drag: 4, gravity: 10 });
     }
     // cone shock in thrust direction
-    fx.ring({ pos: p.clone().addScaledVector(dir, 0.3), normal: dir, r0: 0.1, r1: 1.0 * s, w0: 0.2, w1: 0.02, color: mul(color, 2), life: 0.15, sharp: 0.5 });
-    fx.ring({ pos: p.clone().addScaledVector(dir, 0.9), normal: dir, r0: 0.05, r1: 0.6 * s, w0: 0.2, w1: 0.02, color: mul(color, 1.5), life: 0.18, sharp: 0.5 });
-    fx.light(p, color, 3, 4, 0.1);
+    fx.ring({ pos: p.clone().addScaledVector(dir, 0.3), normal: dir, r0: 0.1, r1: 0.9 * s, w0: 0.15, w1: 0.02, color: mul(color, 1.2), life: 0.13, sharp: 0.6 });
+    fx.ring({ pos: p.clone().addScaledVector(dir, 0.9), normal: dir, r0: 0.05, r1: 0.55 * s, w0: 0.15, w1: 0.02, color: mul(color, 0.9), life: 0.16, sharp: 0.6 });
+    fx.light(p, color, 1.6, 4, 0.1);
   },
 
   /** Bullet hitting a body: small, fast, readable. */

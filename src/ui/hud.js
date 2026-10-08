@@ -23,11 +23,14 @@ export class HUD {
     this.comboN = el('div', 'n', this.comboEl);
     el('div', 'l', this.comboEl).textContent = 'HITS';
     this.comboCount = 0; this.comboT = 0;
+    this.scope = el('div', 'scope', this.root);
     this.cross = el('div', 'crosshair', this.root);
     this.dmgLayer = el('div', 'dmg-layer', this.root);
     this.nums = [];
     this.toastEl = el('div', 'toast', this.root);
     this.status = el('div', 'status', this.root);
+    this.ult = el('div', 'ult', this.root);
+    this.ult.innerHTML = '<div class="k">F</div><div class="t">필살기</div><div class="fill"></div>';
     this.charge = el('div', 'charge', this.root);
     this.chargeFill = el('div', 'fill', this.charge);
     this.help = document.getElementById('help');
@@ -71,6 +74,38 @@ export class HUD {
     d.el.style.display = 'block';
   }
 
+  /** Ultimate cut-in band, animated from the game's real-time clock. */
+  startCutin(title, sub, accent, dur = 1.15) {
+    const el = this.cutin;
+    el.style.setProperty('--accent', accent);
+    el.querySelector('.title').textContent = title;
+    el.querySelector('.sub').textContent = sub;
+    el.classList.add('on');
+    this.cut = { t: 0, dur };
+    this.updateCutin(0);
+  }
+  updateCutin(dtReal) {
+    if (!this.cut) return;
+    const c = this.cut;
+    c.t += dtReal;
+    const k = c.t / c.dur;
+    const el = this.cutin;
+    if (k >= 1) { el.classList.remove('on'); this.cut = null; return; }
+    const eo = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+    let x;
+    if (k < 0.2) x = -110 + 110 * eo(k / 0.2);
+    else if (k < 0.82) x = 3 * ((k - 0.2) / 0.62);
+    else x = 3 + 115 * Math.pow((k - 0.82) / 0.18, 2);
+    const band = el.querySelector('.band');
+    band.style.transform = `skewY(-7deg) translateX(${x}%)`;
+    const por = el.querySelector('.portrait');
+    por.style.transform = `skewY(7deg) translateX(${(1 - eo(k / 0.25)) * -30}%) scale(${1.18 - 0.12 * eo(k / 0.8)})`;
+    const ttl = el.querySelector('.title');
+    ttl.style.transform = `skewY(7deg) translateX(${(1 - eo((k - 0.08) / 0.2)) * 40}%) scale(${1 + (1 - eo((k - 0.08) / 0.2)) * 0.4})`;
+    ttl.style.opacity = k < 0.08 ? 0 : 1;
+    el.style.setProperty('--fade', k < 0.12 ? k / 0.12 : k > 0.85 ? (1 - k) / 0.15 : 1);
+  }
+
   toast(text, dur = 1.2) {
     this.toastEl.textContent = text;
     this.toastEl.classList.remove('on'); void this.toastEl.offsetWidth; this.toastEl.classList.add('on');
@@ -86,6 +121,7 @@ export class HUD {
   }
 
   update(dtReal) {
+    this.updateCutin(dtReal);
     if (this.comboT > 0) {
       this.comboT -= dtReal;
       if (this.comboT <= 0) { this.comboCount = 0; this.comboEl.classList.remove('on'); }
@@ -104,6 +140,9 @@ export class HUD {
       d.el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${k})`;
       d.el.style.opacity = a;
     }
+    const cd = G.ultCooldown ?? 0;
+    this.ult.classList.toggle('ready', cd <= 0);
+    this.ult.querySelector('.fill').style.height = `${(1 - cd / 4) * 100}%`;
     const parts = [];
     if (G.time_userSlow) parts.push('◐ 슬로모션 (Z)');
     if (G.paused) parts.push('❚❚ 일시정지 · 포토모드 (P)');

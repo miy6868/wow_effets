@@ -51,8 +51,9 @@ export class CameraRig {
 
   update(dtReal, followPos, input, opts = {}) {
     if (input && !opts.lockLook) {
-      this.yaw -= input.mouseDX * input.sensitivity;
-      this.pitch += input.mouseDY * input.sensitivity;
+      const sens = input.sensitivity * (input.sensScale ?? 1);
+      this.yaw -= input.mouseDX * sens;
+      this.pitch += input.mouseDY * sens;
       this.pitch = Math.max(-0.5, Math.min(1.25, this.pitch));
     }
     this.distTarget = opts.dist ?? 5.6;

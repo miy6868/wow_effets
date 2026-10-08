@@ -491,3 +491,57 @@ export const distortFragment = /* glsl */ `
     gl_FragColor = vec4(off * 0.5, 0.0, 1.0);
   }
 `;
+
+// ── Energy beam (open cylinder along +Y, uv.y along the length) ─────────────
+export const beamFragment = /* glsl */ `
+  ${noiseChunk}
+  uniform vec3 uColor;
+  uniform vec3 uCore;
+  uniform float uAlpha;
+  uniform float uTime;
+  uniform float uScroll;
+  uniform float uNoise;
+  uniform float uLen;      // world length (for noise scale)
+  uniform float uPower;
+  varying vec2 vUv;
+  varying vec3 vNormalW;
+  varying vec3 vPosW;
+  void main() {
+    vec3 V = normalize(cameraPosition - vPosW);
+    float ndv = abs(dot(normalize(vNormalW), V));
+    float prof = pow(ndv, uPower);
+    float along = vUv.y * uLen;
+    float n = fbm(vec2(vUv.x * 6.0, along * 0.6 - uTime * uScroll));
+    float streak = vnoise(vec2(vUv.x * 18.0, along * 0.25 - uTime * uScroll * 1.6));
+    float k = prof * mix(1.0, 0.55 + n * 0.9 + step(0.7, streak) * 0.6, uNoise);
+    float ends = smoothstep(0.0, 0.02, vUv.y) * (1.0 - smoothstep(0.96, 1.0, vUv.y));
+    vec3 col = mix(uColor, uCore, smoothstep(0.55, 0.95, prof));
+    gl_FragColor = vec4(col * k * ends * uAlpha, 0.0);
+  }
+`;
+
+// ── Accretion disk / swirl ring (flat quad) ──────────────────────────────────
+export const diskFragment = /* glsl */ `
+  ${noiseChunk}
+  uniform vec3 uColor;
+  uniform vec3 uHot;
+  uniform float uAlpha;
+  uniform float uTime;
+  uniform float uIn;
+  uniform float uOut;
+  varying vec2 vUv;
+  void main() {
+    vec2 p = vUv * 2.0 - 1.0;
+    float r = length(p);
+    float a = atan(p.y, p.x);
+    float band = smoothstep(uIn, uIn + 0.06, r) * (1.0 - smoothstep(uOut - 0.25, uOut, r));
+    float swirl = a + 2.2 / max(r, 0.05) - uTime * 3.0;
+    float n = fbm(vec2(swirl * 1.3, r * 6.0));
+    float w = fwidth(n) + 0.01;
+    float bands = smoothstep(0.45 - w, 0.45 + w, n);
+    float inner = 1.0 - smoothstep(uIn, uIn + 0.25, r);
+    vec3 col = mix(uColor, uHot, inner + bands * 0.4);
+    float k = band * (0.35 + bands * 0.9);
+    gl_FragColor = vec4(col * k * uAlpha, 0.0);
+  }
+`;

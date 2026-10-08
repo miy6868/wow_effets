@@ -227,3 +227,52 @@ export function minigunModel() {
   g.userData.foreGrip = new THREE.Vector3(0, 0.28, 0.33);
   return g;
 }
+
+export function spearModel(glow = 0x5dffb0) {
+  const g = new THREE.Group();
+  const shaft = toonMesh(new THREE.CylinderGeometry(0.028, 0.032, 2.3, 8), { color: 0x2e3a4a, spec: 0.3, outlineWidth: 1.4 });
+  shaft.position.y = 0.45; g.add(shaft);
+  for (const y of [-0.62, 0.05, 1.45]) {
+    const ring = toonMesh(new THREE.CylinderGeometry(0.042, 0.042, 0.05, 10), { color: 0xd9b24a, spec: 0.8, outlineWidth: 1.2 });
+    ring.position.y = y; g.add(ring);
+  }
+  // blade: flat leaf-shaped head (extruded)
+  const s = new THREE.Shape();
+  s.moveTo(-0.07, 0); s.quadraticCurveTo(-0.11, 0.22, 0.0, 0.5); s.quadraticCurveTo(0.11, 0.22, 0.07, 0); s.closePath();
+  const geo = new THREE.ExtrudeGeometry(s, { depth: 0.022, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.008, bevelSegments: 1, curveSegments: 10 });
+  geo.translate(0, 0, -0.011); geo.rotateY(-Math.PI / 2); geo.computeVertexNormals();
+  const head = toonMesh(geo, { color: 0xe4ecf6, spec: 1, rim: 1, outlineWidth: 1.4, outlineColor: 0x1b2440 });
+  head.position.y = 1.62; g.add(head);
+  const core = toonMesh(new THREE.OctahedronGeometry(0.035), { color: glow, emissive: 2.2, outline: false });
+  core.scale.set(0.6, 3.2, 0.6); core.position.y = 1.8; g.add(core);
+  const guard = toonMesh(new THREE.ConeGeometry(0.07, 0.12, 6), { color: 0xd9b24a, spec: 0.8, outlineWidth: 1.2 });
+  guard.position.y = 1.56; guard.rotation.x = Math.PI; g.add(guard);
+  const tassel = toonMesh(new THREE.ConeGeometry(0.05, 0.22, 6), { color: 0xe2333f, outlineWidth: 1.2 });
+  tassel.position.set(0, 1.42, 0.0); tassel.rotation.x = Math.PI; g.add(tassel);
+  g.userData.bladeLen = 2.12;
+  return g;
+}
+
+export function daggerModel(edgeColor = 0xff4a6a) {
+  const g = new THREE.Group();
+  const L = 0.62;
+  const s = new THREE.Shape();
+  s.moveTo(-0.02, 0); s.quadraticCurveTo(-0.035, L * 0.6, -0.06, L); s.lineTo(-0.02, L + 0.02);
+  s.quadraticCurveTo(0.05, L * 0.75, 0.03, 0.0); s.closePath();
+  const geo = new THREE.ExtrudeGeometry(s, { depth: 0.014, bevelEnabled: true, bevelThickness: 0.005, bevelSize: 0.005, bevelSegments: 1, curveSegments: 10 });
+  geo.translate(0, 0, -0.007); geo.rotateY(-Math.PI / 2); geo.computeVertexNormals();
+  const blade = toonMesh(geo, { color: 0x3a3048, spec: 1.0, rim: 1, outlineWidth: 1.4, outlineColor: 0x14101c });
+  blade.position.y = 0.1; g.add(blade);
+  const e = new THREE.Shape();
+  e.moveTo(0.018, 0.02); e.quadraticCurveTo(0.04, L * 0.72, -0.03, L * 0.99); e.lineTo(-0.02, L + 0.02); e.quadraticCurveTo(0.05, L * 0.75, 0.032, 0.02); e.closePath();
+  const eg = new THREE.ExtrudeGeometry(e, { depth: 0.018, bevelEnabled: false, curveSegments: 10 });
+  eg.translate(0, 0, -0.009); eg.rotateY(-Math.PI / 2);
+  const edge = toonMesh(eg, { color: edgeColor, emissive: 2.0, outline: false, rim: 0 });
+  edge.position.y = 0.1; g.add(edge);
+  const guard = toonMesh(new THREE.BoxGeometry(0.03, 0.03, 0.16), { color: 0xd9b24a, spec: 0.8, outlineWidth: 1.2 });
+  guard.position.y = 0.09; g.add(guard);
+  const handle = toonMesh(new THREE.CylinderGeometry(0.022, 0.022, 0.16, 8), { color: 0x2a2440, outlineWidth: 1.2 });
+  handle.position.y = 0.0; g.add(handle);
+  g.userData.bladeLen = L + 0.1;
+  return g;
+}

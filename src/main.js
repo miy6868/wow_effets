@@ -86,7 +86,7 @@ function globalKeys() {
   if (input.wasPressed('KeyM')) { G.settings.sound = !G.settings.sound; audio.mute(!G.settings.sound); hud.toast(G.settings.sound ? '사운드 ON' : '사운드 OFF'); }
   if (input.wasPressed('KeyK')) {
     const night = arena.time !== 'night';
-    arena.setTimeOfDay(night ? 'night' : 'dusk', pipeline);
+    arena.setTimeOfDay(night ? 'night' : 'dusk', pipeline, 1.6);
     ambience.night = night;
     hud.toast(night ? '달밤' : '해질녘');
   }
@@ -118,6 +118,7 @@ function frame(dtReal) {
   ambience.update(Time.dt, player.pos);
   audio.music?.tick();
   arena.update(Time.dt, fx, player.pos);
+  arena.updateTime(dtReal);
   fx.update(Time.dt);
 
   attractCam?.();

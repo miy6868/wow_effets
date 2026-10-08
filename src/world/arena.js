@@ -515,33 +515,63 @@ export class Arena {
     }
   }
 
-  /** 'dusk' (default) or 'night': swaps sky, light, haze and set-dressing colours. */
-  setTimeOfDay(mode, pipeline) {
-    const P = TIMES[mode] ?? TIMES.dusk;
+  /** 'dusk' (default) or 'night': swaps sky, light, haze and set-dressing colours.
+   *  With `fade` (seconds) the two presets cross-fade (advance with updateTime). */
+  setTimeOfDay(mode, pipeline, fade = 0) {
+    const to = TIMES[mode] ?? TIMES.dusk;
+    const from = this.todCur ?? TIMES[this.time ?? 'dusk'];
     this.time = mode;
+    this.pipelineRef = pipeline ?? this.pipelineRef;
+    if (fade > 0) { this.tod = { from, to, t: 0, dur: fade }; return; }
+    this.tod = null;
+    this.applyTime(to, to, 1);
+  }
+
+  updateTime(dtReal) {
+    const T = this.tod;
+    if (!T) return;
+    T.t += dtReal / T.dur;
+    const k = Math.min(1, T.t);
+    this.applyTime(T.from, T.to, k * k * (3 - 2 * k));
+    if (k >= 1) this.tod = null;
+  }
+
+  applyTime(A, B, k) {
+    // blend every field, then apply; the blended preset is kept so a toggle in
+    // mid-fade starts from what is on screen
+    const lerp3 = (a, b) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+    const hex = (a, b) => _ca.set(a).lerp(_cb.set(b), k).getHex();
+    const P = {};
+    for (const key of ['lightDir', 'light', 'skyAmb', 'groundAmb', 'rim', 'sunDir', 'sun', 'ridgeRim', 'grassTint', 'rays']) P[key] = lerp3(A[key], B[key]);
+    P.fogRange = [A.fogRange[0] + (B.fogRange[0] - A.fogRange[0]) * k, A.fogRange[1] + (B.fogRange[1] - A.fogRange[1]) * k];
+    for (const key of ['stars', 'sheenK', 'pools']) P[key] = A[key] + (B[key] - A[key]) * k;
+    for (const key of ['fog', 'zenith', 'mid', 'horizon', 'cloudLit', 'cloudShade', 'sheen', 'ridgeHaze']) P[key] = hex(A[key], B[key]);
+    P.ridges = A.ridges.map((c, i) => hex(c, B.ridges[i]));
+    P.grass = A.grass.map((c, i) => hex(c, B.grass[i]));
+    this.todCur = P;
     const L = toonGlobals, S = this.skyMat.uniforms;
     L.uLightDir.value.set(...P.lightDir).normalize();
     L.uLightColor.value.setRGB(...P.light);
     L.uSkyAmb.value.setRGB(...P.skyAmb); L.uGroundAmb.value.setRGB(...P.groundAmb);
     L.uRimColor.value.setRGB(...P.rim);
-    L.uFogColor.value.set(P.fog); L.uFog.value.set(...P.fogRange);
+    L.uFogColor.value.set(P.fog); L.uFog.value.set(P.fogRange[0], P.fogRange[1]);
     S.uZenith.value.set(P.zenith); S.uMid.value.set(P.mid); S.uHorizon.value.set(P.horizon);
     S.uSunDir.value.set(...P.sunDir).normalize();
     S.uSunColor.value.setRGB(...P.sun);
     S.uCloudLit.value.set(P.cloudLit); S.uCloudShade.value.set(P.cloudShade);
     S.uStars.value = P.stars;
     this.ground.material.uniforms.uSheen.value.set(P.sheen).multiplyScalar(P.sheenK);
-    this.ridgeMats.forEach((m, i) => {
-      m.uniforms.uColor.value.set(P.ridges[i]); m.uniforms.uHaze.value.set(P.ridgeHaze); m.uniforms.uRim.value.setRGB(...P.ridgeRim);
-    });
+    this.ridgeMats.forEach((m, i) => { m.uniforms.uColor.value.set(P.ridges[i]); m.uniforms.uHaze.value.set(P.ridgeHaze); m.uniforms.uRim.value.setRGB(...P.ridgeRim); });
     if (this.grassMat) {
       const u = this.grassMat.uniforms;
       u.uBase.value.set(P.grass[0]); u.uTip.value.set(P.grass[1]); u.uSunTint.value.setRGB(...P.grassTint);
     }
     if (this.poolMat) this.poolMat.uniforms.uGain.value = P.pools;
-    if (pipeline) pipeline.u.uSunColor.value.setRGB(...P.rays);
+    if (this.pipelineRef) this.pipelineRef.u.uSunColor.value.setRGB(...P.rays);
   }
 }
+
+const _ca = new THREE.Color(), _cb = new THREE.Color();
 
 const TIMES = {
   dusk: {

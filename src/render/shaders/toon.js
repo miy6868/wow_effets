@@ -207,6 +207,8 @@ export const groundFragment = /* glsl */ `
   uniform vec3 uGrassDark;
   uniform float uArenaR;
   uniform float uTime;
+  uniform vec3 uSunDir;     // the sky's (low) sun, for the polished-stone sheen
+  uniform vec3 uSheen;      // horizon colour reflected at grazing angles
   varying vec3 vPosW;
   varying vec3 vNormalW;
 
@@ -252,7 +254,18 @@ export const groundFragment = /* glsl */ `
     stone *= 1.0 - speck * 0.08;
     float gw = fwidth(grout) * 0.8 + 1e-4;
     float isGrout = 1.0 - smoothstep(0.028 - gw, 0.028 + gw, grout);
-    vec3 plaza = mix(stone, uGrout, isGrout);
+    // carved lip along each tile edge: lit where the edge bevel faces the
+    // low sun, shaded where it faces away (cel-stepped, reads as relief)
+    vec2 radial = p / max(r, 1e-3);
+    vec2 tangent = vec2(-radial.y, radial.x);
+    vec2 outN = gR < gA ? radial * (fr < 0.5 ? -1.0 : 1.0) : tangent * (fa < 0.5 ? -1.0 : 1.0);
+    float facing = dot(outN, normalize(uLightDir.xz));
+    float lip = (1.0 - isGrout) * (1.0 - smoothstep(0.085 - gw, 0.085 + gw, grout));
+    stone = mix(stone, stone * mix(vec3(0.78, 0.78, 0.9), vec3(1.16, 1.1, 1.0), step(0.0, facing)), lip * step(0.2, abs(facing)));
+    // moss creeping into the grout away from the busy center
+    float moss = smoothstep(9.0, 16.0, r) * step(0.58, vnoise(p * 0.35 + 3.0));
+    vec3 groutC = mix(uGrout, vec3(0.27, 0.33, 0.24), moss * 0.8);
+    vec3 plaza = mix(stone, groutC, isGrout);
     // center emblem rings
     float ringLine = abs(r - 5.0);
     ringLine = min(ringLine, abs(r - 5.6));
@@ -283,6 +296,14 @@ export const groundFragment = /* glsl */ `
     // cast shadows from characters / props: cool violet, cel-soft edge
     float sh = sunShadow(vPosW);
     col *= mix(vec3(1.0), vec3(0.54, 0.58, 0.82), sh * (1.0 - shadowK * 0.45));
+    // polished stone: the warm horizon reflects at grazing angles and the low
+    // sun lays a soft glare path toward the camera (not in grout, grass or shadow)
+    vec3 V = normalize(cameraPosition - vPosW);
+    float fres = pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 4.0);
+    vec3 R = reflect(-V, N);
+    float glare = pow(max(dot(R, normalize(uSunDir)), 0.0), 18.0);
+    float polish = onPlaza * (1.0 - isGrout * 0.7) * (1.0 - sh * 0.85);
+    col += uSheen * polish * (fres * 0.22 + glare * (0.12 + fres * 0.55));
     col += toonPointLights(vPosW, N, col * 1.3);
     col *= 1.0 - uWorldDim * 0.8;
     col = applyFog(col, vPosW);
@@ -367,6 +388,8 @@ export function makeGroundMaterial(opts = {}) {
       uGrass: { value: new THREE.Color(opts.grass ?? 0x6a8a4e) },
       uGrassDark: { value: new THREE.Color(opts.grassDark ?? 0x587a45) },
       uArenaR: { value: opts.arenaR ?? 26 },
+      uSunDir: { value: new THREE.Vector3(-0.62, 0.13, 0.77).normalize() },
+      uSheen: { value: new THREE.Color(0xf2a274).multiplyScalar(0.7) },
     },
     vertexShader: groundVertex,
     fragmentShader: groundFragment,

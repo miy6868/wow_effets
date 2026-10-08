@@ -21,7 +21,7 @@ const { chromium } = require('playwright');
   await page.waitForFunction(() => !!window.__app, null, { timeout: 30000 }).catch(() => {});
   const ev = (fn, ...args) => page.evaluate(([src, a]) => { const f = eval('(' + src + ')'); return f(window.__app, ...a); }, [fn.toString(), args]);
   const step = (n = 1) => page.evaluate((n) => window.__app.step(n), n);
-  const shot = async (name) => { await page.screenshot({ path: path.join(outDir, name + '.png') }); console.log('shot', name); };
+  const shot = async (name) => { await page.screenshot({ path: path.join(outDir, name + '.png'), timeout: 180000 }); console.log('shot', name); };
   try {
     const scenario = require(path.resolve(scenarioPath));
     await scenario({ page, shot, ev, step });

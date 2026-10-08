@@ -5,6 +5,8 @@ import { toonMesh } from '../render/toon.js';
 import { G } from '../ctx.js';
 import { ARENA_R } from '../world/arena.js';
 
+const FLASH_WHITE = [1, 0.97, 0.94];
+
 const _v = new THREE.Vector3();
 const _v2 = new THREE.Vector3();
 const UP = new THREE.Vector3(0, 1, 0);
@@ -181,9 +183,10 @@ export class Dummy {
     if (!light || T - (this.lastFlash ?? -1) > 0.1) {
       this.flashT = h.flashT ?? (light ? 0.022 : 0.045);
       this.flashA = light ? 0.5 : 0.78;
+      this.flashC = h.flash ?? FLASH_WHITE;
       this.lastFlash = T;
     }
-    this.hurtT = 0.3;
+    this.hurtT = 0.22;
     this.stunEyes = 0.6;
     const frozen = this.status.freeze > 0;
     let kb = (h.kb ?? 3) / this.mass;
@@ -206,8 +209,8 @@ export class Dummy {
     const T = G.time;
     this.stateT += dt;
     // flash / hurt tint
-    if (this.flashT > 0) { this.flashT -= dt; this.flash.value.set(1, 0.97, 0.94, this.flashA ?? 0.9); }
-    else if (this.hurtT > 0) { this.hurtT -= dt; this.flash.value.set(1, 0.3, 0.25, (this.hurtT / 0.3) * 0.45); }
+    if (this.flashT > 0) { this.flashT -= dt; const c = this.flashC ?? FLASH_WHITE; this.flash.value.set(c[0], c[1], c[2], this.flashA ?? 0.9); }
+    else if (this.hurtT > 0) { this.hurtT -= dt; this.flash.value.set(0.95, 0.38, 0.3, (this.hurtT / 0.22) * 0.26); }
     else if (this.status.freeze > 0) this.flash.value.set(0.6, 0.9, 1.2, 0.45);
     else this.flash.value.w = 0;
     this.stunEyes -= dt;

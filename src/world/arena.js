@@ -1,8 +1,8 @@
 // The training arena: stone plaza, grass field, pillars, distant hills, sky.
 import * as THREE from 'three';
-import { makeGroundMaterial, toonGlobals } from '../render/shaders/toon.js';
+import { makeGroundMaterial, toonGlobals, makeToonMaterial, makeOutlineMaterial } from '../render/shaders/toon.js';
 import { skyVertex, skyFragment, ridgeVertex, ridgeFragment, grassVertex, grassFragment } from '../render/shaders/sky.js';
-import { toonMesh } from '../render/toon.js';
+import { toonMesh, computeOutlineNormals } from '../render/toon.js';
 
 export const ARENA_R = 26;
 
@@ -47,6 +47,7 @@ export class Arena {
     groundGeo.rotateX(-Math.PI / 2);
     this.ground = new THREE.Mesh(groundGeo, makeGroundMaterial({ arenaR: ARENA_R }));
     this.ground.material.uniforms.uTime = toonGlobals.uTime;
+    this.ground.material.uniforms.uSunDir.value = this.skyMat.uniforms.uSunDir.value;
     this.ground.renderOrder = -50;
     scene.add(this.ground);
 
@@ -54,6 +55,120 @@ export class Arena {
     this.buildHills();
     this.buildGrass();
     this.buildLanterns();
+    this.buildTorii();
+    this.buildTrees();
+  }
+
+  /** A vermilion torii just outside the pillar ring, backlit by the low sun. */
+  buildTorii() {
+    const g = new THREE.Group();
+    const RED = 0xc8432c, BLACK = 0x2a2630;
+    const T = (geo, color, o = {}) => toonMesh(geo, { color, outlineWidth: 2.4, rim: 0.9, ...o });
+    for (const sx of [-1, 1]) {
+      const post = T(new THREE.CylinderGeometry(0.26, 0.32, 6.2, 12), RED);
+      post.position.set(sx * 2.7, 3.1, 0); post.rotation.z = sx * 0.035;
+      g.add(post);
+      const sleeve = T(new THREE.CylinderGeometry(0.38, 0.4, 0.55, 12), BLACK);
+      sleeve.position.set(sx * 2.71, 0.27, 0);
+      g.add(sleeve);
+    }
+    const nuki = T(new THREE.BoxGeometry(7.0, 0.34, 0.26), RED); nuki.position.y = 4.55; g.add(nuki);
+    const strut = T(new THREE.BoxGeometry(0.34, 0.8, 0.24), RED); strut.position.y = 5.1; g.add(strut);
+    const plaque = T(new THREE.BoxGeometry(0.62, 0.86, 0.12), BLACK); plaque.position.set(0, 5.05, 0.16); g.add(plaque);
+    const gold = toonMesh(new THREE.BoxGeometry(0.46, 0.7, 0.04), { color: 0xffcf8a, emissive: 0.6, outline: false, rim: 0 });
+    gold.position.set(0, 5.05, 0.23); g.add(gold);
+    // upper lintels: the top one sweeps upward at both ends
+    const bent = (w, h, d, lift) => {
+      const geo = new THREE.BoxGeometry(w, h, d, 24, 1, 1);
+      const pos = geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i) / (w / 2);
+        pos.setY(i, pos.getY(i) + lift * x * x * x * x + lift * 0.25 * x * x);
+      }
+      geo.computeVertexNormals();
+      return geo;
+    };
+    const shimaki = T(bent(7.6, 0.34, 0.42, 0.18), RED); shimaki.position.y = 5.55; g.add(shimaki);
+    const kasagi = T(bent(8.8, 0.32, 0.56, 0.42), BLACK); kasagi.position.y = 5.86; g.add(kasagi);
+    const a = 1.963, r = ARENA_R + 5.2;
+    g.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+    g.rotation.y = Math.PI / 2 - a;
+    this.scene.add(g);
+    // stepping stones leading to it
+    for (let i = 0; i < 3; i++) {
+      const st = toonMesh(new THREE.CylinderGeometry(0.75 - i * 0.05, 0.8 - i * 0.05, 0.12, 9), { color: 0x7c7f93, outlineWidth: 1.8 });
+      const rr = ARENA_R + 1.6 + i * 1.2;
+      st.position.set(Math.cos(a) * rr, 0.06, Math.sin(a) * rr);
+      this.scene.add(st);
+    }
+  }
+
+  /** Cherry trees in the grass ring: instanced trunks + lumpy cel canopies. */
+  buildTrees() {
+    const rnd = mulberry(7);
+    const trunkGeo = new THREE.CylinderGeometry(0.7, 1, 1, 7, 1); trunkGeo.translate(0, 0.5, 0);
+    const blobGeo = new THREE.IcosahedronGeometry(1, 3);
+    {
+      const pos = blobGeo.attributes.position, v = new THREE.Vector3();
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i);
+        const n = Math.sin(v.x * 2.3 + 1.3) * Math.sin(v.y * 2.1 + 0.4) * Math.sin(v.z * 2.5 + 2.1);
+        v.multiplyScalar(1 + n * 0.2);
+        pos.setXYZ(i, v.x, v.y, v.z);
+      }
+      blobGeo.computeVertexNormals();
+    }
+    const trunks = [], blobs = [];
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
+    const seg = (a, b, r) => {
+      const d = new THREE.Vector3().subVectors(b, a);
+      q.setFromUnitVectors(up, d.clone().normalize());
+      trunks.push(m.clone().compose(a, q, sc.set(r, d.length(), r)));
+    };
+    const spots = [0.55, 1.05, 1.72, 2.42, 3.25, 3.95, 4.6, 5.3, 5.95];
+    for (const ang of spots) {
+      const a = ang + (rnd() - 0.5) * 0.2;
+      const r = ARENA_R + 7 + rnd() * 6;
+      const base = new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r);
+      const H = 3.2 + rnd() * 1.4;
+      const lean = new THREE.Vector3((rnd() - 0.5) * 1.4, 0, (rnd() - 0.5) * 1.4);
+      const mid = base.clone().add(new THREE.Vector3(0, H * 0.55, 0)).addScaledVector(lean, 0.5);
+      const top = base.clone().add(new THREE.Vector3(0, H, 0)).add(lean);
+      seg(base, mid, 0.34); seg(mid, top, 0.24);
+      const crown = top.clone();
+      const nb = 3 + Math.floor(rnd() * 2);
+      for (let k = 0; k < nb; k++) {
+        const ba = rnd() * Math.PI * 2;
+        const tip = mid.clone().add(new THREE.Vector3(Math.cos(ba) * (1.4 + rnd()), H * 0.35 + rnd() * 0.8, Math.sin(ba) * (1.4 + rnd())));
+        seg(mid, tip, 0.12);
+        blobs.push([tip.clone().add(new THREE.Vector3(0, 0.3, 0)), 1.3 + rnd() * 0.5]);
+      }
+      blobs.push([crown.clone().add(new THREE.Vector3(0, 0.5, 0)), 2.0 + rnd() * 0.4]);
+      for (let k = 0; k < 4; k++) {
+        const ba = rnd() * Math.PI * 2;
+        blobs.push([crown.clone().add(new THREE.Vector3(Math.cos(ba) * 1.5, rnd() * 0.8 - 0.2, Math.sin(ba) * 1.5)), 1.2 + rnd() * 0.5]);
+      }
+    }
+    const inst = (geo, mats, color, o) => {
+      computeOutlineNormals(geo);
+      const mesh = new THREE.InstancedMesh(geo, makeToonMaterial({ color, ...o }), mats.length);
+      const ol = new THREE.InstancedMesh(geo, makeOutlineMaterial({ color: o.outlineColor, width: o.outlineWidth ?? 2.2 }), mats.length);
+      ol.renderOrder = -1;
+      mats.forEach((mm, i) => { mesh.setMatrixAt(i, mm); ol.setMatrixAt(i, mm); });
+      if (o.tints) { mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(o.tints), 3); }
+      mesh.layers.enable(1);
+      this.scene.add(mesh, ol);
+    };
+    inst(trunkGeo, trunks, 0x4a3a44, { outlineColor: 0x1c1420, outlineWidth: 2.0, rim: 0.4 });
+    const bm = [], tints = [];
+    for (const [p, s] of blobs) {
+      q.setFromEuler(new THREE.Euler(rnd() * 6, rnd() * 6, rnd() * 6));
+      bm.push(new THREE.Matrix4().compose(p, q, sc.set(s * 1.1, s * 0.85, s * 1.1)));
+      const k = 0.92 + rnd() * 0.14;
+      tints.push(k, k * (0.96 + rnd() * 0.06), k);
+    }
+    inst(blobGeo, bm, 0xf5b2c9, { outlineColor: 0x6e3354, outlineWidth: 2.2, rim: 1.0, emissive: 0.06, tints });
+    this.treeTops = blobs.map(([p]) => p);
   }
 
   buildGrass() {
@@ -138,6 +253,11 @@ export class Arena {
     this._lt = (this._lt ?? 0) - dt;
     if (this._lt > 0) return;
     this._lt = 0.12;
+    // now and then a petal lets go of a cherry tree and drifts downwind
+    if (this.treeTops && Math.random() < 0.35) {
+      const t = this.treeTops[(Math.random() * this.treeTops.length) | 0];
+      fx.alpha.emit({ pos: t.clone().add(new THREE.Vector3((Math.random() - 0.5) * 2, -0.6, (Math.random() - 0.5) * 2)), vel: new THREE.Vector3(0.6 + Math.random() * 0.4, -0.45, 0.2), shape: 6, size: 0.08, sizeEnd: 0.08, life: 7, color: [1.0, 0.74, 0.8], colorEnd: [1.0, 0.74, 0.8], alpha: 0.95, alphaEnd: 0, colorCurve: 3, fadeIn: 0.1, rot: Math.random() * 6, rotVel: 2 + Math.random() * 2, bounce: 0, floorY: 0.03 });
+    }
     const p = this.lanterns[(Math.random() * this.lanterns.length) | 0];
     fx.add.emit({ pos: p.clone().add(new THREE.Vector3((Math.random() - 0.5) * 0.3, 0.1, (Math.random() - 0.5) * 0.3)), vel: new THREE.Vector3((Math.random() - 0.5) * 0.2, 0.25 + Math.random() * 0.3, (Math.random() - 0.5) * 0.2), shape: 0, size: 0.06, sizeEnd: 0.02, life: 2 + Math.random(), color: [1.6, 0.9, 0.4], alpha: 0.9, alphaEnd: 0, fadeIn: 0.2 });
   }
@@ -239,6 +359,10 @@ export class Arena {
 }
 
 /** Drifting sunlit motes and a few petals around the camera — quiet ambient life. */
+function mulberry(a) {
+  return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+
 export class Ambience {
   constructor(fx) { this.fx = fx; this.t = 0; }
   update(dt, center) {

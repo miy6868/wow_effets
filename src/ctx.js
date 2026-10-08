@@ -14,5 +14,6 @@ export const G = {
     shake: 1.0,
     hitstop: 1.0,
     sound: true,
+    music: true,
   },
 };

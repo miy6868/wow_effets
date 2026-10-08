@@ -19,10 +19,10 @@ const lanceGeo = (() => { const g = new THREE.OctahedronGeometry(1, 0); g.scale(
 /** Holy impact: gold star + cross + ring + drifting feathers of light. */
 export function holyBurst(p, s = 1) {
   const fx = G.fx;
-  fx.add.emit({ pos: p, shape: SHAPE.CROSS, size: 2.6 * s, sizeEnd: 1.2 * s, life: 0.2, color: [3, 2.6, 1.6], alphaEnd: 0 });
-  fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 1.6 * s, sizeEnd: 0.1, life: 0.12, color: [3.2, 2.8, 1.8], alphaEnd: 0, rot: 0.785 });
-  fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 1.2 * s, sizeEnd: 1.8 * s, life: 0.16, color: [1.4, 1.0, 0.4], alpha: 0.8, alphaEnd: 0 });
-  fx.ring({ pos: p, billboard: true, r0: 0.1, r1: 1.4 * s, w0: 0.08, w1: 0.012, color: [1.8, 1.4, 0.7], life: 0.2, sharp: 1 });
+  fx.add.emit({ pos: p, shape: SHAPE.CROSS, size: 2.4 * s, sizeEnd: 1.0 * s, life: 0.18, color: [2.6, 2.1, 1.1], alphaEnd: 0 });
+  fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 1.3 * s, sizeEnd: 0.1, life: 0.1, color: [2.8, 2.3, 1.3], alphaEnd: 0, rot: 0.785 });
+  fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 0.9 * s, sizeEnd: 1.3 * s, life: 0.14, color: [1.1, 0.7, 0.25], alpha: 0.65, alphaEnd: 0 });
+  fx.ring({ pos: p, billboard: true, r0: 0.1, r1: 1.0 * s, w0: 0.05, w1: 0.008, color: [1.3, 0.95, 0.45], life: 0.14, sharp: 1 });
   for (let i = 0; i < 10; i++) {
     randUnit(_v2);
     fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(2, 5) * s), shape: SHAPE.DIAMOND, size: rand(0.06, 0.12), sizeEnd: 0, life: rand(0.6, 1.1), color: [2.4, 2, 1], alphaEnd: 0, drag: 3, gravity: -0.6, rotVel: rand(-4, 4) });
@@ -79,7 +79,7 @@ export class LightMagic extends MagicWeapon {
       after(spawnT + 0.0001, () => {
         const h = home();
         G.fx.add.emit({ pos: h, shape: SHAPE.STAR, size: 1.0, sizeEnd: 0, life: 0.15, color: [3, 2.5, 1.4], alphaEnd: 0 });
-        G.fx.ring({ pos: h, billboard: true, r0: 0.05, r1: 0.35, w0: 0.1, w1: 0.02, color: [1.0, 0.75, 0.35], life: 0.14, sharp: 1 });
+        G.fx.ring({ pos: h, billboard: true, r0: 0.05, r1: 0.3, w0: 0.06, w1: 0.01, color: [0.9, 0.65, 0.3], life: 0.12, sharp: 1 });
       });
       G.fx.spawn(new THREE.Object3D(), launchT, (e) => {
         if (e.t < spawnT) return;
@@ -108,7 +108,7 @@ export class LightMagic extends MagicWeapon {
             },
             onHit: (pr, d, point) => {
               holyBurst(point, 0.9);
-              hit(d, { dir: pr.vel.clone().setY(0).normalize(), point, kb: 2.5, lift: d.airborne ? 3 : 1.2, hitstop: 0.06, atkStop: 0, shake: 0.08, kind: 'none', dmg: 105 + Math.round(Math.random() * 20), sound: 'lanceHit' });
+              hit(d, { flash: [1, 0.93, 0.72], dir: pr.vel.clone().setY(0).normalize(), point, kb: 2.5, lift: d.airborne ? 3 : 1.2, hitstop: 0.06, atkStop: 0, shake: 0.08, kind: 'none', dmg: 105 + Math.round(Math.random() * 20), sound: 'lanceHit' });
             },
             onGround: (pr, point) => { holyBurst(point.clone().setY(0.2), 0.7); G.fx.decal({ pos: point, size: 1.2, type: 4, color: [1.4, 1.1, 0.4], life: 1.2, additive: true }); },
             onDead: () => mesh.parent?.remove(mesh),
@@ -169,7 +169,7 @@ class BeamAction {
       const need = this.charge > 0.75 ? 3 : this.charge > 0.4 ? 2 : this.charge > 0.05 ? 1 : 0;
       while (this.circles.length < need) {
         const i = this.circles.length;
-        const c = fx.decal({ pos: new THREE.Vector3(), size: 0.42 + i * 0.2, type: 3, color: [1.3, 0.95, 0.38], life: 99, spin: i % 2 ? -2 : 2, reveal: 0.15, additive: true });
+        const c = fx.decal({ pos: new THREE.Vector3(), size: 0.34 + i * 0.17, type: 3, color: [0.8, 0.55, 0.2], life: 99, spin: i % 2 ? -2 : 2, reveal: 0.15, additive: true });
         c.obj.rotation.set(0, 0, 0);
         this.circles.push(c);
         G.audio?.play('chargeLvl', { pitch: 1 + i * 0.25 });
@@ -221,7 +221,7 @@ class BeamAction {
         let r = segmentQuery(hp, end, R * 0.9, ex);
         while (r) {
           ex.add(r.d);
-          hit(r.d, { dir: dir.clone().setY(0).normalize(), fxDir: dir, point: r.point, kb: 4 + this.R * 2, lift: 1.5, hitstop: 0.03, shake: 0, kind: 'none', dmg: 40 + Math.round(Math.random() * 10), sound: null });
+          hit(r.d, { flash: [1, 0.93, 0.72], dir: dir.clone().setY(0).normalize(), fxDir: dir, point: r.point, kb: 4 + this.R * 2, lift: 1.5, hitstop: 0.03, shake: 0, kind: 'none', dmg: 40 + Math.round(Math.random() * 10), sound: null });
           // light tick: small star + spray (a full holy burst every tick would white out)
           fx.add.emit({ pos: r.point, shape: SHAPE.STAR, size: 0.9, sizeEnd: 0.1, life: 0.08, color: [2.2, 1.9, 1.2], alphaEnd: 0, rot: Math.random() });
           for (let k = 0; k < 4; k++) fx.add.emit({ pos: r.point, vel: randUnit(_v2).multiplyScalar(rand(4, 9)), shape: SHAPE.STREAK, size: 0.035, stretch: 0.03, life: rand(0.1, 0.2), color: [2.6, 2.1, 1.0], alphaEnd: 0, drag: 5 });
@@ -262,7 +262,7 @@ class BeamAction {
     this.srcLight = G.fx.light(new THREE.Vector3(), [1, 0.8, 0.4], 1.4, 5, 0);
     const hp = this.hands();
     const dir = this.aimDir(hp);
-    G.fx.add.emit({ pos: hp, shape: SHAPE.STAR, size: 2.6 * c + 0.6, sizeEnd: 0.3, life: 0.16, color: [2.6, 2.2, 1.4], alphaEnd: 0 });
+    G.fx.add.emit({ pos: hp, shape: SHAPE.STAR, size: 2.0 * c + 0.6, sizeEnd: 0.3, life: 0.14, color: [2.4, 1.9, 1.1], alphaEnd: 0 });
     G.fx.ring({ pos: hp, normal: dir, r0: 0.2, r1: 1.5 + c, w0: 0.08, w1: 0.012, color: [1.2, 0.9, 0.4], life: 0.26, sharp: 1 });
     G.fx.distort({ pos: hp, r0: 0.3, r1: 5, strength: 0.04, life: 0.35 });
     G.screen.flash([1, 0.9, 0.7], 0.07, 0.07);

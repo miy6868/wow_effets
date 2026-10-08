@@ -27,9 +27,9 @@ function crystalMesh(color = ICE, s = 1, emissive = 0.35) {
 /** Frost burst + shards (used on hits and shatters). */
 export function frostBurst(pos, s = 1, shards = 8) {
   const fx = G.fx;
-  fx.add.emit({ pos, shape: SHAPE.STAR, size: 1.6 * s, sizeEnd: 0.1, life: 0.12, color: [2.2, 3, 3.6], alphaEnd: 0, rot: Math.random() });
-  fx.add.emit({ pos, shape: SHAPE.GLOW, size: 1.1 * s, sizeEnd: 1.5 * s, life: 0.14, color: [0.6, 1.1, 1.8], alpha: 0.7, alphaEnd: 0 });
-  fx.ring({ pos, billboard: true, r0: 0.1, r1: 1.2 * s, w0: 0.08, w1: 0.015, color: [1.0, 1.6, 2.4], life: 0.16, sharp: 1 });
+  fx.add.emit({ pos, shape: SHAPE.STAR, size: 1.2 * s, sizeEnd: 0.1, life: 0.1, color: [1.6, 2.3, 3.2], alphaEnd: 0, rot: Math.random() });
+  fx.add.emit({ pos, shape: SHAPE.GLOW, size: 0.8 * s, sizeEnd: 1.1 * s, life: 0.12, color: [0.35, 0.7, 1.3], alpha: 0.6, alphaEnd: 0 });
+  fx.ring({ pos, billboard: true, r0: 0.1, r1: 0.9 * s, w0: 0.05, w1: 0.01, color: [0.6, 1.0, 1.8], life: 0.13, sharp: 1 });
   for (let i = 0; i < shards; i++) {
     randUnit(_v2); _v2.y = Math.abs(_v2.y) + 0.2;
     fx.debris.shard.emit({ pos: pos.clone(), vel: _v2.normalize().multiplyScalar(rand(3, 8) * s), scale: rand(0.05, 0.12) * s, life: rand(0.8, 1.4), bounce: 0.3, spin: rand(8, 16) });
@@ -38,9 +38,9 @@ export function frostBurst(pos, s = 1, shards = 8) {
     randUnit(_v2);
     fx.add.emit({ pos, vel: _v2.multiplyScalar(rand(2, 7) * s), shape: SHAPE.DIAMOND, size: rand(0.05, 0.1), sizeEnd: 0, life: rand(0.3, 0.6), color: [1.6, 2.4, 3.2], alphaEnd: 0, drag: 3, gravity: 3 });
   }
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 3; i++) {
     randUnit(_v2);
-    fx.puffs.emit({ pos: pos.clone().addScaledVector(_v2, 0.2), vel: _v2.multiplyScalar(rand(1, 2.5)), size: rand(0.15, 0.25) * s, sizeEnd: rand(0.4, 0.6) * s, life: rand(0.5, 0.8), mode: PUFF.MIST, color: [0.85, 0.95, 1.05], shade: [0.55, 0.7, 0.9], drag: 3, rise: 0.4, dissolveStart: 0.15 });
+    fx.puffs.emit({ pos: pos.clone().addScaledVector(_v2, 0.2), vel: _v2.multiplyScalar(rand(1, 2.5)), size: rand(0.12, 0.2) * s, sizeEnd: rand(0.3, 0.45) * s, life: rand(0.5, 0.8), mode: PUFF.MIST, color: [0.62, 0.8, 1.0], shade: [0.34, 0.46, 0.78], drag: 3, rise: 0.4, dissolveStart: 0.15 });
   }
   fx.light(pos, [0.6, 0.85, 1.2], 1.6, 4, 0.15);
 }
@@ -60,9 +60,9 @@ export function freeze(d, sec = 2.6) {
     c.rotation.set(Math.sin(a) * 0.6, rand(0, 6), -Math.cos(a) * 0.6);
     g.add(c);
   }
-  const big = crystalMesh(0xc6f0ff, 1.3 * s, 0.3);
+  const big = crystalMesh(0xa8e4ff, 1.3 * s, 0.22);
   big.position.y = 1.05 * s; big.scale.set(1.55 * s, 1.35 * s, 1.55 * s);
-  big.material.transparent = true; big.material.uniforms.uOpacity.value = 0.42; big.material.depthWrite = false;
+  big.material.transparent = true; big.material.uniforms.uOpacity.value = 0.32; big.material.depthWrite = false;
   big.renderOrder = 5;
   g.add(big);
   g.scale.setScalar(0.01);
@@ -128,7 +128,7 @@ export class IceMagic extends MagicWeapon {
     const palm = this.castPalm(p, 0);
     const dir0 = _v.subVectors(this.aimPoint, palm).normalize().clone();
     const right = p.right(new THREE.Vector3());
-    G.fx.ring({ pos: palm, normal: dir0, r0: 0.1, r1: 0.6, w0: 0.1, w1: 0.02, color: [0.8, 1.4, 2.2], life: 0.18, sharp: 1 });
+    G.fx.ring({ pos: palm, normal: dir0, r0: 0.08, r1: 0.45, w0: 0.06, w1: 0.012, color: [0.6, 1.1, 1.9], life: 0.14, sharp: 1 });
     G.audio?.play('ice');
     [-1, 0, 1].forEach((k, i) => after(i * 0.06 + 0.0001, () => {
       const from = this.castPalm(p, 0).addScaledVector(right, k * 0.25).add(_v.set(0, Math.abs(k) * 0.12, 0));
@@ -143,11 +143,11 @@ export class IceMagic extends MagicWeapon {
           mesh.quaternion.setFromUnitVectors(Y, _v.copy(pr.vel).normalize());
           G.fx.add.emit({ pos: pr.pos, vel: pr.vel, shape: SHAPE.STREAK, size: 0.12, stretch: 0.012, life: 1 / 50, color: [0.6, 1.1, 2], alpha: 1, alphaEnd: 1 });
           if (Math.random() < 0.7) G.fx.add.emit({ pos: pr.pos.clone().add(randUnit(_v2).multiplyScalar(0.1)), vel: randUnit(_v2).multiplyScalar(0.5), shape: SHAPE.DIAMOND, size: rand(0.04, 0.08), sizeEnd: 0, life: rand(0.3, 0.5), color: [1.4, 2.2, 3], alphaEnd: 0 });
-          if (Math.random() < 0.5) G.fx.alpha.emit({ pos: pr.pos.clone(), vel: randUnit(_v2).multiplyScalar(0.3), shape: SHAPE.SMOKE, size: 0.12, sizeEnd: 0.35, life: 0.4, color: [0.92, 0.97, 1.0], alpha: 0.45, alphaEnd: 0 });
+          if (Math.random() < 0.5) G.fx.alpha.emit({ pos: pr.pos.clone(), vel: randUnit(_v2).multiplyScalar(0.3), shape: SHAPE.SMOKE, size: 0.1, sizeEnd: 0.3, life: 0.35, color: [0.72, 0.86, 1.0], alpha: 0.32, alphaEnd: 0 });
         },
         onHit: (pr, d, point) => {
           frostBurst(point, 0.7, 5);
-          hit(d, { dir: pr.vel.clone().setY(0).normalize(), point, kb: 1.6, lift: d.airborne ? 2.5 : 0, hitstop: 0.06, atkStop: 0, shake: 0.05, kind: 'none', dmg: 70 + Math.round(Math.random() * 15), sound: 'iceHit' });
+          hit(d, { flash: [0.78, 0.92, 1.05], dir: pr.vel.clone().setY(0).normalize(), point, kb: 1.6, lift: d.airborne ? 2.5 : 0, hitstop: 0.06, atkStop: 0, shake: 0.05, kind: 'none', dmg: 70 + Math.round(Math.random() * 15), sound: 'iceHit' });
           d.chill = (d.chill ?? 0) + 0.34;
           if (d.chill >= 1 && !d.iceMesh) { d.chill = 0; freeze(d); }
         },
@@ -179,7 +179,7 @@ export class IceMagic extends MagicWeapon {
           if (hitSet.has(d)) continue;
           if (Math.hypot(d.pos.x - pos.x, d.pos.z - pos.z) < 1.1 + d.radius && d.pos.y < 2) {
             hitSet.add(d);
-            hit(d, { dir: dir.clone(), kb: 2.5, lift: 11, hitstop: 0.1, shake: 0.15, kind: 'none', dmg: 210, sound: 'iceHit', spin: 1.1 });
+            hit(d, { flash: [0.78, 0.92, 1.05], dir: dir.clone(), kb: 2.5, lift: 11, hitstop: 0.1, shake: 0.15, kind: 'none', dmg: 210, sound: 'iceHit', spin: 1.1 });
             after(0.1, () => freeze(d, 2.4));
           }
         }
@@ -215,7 +215,7 @@ function spikeCluster(pos, dir, s = 1) {
     randUnit(_v2); _v2.y = Math.abs(_v2.y) + 0.5;
     fx.debris.shard.emit({ pos: pos.clone().setY(0.2), vel: _v2.normalize().multiplyScalar(rand(3, 7)), scale: rand(0.04, 0.09), life: rand(0.6, 1.0) });
   }
-  for (let i = 0; i < 1; i++) fx.puffs.emit({ pos: pos.clone().add(_v.set(rand(-0.4, 0.4), 0.2, rand(-0.4, 0.4))), vel: _v2.set(rand(-1, 1), rand(0.5, 1.5), rand(-1, 1)), size: 0.2 * s, sizeEnd: 0.5 * s, life: rand(0.6, 0.9), mode: PUFF.MIST, color: [0.85, 0.95, 1.05], shade: [0.55, 0.7, 0.9], drag: 2, rise: 0.2, dissolveStart: 0.2 });
+  for (let i = 0; i < 1; i++) fx.puffs.emit({ pos: pos.clone().add(_v.set(rand(-0.4, 0.4), 0.2, rand(-0.4, 0.4))), vel: _v2.set(rand(-1, 1), rand(0.5, 1.5), rand(-1, 1)), size: 0.2 * s, sizeEnd: 0.5 * s, life: rand(0.6, 0.9), mode: PUFF.MIST, color: [0.62, 0.8, 1.0], shade: [0.34, 0.46, 0.78], drag: 2, rise: 0.2, dissolveStart: 0.2 });
   const life = 1.5;
   fx.spawn(g, life, (e, k) => {
     const t = e.t;
@@ -233,7 +233,7 @@ function spikeCluster(pos, dir, s = 1) {
         randUnit(_v2); _v2.y = Math.abs(_v2.y) + 0.3;
         fx.debris.shard.emit({ pos: pos.clone().setY(rand(0.3, 1.2)), vel: _v2.normalize().multiplyScalar(rand(2, 5)), scale: rand(0.05, 0.12), life: rand(0.7, 1.2) });
       }
-      fx.puffs.emit({ pos: pos.clone().setY(0.4), vel: new THREE.Vector3(0, 0.5, 0), size: 0.3, sizeEnd: 0.7, life: 0.7, mode: PUFF.MIST, color: [0.85, 0.95, 1.05], shade: [0.55, 0.7, 0.9], drag: 2, dissolveStart: 0.1 });
+      fx.puffs.emit({ pos: pos.clone().setY(0.4), vel: new THREE.Vector3(0, 0.5, 0), size: 0.3, sizeEnd: 0.7, life: 0.7, mode: PUFF.MIST, color: [0.62, 0.8, 1.0], shade: [0.34, 0.46, 0.78], drag: 2, dissolveStart: 0.1 });
     },
   });
 }

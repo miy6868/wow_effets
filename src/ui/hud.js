@@ -34,6 +34,8 @@ export class HUD {
     this.status = el('div', 'status', this.root);
     this.hint = el('div', 'hud-hint', this.root);
     this.hint.innerHTML = '<b>H</b> 조작법 · <b>F</b> 필살기 · <b>Shift</b> 대시 · <b>C</b> 순간이동 · <b>Z</b> 슬로모션 · <b>P</b> 일시정지';
+    this.hintT = 25; // full control line for the first moments of play, then just "H"
+    this.playing = false;
     this.ult = el('div', 'ult', this.root);
     this.ult.innerHTML = '<svg viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="28"/><circle class="fg" cx="32" cy="32" r="28"/></svg><div class="k">F</div><div class="t">ULT</div>';
     this.ultRing = this.ult.querySelector('.fg');
@@ -168,6 +170,10 @@ export class HUD {
     this.ult.classList.toggle('ready', cd <= 0);
     this.ultRing.style.strokeDashoffset = `${176 * (cd / 4)}`;
     if (this.titleT > 0) { this.titleT -= dtReal; if (this.titleT <= 0) this.wtitle.classList.remove('show'); }
+    if (this.playing && this.hintT > 0) {
+      this.hintT -= dtReal;
+      if (this.hintT <= 0) { this.hint.classList.add('mini'); this.hint.innerHTML = '<b>H</b> 조작법'; }
+    }
     const parts = [];
     if (G.time_userSlow) parts.push('◐ 슬로모션 (Z)');
     if (G.paused) parts.push('❚❚ 일시정지 · 포토모드 (P)');

@@ -1,6 +1,7 @@
 // Procedural sound effects (WebAudio). Every sound is synthesized: layered
 // noise bursts, filtered sweeps, pitched thumps. No sample files needed.
 import { G } from '../ctx.js';
+import { Music } from './music.js';
 
 export class Audio {
   constructor() {
@@ -30,6 +31,15 @@ export class Audio {
     this.verb.connect(this.verbGain).connect(this.master);
     this.noiseBuf = this.makeNoise(2);
     this.startAmbience();
+    this.music = new Music(ctx, this.master, this.verb);
+    this.music.setOn(G.settings.music !== false);
+    this.mute(!G.settings.sound);
+  }
+
+  /** Silence everything (sfx, wind, score) without tearing the graph down. */
+  mute(m) {
+    if (!this.master) return;
+    this.master.gain.setTargetAtTime(m ? 0 : this.volume, this.ctx.currentTime, 0.05);
   }
 
   setVolume(v) { this.volume = v; if (this.master) this.master.gain.value = v; }

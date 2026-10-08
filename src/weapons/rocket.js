@@ -43,7 +43,7 @@ export function blastDamage(pos, radius, dmg, kb, lift, opts = {}) {
       const dir = new THREE.Vector3(d.pos.x - pos.x, 0, d.pos.z - pos.z);
       if (dir.lengthSq() < 1e-4) dir.set(Math.random() - 0.5, 0, Math.random() - 0.5);
       dir.normalize();
-      hit(d, { dir, kb: kb * k, lift: lift * k, hitstop: opts.stop ?? 0.08, shake: 0, kind: opts.kind ?? 'none', color: opts.color, dmg: Math.round(dmg * k), sound: opts.sound ?? null, spin: 1.5, fxScale: 0.8 });
+      hit(d, { dir, kb: kb * k, lift: lift * k, hitstop: opts.stop ?? 0.08, shake: 0, kind: opts.kind ?? 'none', color: opts.color, flash: opts.flash, dmg: Math.round(dmg * k), sound: opts.sound ?? null, spin: 1.5, fxScale: 0.8 });
       opts.onHit?.(d);
     }
   }

@@ -104,7 +104,7 @@ export class LightningMagic extends MagicWeapon {
         lightning({ a: from(), b: to, width: i === 0 ? 0.45 : 0.36, life: 0.26, color: BOLT, core: CORE });
         const pt = to();
         zapHit(pt, 0.9);
-        hit(du, { dir: _v.subVectors(du.pos, p.pos).setY(0).normalize(), point: pt, kb: 2.2, lift: du.airborne ? 3 : 0, hitstop: 0.09, atkStop: i === 0 ? 0.03 : 0, shake: 0.08, kind: 'none', dmg: 95 + Math.round(Math.random() * 20), sound: 'zap', spin: 0.5 });
+        hit(du, { flash: [0.82, 0.9, 1.1], dir: _v.subVectors(du.pos, p.pos).setY(0).normalize(), point: pt, kb: 2.2, lift: du.airborne ? 3 : 0, hitstop: 0.09, atkStop: i === 0 ? 0.03 : 0, shake: 0.08, kind: 'none', dmg: 95 + Math.round(Math.random() * 20), sound: 'zap', spin: 0.5 });
         du.status.shock = 1.0;
       });
       const fixed = du;
@@ -118,7 +118,7 @@ export class LightningMagic extends MagicWeapon {
     const base = this.aimPoint.clone(); base.y = 0.03;
     if (base.distanceTo(p.pos) > 26) base.copy(p.pos).addScaledVector(_v.subVectors(base, p.pos).setY(0).normalize(), 26);
     // warning circle
-    G.fx.decal({ pos: base, size: 4.2, type: 3, color: [0.4, 0.7, 2.2], life: 1.3, spin: 1.5, reveal: 0.2, additive: true, fadeStart: 0.7 });
+    G.fx.decal({ pos: base, size: 4.2, type: 3, color: [0.2, 0.38, 1.1], life: 1.3, spin: 1.5, reveal: 0.2, additive: true, fadeStart: 0.55 });
     G.fx.decal({ pos: base, size: 4.2, type: 4, color: [0.08, 0.14, 0.45], life: 1.3, additive: true, fadeStart: 0.6 });
     G.audio?.play('charge', { pitch: 1.4 });
     // gathering clouds of sparks above
@@ -136,12 +136,12 @@ export function strike(pos, s = 1) {
   lightning({ a: top.clone().add(_v.set(rand(-3, 3), 0, rand(-3, 3))), b: pos.clone(), width: 0.5 * s, life: 0.2, branches: 2, jag: 0.15, color: [0.5, 0.7, 2.6], core: [2.5, 3, 4.5] });
   // ground burst
   fx.add.emit({ pos: pos.clone().setY(0.5), shape: SHAPE.STAR, size: 3.2 * s, sizeEnd: 0.4, life: 0.12, color: [2, 2.4, 3.6], alphaEnd: 0 });
-  fx.add.emit({ pos: pos.clone().setY(0.4), shape: SHAPE.GLOW, size: 1.8 * s, sizeEnd: 2.6 * s, life: 0.16, color: [0.35, 0.55, 1.4], alpha: 0.8, alphaEnd: 0 });
+  fx.add.emit({ pos: pos.clone().setY(0.4), shape: SHAPE.GLOW, size: 1.5 * s, sizeEnd: 2.2 * s, life: 0.14, color: [0.3, 0.48, 1.25], alpha: 0.75, alphaEnd: 0 });
   fx.add.emit({ pos: pos.clone().setY(0.4), shape: SHAPE.SPIKES, size: 3.4 * s, sizeEnd: 4.6 * s, life: 0.09, color: [1.0, 1.3, 2.4], alphaEnd: 0 });
   fx.ring({ pos: pos.clone().setY(0.08), normal: UP, r0: 0.3, r1: 5 * s, w0: 0.06, w1: 0.01, color: [0.6, 0.9, 2.1], life: 0.35, sharp: 1 });
   fx.distort({ pos: pos.clone().setY(0.6), r0: 0.3, r1: 5 * s, strength: 0.035, life: 0.3 });
-  fx.decal({ pos, size: 2.6 * s, type: 0, color: [0.6, 0.9, 3], glow: 2, life: 6 });
-  fx.decal({ pos, size: 3.2 * s, type: 1, color: [0.6, 1.0, 3.2], glow: 1.6, life: 3, reveal: 0.1 });
+  fx.decal({ pos, size: 2.2 * s, type: 0, color: [0.45, 0.7, 2.0], glow: 0.8, life: 6 });
+  fx.decal({ pos, size: 2.8 * s, type: 1, color: [0.3, 0.55, 1.7], glow: 0.7, life: 2.4, reveal: 0.1 });
   for (let i = 0; i < 36; i++) {
     randUnit(_v2); _v2.y = Math.abs(_v2.y) * 0.8 + 0.2;
     fx.add.emit({ pos: pos.clone().setY(0.3), vel: _v2.multiplyScalar(rand(6, 18)), shape: SHAPE.STREAK, size: 0.05, stretch: 0.03, life: rand(0.2, 0.5), color: [2.5, 3.2, 6], colorEnd: [0.4, 0.6, 2], alphaEnd: 0, drag: 3, gravity: 14 });
@@ -156,7 +156,7 @@ export function strike(pos, s = 1) {
     const e = pos.clone().add(_v.set(Math.cos(a) * rand(2, 3.5) * s, 0.1, Math.sin(a) * rand(2, 3.5) * s));
     lightning({ a: pos.clone().setY(0.15), b: e, width: 0.18, life: 0.3, branches: 1, depth: 4, jag: 0.25, color: [0.5, 0.8, 2.6], core: [2.5, 3, 4.5] });
   }
-  fx.light(pos.clone().setY(2), [0.55, 0.75, 1.5], 2.6, 9, 0.22);
+  fx.light(pos.clone().setY(2), [0.55, 0.75, 1.5], 2.0, 8, 0.2);
   G.screen.flash([0.8, 0.88, 1], 0.16, 0.06);
   G.rig.shake(0.4);
   G.audio?.play('thunder', { pos });
@@ -165,7 +165,7 @@ export function strike(pos, s = 1) {
     if (dist < 2.4 * s + d.radius) {
       const dir = new THREE.Vector3(d.pos.x - pos.x, 0, d.pos.z - pos.z);
       if (dir.lengthSq() < 1e-4) dir.set(0, 0, 1);
-      hit(d, { dir: dir.normalize(), kb: 4, lift: 9, hitstop: 0.12, shake: 0, kind: 'none', dmg: 260 + Math.round(Math.random() * 40), sound: null, spin: 1 });
+      hit(d, { flash: [0.82, 0.9, 1.1], dir: dir.normalize(), kb: 4, lift: 9, hitstop: 0.12, shake: 0, kind: 'none', dmg: 260 + Math.round(Math.random() * 40), sound: null, spin: 1 });
       zapHit(d.center(new THREE.Vector3()), 1);
       d.status.shock = 1.4;
     }

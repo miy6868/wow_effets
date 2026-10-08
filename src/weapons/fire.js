@@ -103,7 +103,7 @@ export class FireMagic extends MagicWeapon {
   burst(pos, direct) {
     FXP.explosion(pos, 0.8);
     G.fx.distort({ pos, r0: 0.3, r1: 4, strength: 0.03, life: 0.35 });
-    blastDamage(pos, 2.4, 160, 6, 5.5, { onHit: (d) => { d.status.burn = 3; } });
+    blastDamage(pos, 2.4, 160, 6, 5.5, { flash: [1, 0.78, 0.5], onHit: (d) => { d.status.burn = 3; } });
     G.audio?.play('explosion', { pos, vol: 0.6, pitch: 1.3 });
   }
 }
@@ -207,7 +207,7 @@ export function eruption(pos, s = 1) {
         for (const d of G.dummies.list) {
           const dx = d.pos.x - pos.x, dz = d.pos.z - pos.z;
           if (Math.hypot(dx, dz) < 1.6 * s + d.radius && d.pos.y < 7) {
-            hit(d, { dir: new THREE.Vector3(dx || 0.01, 0, dz), kb: 0.8, lift, hitstop: 0.06, shake: 0.05, kind: 'none', dmg, sound: null, spin: 1.2 });
+            hit(d, { flash: [1, 0.78, 0.5], dir: new THREE.Vector3(dx || 0.01, 0, dz), kb: 0.8, lift, hitstop: 0.06, shake: 0.05, kind: 'none', dmg, sound: null, spin: 1.2 });
             d.status.burn = 3;
           }
         }

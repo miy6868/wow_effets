@@ -80,7 +80,8 @@ function globalKeys() {
   }
   if (input.wasPressed('KeyT')) { dummies.reset(); hud.toast('허수아비 리셋'); }
   if (input.wasPressed('KeyH') || input.wasPressed('F1')) hud.help.classList.toggle('on');
-  if (input.wasPressed('KeyM')) { G.settings.sound = !G.settings.sound; hud.toast(G.settings.sound ? '사운드 ON' : '사운드 OFF'); }
+  if (input.wasPressed('KeyM')) { G.settings.sound = !G.settings.sound; audio.mute(!G.settings.sound); hud.toast(G.settings.sound ? '사운드 ON' : '사운드 OFF'); }
+  if (input.wasPressed('KeyJ')) { G.settings.music = !G.settings.music; audio.music?.setOn(G.settings.music); hud.toast(G.settings.music ? '음악 ON' : '음악 OFF'); }
   if (input.wasPressed('KeyN')) { G.settings.damageNumbers = !G.settings.damageNumbers; hud.toast(G.settings.damageNumbers ? '데미지 숫자 ON' : '데미지 숫자 OFF'); }
   if (input.wasPressed('KeyB')) { pipeline.bloomEnabled = !pipeline.bloomEnabled; hud.toast(pipeline.bloomEnabled ? '블룸 ON' : '블룸 OFF'); }
   if (input.wasPressed('KeyG')) {
@@ -106,6 +107,7 @@ function frame(dtReal) {
   dummies.update(Time.dt);
   projectiles.update(Time.dt);
   ambience.update(Time.dt, player.pos);
+  audio.music?.tick();
   arena.update(Time.dt, fx, player.pos);
   fx.update(Time.dt);
 
@@ -219,6 +221,8 @@ if (start) {
       rig.cine = null;
       document.body.classList.remove('attract');
       start.classList.add('hide'); audio.unlock(); canvas.requestPointerLock?.();
+      hud.playing = true;
+      hud.setWeapon(player.weaponIndex);
       setTimeout(() => start.remove(), 800);
     });
   }

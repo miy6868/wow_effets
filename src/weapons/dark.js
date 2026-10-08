@@ -96,7 +96,7 @@ export class DarkMagic extends MagicWeapon {
       },
       onHit: (pr, d, point) => {
         voidBurst(pr.pos.clone(), 0.9);
-        hit(d, { dir: pr.vel.clone().setY(0).normalize(), point, kb: 3.5, lift: d.airborne ? 3 : 1, hitstop: 0.07, atkStop: 0, shake: 0.08, kind: 'none', dmg: 115 + Math.round(Math.random() * 20), sound: 'voidHit' });
+        hit(d, { flash: [0.82, 0.66, 1.0], dir: pr.vel.clone().setY(0).normalize(), point, kb: 3.5, lift: d.airborne ? 3 : 1, hitstop: 0.07, atkStop: 0, shake: 0.08, kind: 'none', dmg: 115 + Math.round(Math.random() * 20), sound: 'voidHit' });
       },
       onGround: (pr, point) => { voidBurst(point.clone().setY(0.3), 0.7); G.fx.decal({ pos: point, size: 1.4, type: 1, color: [1.2, 0.4, 2.4], dark: [0.04, 0.02, 0.06], glow: 1.5, life: 3, reveal: 0.1 }); },
       onExpire: (pr) => voidBurst(pr.pos.clone(), 0.7),
@@ -244,7 +244,7 @@ function collapseBlast(c, pulled) {
       if (dir.lengthSq() < 0.01) dir.set(Math.random() - 0.5, 0, Math.random() - 0.5);
       dir.normalize();
       d.juggleGrav = 1;
-      hit(d, { dir, kb: 18, lift: 9, hitstop: 0.14, shake: 0, kind: 'none', dmg: 480 + Math.round(Math.random() * 60), sound: null, spin: 2, crit: true });
+      hit(d, { flash: [0.82, 0.66, 1.0], dir, kb: 18, lift: 9, hitstop: 0.14, shake: 0, kind: 'none', dmg: 480 + Math.round(Math.random() * 60), sound: null, spin: 2, crit: true });
       voidBurst(dc, 0.8);
     }
   }

@@ -219,6 +219,8 @@ export const FXP = {
     const fx = G.fx;
     const fire = opts.fire ?? [1.7, 0.85, 0.18];
     const deep = opts.deep ?? [0.95, 0.22, 0.04];
+    const spark = opts.fire ? mul(fire, 2.3) : [4, 2.6, 1.2];
+    const sparkEnd = opts.deep ? mul(deep, 1.6) : [1.6, 0.35, 0.05];
     // 1. flash core (tight, very short) — flash size saturates so huge blasts don't white out
     const sf = Math.min(s, 1.3);
     fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 3.6 * sf, sizeEnd: 0.5, life: 0.12, color: [4, 3.4, 2.4], alphaEnd: 0, rot: Math.random() });
@@ -241,11 +243,11 @@ export const FXP = {
     // 5. sparks & embers
     for (let i = 0; i < 40; i++) {
       randUnit(_v2); _v2.y = Math.abs(_v2.y);
-      fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(10, 30) * s), shape: SHAPE.STREAK, size: 0.08 * s, stretch: 0.03, life: rand(0.3, 0.75), color: [4, 2.6, 1.2], colorEnd: [1.6, 0.35, 0.05], alphaEnd: 0, drag: 2.5, gravity: 14 });
+      fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(10, 30) * s), shape: SHAPE.STREAK, size: 0.08 * s, stretch: 0.03, life: rand(0.3, 0.75), color: spark, colorEnd: sparkEnd, alphaEnd: 0, drag: 2.5, gravity: 14 });
     }
     for (let i = 0; i < 20; i++) {
       randUnit(_v2); _v2.y = Math.abs(_v2.y) + 0.3;
-      fx.add.emit({ pos: p.clone().addScaledVector(_v2, s), vel: _v2.multiplyScalar(rand(1, 4) * s), shape: SHAPE.DOT, size: rand(0.05, 0.09), sizeEnd: 0.0, life: rand(1, 2), color: [3.5, 1.8, 0.45], colorEnd: [1.6, 0.35, 0.05], alpha: 1, alphaEnd: 0.5, drag: 1.5, gravity: -1.5 });
+      fx.add.emit({ pos: p.clone().addScaledVector(_v2, s), vel: _v2.multiplyScalar(rand(1, 4) * s), shape: SHAPE.DOT, size: rand(0.05, 0.09), sizeEnd: 0.0, life: rand(1, 2), color: mul(spark, 0.85), colorEnd: sparkEnd, alpha: 1, alphaEnd: 0.5, drag: 1.5, gravity: -1.5 });
     }
     // 6. rocks
     for (let i = 0; i < 12 * s; i++) {
@@ -253,8 +255,8 @@ export const FXP = {
       fx.debris.rock.emit({ pos: p.clone().setY(Math.max(0.2, p.y)), vel: _v2.normalize().multiplyScalar(rand(6, 15)), scale: rand(0.08, 0.22) * s, life: rand(1.5, 2.5) });
     }
     // 7. scorch
-    if (p.y < 2.5) fx.decal({ pos: p, size: 3.4 * s, type: 0, color: [3, 1.0, 0.2], glow: 1.4, life: 7, fadeStart: 0.5 });
-    fx.light(p, [1, 0.6, 0.25], 3.5, 10 * s, 0.5);
+    if (p.y < 2.5) fx.decal({ pos: p, size: 3.4 * s, type: 0, color: opts.fire ? mul(fire, 1.7) : [3, 1.0, 0.2], glow: 1.4, life: 7, fadeStart: 0.5 });
+    fx.light(p, opts.fire ? mul(fire, 0.6) : [1, 0.6, 0.25], 3.5, 10 * s, 0.5);
     G.rig?.shake(0.5 * Math.min(1.3, s));
     G.screen?.chroma(0.01 * s, 0.25);
   },

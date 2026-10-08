@@ -11,6 +11,7 @@ import { bladeQuat, clamp01, easing } from '../entities/pose.js';
 import { hit } from '../combat/combat.js';
 import { toonMesh } from '../render/toon.js';
 import { Time } from '../core/time.js';
+import { freeze } from './ice.js';
 
 const _v = new THREE.Vector3();
 const _v2 = new THREE.Vector3();
@@ -264,11 +265,20 @@ function markTarget(d) {
 }
 
 // ── Magic: 메테오 ─────────────────────────────────────────────────────────────
+// element palettes: the meteor takes on the colour of the equipped magic
+const METEOR_PAL = {
+  fire:      { fire: [1.7, 0.85, 0.18], deep: [0.95, 0.22, 0.04], circle: [0.75, 0.24, 0.06], circle2: [0.85, 0.38, 0.1], ground: [1.0, 0.3, 0.07], light: [1, 0.5, 0.15], rock: 0x3e2622, accent: '#ffa060', title: '메테오', sub: 'METEOR STRIKE' },
+  ice:       { fire: [0.75, 1.3, 1.9], deep: [0.15, 0.35, 0.85], circle: [0.25, 0.5, 0.9], circle2: [0.4, 0.7, 1.0], ground: [0.3, 0.6, 1.1], light: [0.5, 0.75, 1.1], rock: 0x6f9ac2, accent: '#9fdcff', title: '빙성 낙하', sub: 'GLACIAL COMET' },
+  lightning: { fire: [1.0, 1.25, 2.2], deep: [0.25, 0.3, 1.1], circle: [0.35, 0.45, 1.1], circle2: [0.55, 0.65, 1.3], ground: [0.4, 0.5, 1.3], light: [0.6, 0.7, 1.3], rock: 0x2c3150, accent: '#a6b8ff', title: '뇌성 낙하', sub: 'THUNDER STAR' },
+  light:     { fire: [2.0, 1.6, 0.7], deep: [1.0, 0.55, 0.12], circle: [0.9, 0.7, 0.25], circle2: [1.0, 0.85, 0.4], ground: [1.1, 0.85, 0.3], light: [1, 0.85, 0.5], rock: 0xd9c38a, accent: '#ffe6a0', title: '성광 낙하', sub: 'HOLY COMET' },
+  dark:      { fire: [1.2, 0.45, 1.9], deep: [0.35, 0.08, 0.7], circle: [0.55, 0.18, 0.9], circle2: [0.7, 0.3, 1.1], ground: [0.7, 0.2, 1.2], light: [0.6, 0.25, 1.0], rock: 0x1d1426, accent: '#c89bff', title: '심연 낙하', sub: 'ABYSSAL COMET' },
+};
 export class UltMeteor extends UltBase {
   start() {
     const p = this.player;
     this.real0 = Time.real;
-    cutIn('메테오', 'METEOR STRIKE', '#ffa060');
+    this.pal = METEOR_PAL[this.w.id] ?? METEOR_PAL.fire;
+    cutIn(this.pal.title, this.pal.sub, this.pal.accent);
     // target: crosshair point, or the densest nearby group
     let tgt = this.w.aimPoint.clone(); tgt.y = 0;
     const flat = tgt.clone().sub(p.pos).setY(0);
@@ -309,20 +319,22 @@ export class UltMeteor extends UltBase {
     const pathDir = this.tgt.clone().sub(this.from).normalize();
     const sky = this.from.clone().lerp(this.tgt, 0.62);
     const q = new THREE.Quaternion().setFromUnitVectors(UP, pathDir.clone().negate());
-    this.skyCircle = fx.decal({ pos: sky, y: sky.y, size: 11, type: 3, color: [0.75, 0.24, 0.06], life: 3.4, spin: 0.7, reveal: 0.4, additive: true, fadeStart: 0.8 });
-    this.skyCircle2 = fx.decal({ pos: sky, y: sky.y, size: 7, type: 3, color: [0.85, 0.38, 0.1], life: 3.4, spin: -1.1, reveal: 0.5, additive: true, fadeStart: 0.8 });
+    const P = this.pal;
+    this.skyCircle = fx.decal({ pos: sky, y: sky.y, size: 11, type: 3, color: P.circle, life: 3.4, spin: 0.7, reveal: 0.4, additive: true, fadeStart: 0.8 });
+    this.skyCircle2 = fx.decal({ pos: sky, y: sky.y, size: 7, type: 3, color: P.circle2, life: 3.4, spin: -1.1, reveal: 0.5, additive: true, fadeStart: 0.8 });
     this.skyCircle.obj.quaternion.copy(q); this.skyCircle2.obj.quaternion.copy(q);
     this.skyCircle2.obj.position.addScaledVector(pathDir, 0.4);
     fx.add.emit({ pos: sky, shape: SHAPE.STAR, size: 6, sizeEnd: 1, life: 0.3, color: [1.6, 0.8, 0.3], alphaEnd: 0 });
-    fx.decal({ pos: this.tgt, size: 11, type: 3, color: [1.0, 0.3, 0.07], life: 3.4, spin: 0.5, reveal: 0.5, additive: true, fadeStart: 0.7 });
-    fx.decal({ pos: this.tgt, size: 12, type: 4, color: [0.35, 0.08, 0.015], life: 3.4, additive: true, fadeStart: 0.6 });
+    fx.decal({ pos: this.tgt, size: 11, type: 3, color: P.ground, life: 3.4, spin: 0.5, reveal: 0.5, additive: true, fadeStart: 0.7 });
+    fx.decal({ pos: this.tgt, size: 12, type: 4, color: P.ground.map((x) => x * 0.33), life: 3.4, additive: true, fadeStart: 0.6 });
     G.audio?.play('charge', { pitch: 0.5 });
     G.rig.shake(0.15);
   }
   spawnMeteor() {
     const fx = G.fx;
     const g = new THREE.Group();
-    const rock = toonMesh(new THREE.DodecahedronGeometry(2.6, 1), { color: 0x3e2622, outlineWidth: 3, emissive: 0.1 });
+    const P = this.pal;
+    const rock = toonMesh(new THREE.DodecahedronGeometry(2.6, 1), { color: P.rock, outlineWidth: 3, emissive: 0.1 });
     g.add(rock);
     for (let i = 0; i < 7; i++) {
       const c = toonMesh(new THREE.DodecahedronGeometry(rand(0.5, 0.8), 0), { color: 0x3a221e, outlineWidth: 2 });
@@ -331,9 +343,9 @@ export class UltMeteor extends UltBase {
     }
     G.scene.add(g);
     this.meteor = g;
-    this.glow = fx.sphere({ pos: this.from, r0: 3.5, r1: 3.5, color: [1.8, 0.6, 0.12], coreColor: [0.6, 0.25, 0.06], life: 5, power: 2.2, core: 0.0, noise: 0.6, alphaCurve: () => 1, follow: (m) => m.position.copy(g.position) });
+    this.glow = fx.sphere({ pos: this.from, r0: 3.5, r1: 3.5, color: P.fire.map((x) => x * 1.05), coreColor: P.deep.map((x) => x * 0.6), life: 5, power: 2.2, core: 0.0, noise: 0.6, alphaCurve: () => 1, follow: (m) => m.position.copy(g.position) });
     this.haze = fx.distort({ pos: this.from, mode: 'haze', r0: 5, r1: 5, strength: 0.03, life: 5, strengthCurve: () => 1 });
-    this.light = fx.light(this.from, [1, 0.5, 0.15], 4, 22, 0);
+    this.light = fx.light(this.from, P.light, 4, 22, 0);
     this.fallT = 1.35;
     G.audio?.play('meteor');
   }
@@ -349,7 +361,7 @@ export class UltMeteor extends UltBase {
     const vel = this.tgt.clone().setY(1.2).sub(this.from).normalize();
     // fire trail
     for (let i = 0; i < 5; i++) {
-      fx.puffs.emit({ pos: pos.clone().add(randUnit(_v).multiplyScalar(2.4)), vel: vel.clone().multiplyScalar(-rand(4, 10)).add(randUnit(_v2).multiplyScalar(2)), size: rand(1.0, 1.5), sizeEnd: rand(0.3, 0.5), life: rand(0.5, 0.8), mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: rand(1, 1.2), drag: 2, rise: 1, dissolveStart: 0.3 });
+      fx.puffs.emit({ pos: pos.clone().add(randUnit(_v).multiplyScalar(2.4)), vel: vel.clone().multiplyScalar(-rand(4, 10)).add(randUnit(_v2).multiplyScalar(2)), size: rand(1.0, 1.5), sizeEnd: rand(0.3, 0.5), life: rand(0.5, 0.8), mode: PUFF.FIRE, color: this.pal.fire, shade: this.pal.deep, heat: rand(1, 1.2), drag: 2, rise: 1, dissolveStart: 0.3 });
     }
     if (Math.random() < 0.6) fx.puffs.emit({ pos: pos.clone().add(randUnit(_v).multiplyScalar(1.2)), vel: vel.clone().multiplyScalar(-3), size: 0.9, sizeEnd: 1.8, life: 1.4, mode: PUFF.SMOKE, color: [0.36, 0.3, 0.34], shade: [0.16, 0.12, 0.18], drag: 1, rise: 0.5, dissolveStart: 0.3 });
     for (let i = 0; i < 3; i++) fx.add.emit({ pos: pos.clone().add(randUnit(_v).multiplyScalar(1.8)), vel: vel.clone().multiplyScalar(-rand(6, 14)).add(randUnit(_v2).multiplyScalar(3)), shape: SHAPE.STREAK, size: 0.09, stretch: 0.04, life: rand(0.3, 0.6), color: [4, 2, 0.5], colorEnd: [1.6, 0.3, 0.05], alphaEnd: 0, drag: 1 });
@@ -368,15 +380,16 @@ export class UltMeteor extends UltBase {
     G.screen.dim(0);
     G.slowmo(0.18, 0.18, 0.45);
     G.rig.shake(1.0); G.rig.fovPunch(7);
-    FXP.explosion(p, 2.2);
-    fx.decal({ pos: p, size: 12, type: 1, color: [3, 1.0, 0.25], glow: 2, life: 8, reveal: 0.25, glowPow: 2 });
-    fx.ring({ pos: p.clone().setY(0.1), normal: UP, r0: 1, r1: 22, w0: 0.06, w1: 0.006, color: [1.4, 0.8, 0.4], life: 0.7, sharp: 1 });
+    const P = this.pal;
+    FXP.explosion(p, 2.2, { fire: P.fire, deep: P.deep });
+    fx.decal({ pos: p, size: 12, type: 1, color: P.fire.map((x) => x * 1.8), glow: 2, life: 8, reveal: 0.25, glowPow: 2 });
+    fx.ring({ pos: p.clone().setY(0.1), normal: UP, r0: 1, r1: 22, w0: 0.06, w1: 0.006, color: P.fire.map((x) => x * 0.8), life: 0.7, sharp: 1 });
     fx.distort({ pos: p, r0: 1, r1: 22, strength: 0.08, life: 0.7, width: 0.08 });
     fx.distort({ pos: p.clone().setY(3), mode: 'haze', r0: 7, r1: 8, strength: 0.03, life: 3 });
     for (let i = 0; i < 18; i++) {
       const a = (i / 18) * Math.PI * 2;
       const q = p.clone().add(_v.set(Math.cos(a) * rand(3, 6), 0, Math.sin(a) * rand(3, 6)));
-      for (let k = 0; k < 2; k++) fx.puffs.emit({ pos: q.clone().setY(0.3 + k * 0.5), vel: _v2.set(Math.cos(a) * 2, rand(5, 11), Math.sin(a) * 2), size: rand(0.4, 0.7), sizeEnd: rand(0.1, 0.25), life: rand(0.5, 0.9), mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: rand(1, 1.2), drag: 2, rise: 2, dissolveStart: 0.35, stretch: 1.4 });
+      for (let k = 0; k < 2; k++) fx.puffs.emit({ pos: q.clone().setY(0.3 + k * 0.5), vel: _v2.set(Math.cos(a) * 2, rand(5, 11), Math.sin(a) * 2), size: rand(0.4, 0.7), sizeEnd: rand(0.1, 0.25), life: rand(0.5, 0.9), mode: PUFF.FIRE, color: P.fire, shade: P.deep, heat: rand(1, 1.2), drag: 2, rise: 2, dissolveStart: 0.35, stretch: 1.4 });
     }
     for (let i = 0; i < 26; i++) {
       randUnit(_v2); _v2.y = Math.abs(_v2.y) + 0.5;
@@ -391,7 +404,10 @@ export class UltMeteor extends UltBase {
         dir.normalize();
         const k = 1 - dist / 13 * 0.6;
         hit(d, { dir, kb: 22 * k, lift: 15 * k, hitstop: 0.15, shake: 0, kind: 'none', dmg: Math.round(1500 * k), crit: true, sound: null, spin: 2.2 });
-        d.status.burn = 3;
+        const id = this.w.id;
+        if (id === 'fire') d.status.burn = 3;
+        else if (id === 'lightning') d.status.shock = 1.6;
+        else if (id === 'ice') { const dd = d; G.fx.spawn(new THREE.Object3D(), 0.35, null, G.scene, { onEnd: () => freeze(dd, 2.4) }); }
       }
     }
   }

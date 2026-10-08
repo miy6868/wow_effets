@@ -75,6 +75,7 @@ function globalKeys() {
   }
   if (input.wasPressed('KeyP')) {
     Time.paused = !Time.paused; G.paused = Time.paused;
+    document.body.classList.toggle('photo', Time.paused);
     hud.toast(Time.paused ? '일시정지 · 마우스로 카메라 회전' : '재개');
   }
   if (input.wasPressed('KeyT')) { dummies.reset(); hud.toast('허수아비 리셋'); }

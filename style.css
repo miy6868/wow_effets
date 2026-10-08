@@ -147,3 +147,6 @@ body.scoped .crosshair { opacity: 0 !important; }
 /* hide gameplay HUD during ultimate cinematics */
 .wbar, .wtitle, .hud-hint, .ult, .combo { transition: opacity 0.3s; }
 body.cine .wbar, body.cine .wtitle, body.cine .hud-hint, body.cine .ult, body.cine .crosshair { opacity: 0 !important; }
+
+/* photo mode (P): clean frame, only the status line */
+body.photo .wbar, body.photo .wtitle, body.photo .hud-hint, body.photo .ult, body.photo .combo, body.photo .crosshair, body.photo .dmg-layer { opacity: 0 !important; }

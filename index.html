@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VFX 수련장 — 카툰 전투 이펙트 체험</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three/three.module.js" } }</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"></div>
+<div id="cutin"><div class="band"><div class="lines"></div><div class="portrait"></div><div class="title"></div><div class="sub"></div></div></div>
+<div id="help">
+  <h2>조작법</h2>
+  <table>
+    <tr><td>WASD</td><td>이동</td></tr>
+    <tr><td>마우스</td><td>카메라 (클릭 시 포인터 잠금)</td></tr>
+    <tr><td>좌클릭</td><td>기본 공격 (연타 = 콤보, 공중 = 공중 콤보)</td></tr>
+    <tr><td>우클릭</td><td>무기별 특수기 (일부는 꾹 눌러 차지)</td></tr>
+    <tr><td>F</td><td>필살기 (컷인 + 슬로모션)</td></tr>
+    <tr><td>Space</td><td>점프 / 공중에서 이단 점프</td></tr>
+    <tr><td>Shift</td><td>대시 (잔상 회피)</td></tr>
+    <tr><td>C</td><td>순간이동</td></tr>
+    <tr><td>1~0, -, =, Q/E, 휠</td><td>무기 교체</td></tr>
+    <tr><td>Z</td><td>관찰용 슬로모션 토글 (×0.25)</td></tr>
+    <tr><td>P</td><td>일시정지 (포토모드, 카메라만 회전)</td></tr>
+    <tr><td>T</td><td>허수아비 리셋</td></tr>
+    <tr><td>N / V / B / M</td><td>데미지숫자 / 화면흔들림 / 블룸 / 사운드 토글</td></tr>
+    <tr><td>H</td><td>이 도움말 열기/닫기</td></tr>
+  </table>
+</div>
+<div id="start"><div class="box"><h1>VFX 수련장</h1><p>카툰 전투 이펙트 체험</p><p class="click">클릭하여 시작</p><p class="hint">H — 조작법</p></div></div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

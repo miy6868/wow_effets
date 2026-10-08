@@ -514,10 +514,15 @@ export const beamFragment = /* glsl */ `
     float along = vUv.y * uLen;
     float n = fbm(vec2(vUv.x * 6.0, along * 0.6 - uTime * uScroll));
     float streak = vnoise(vec2(vUv.x * 18.0, along * 0.25 - uTime * uScroll * 1.6));
-    float k = prof * mix(1.0, 0.55 + n * 0.9 + step(0.7, streak) * 0.6, uNoise);
+    // cel bands: hard white core, saturated body, soft outer haze; edges wobble with noise
+    float pn = prof + (n - 0.5) * 0.25 * uNoise;
+    float w = fwidth(pn) + 0.02;
+    float core = smoothstep(0.78 - w, 0.78 + w, pn);
+    float body = smoothstep(0.42 - w, 0.42 + w, pn);
+    float haze = prof * 0.35;
     float ends = smoothstep(0.0, 0.02, vUv.y) * (1.0 - smoothstep(0.96, 1.0, vUv.y));
-    vec3 col = mix(uColor, uCore, smoothstep(0.55, 0.95, prof));
-    gl_FragColor = vec4(col * k * ends * uAlpha, 0.0);
+    vec3 col = uColor * (haze + body * (0.7 + step(0.7, streak) * 0.35)) + (uCore - uColor * 0.7) * core;
+    gl_FragColor = vec4(max(col, 0.0) * ends * uAlpha, 0.0);
   }
 `;
 

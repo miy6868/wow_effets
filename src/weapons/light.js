@@ -179,7 +179,7 @@ class BeamAction {
     } else if (this.phase === 'fire') {
       this.fireT += dt;
       const dir = this.aimDir(hp);
-      this.ballPos.copy(hp);
+      this.ballPos.copy(hp); this.ballR = 0.12;
       this.placeCircles(hp, dir);
       const len = this.beamLen(hp, dir);
       const pulse = 1 + Math.sin(G.time * 45) * 0.06;
@@ -222,7 +222,9 @@ class BeamAction {
         while (r) {
           ex.add(r.d);
           hit(r.d, { dir: dir.clone().setY(0).normalize(), fxDir: dir, point: r.point, kb: 4 + this.R * 2, lift: 1.5, hitstop: 0.03, shake: 0, kind: 'none', dmg: 40 + Math.round(Math.random() * 10), sound: null });
-          holyBurst(r.point, 0.6);
+          // light tick: small star + spray (a full holy burst every tick would white out)
+          fx.add.emit({ pos: r.point, shape: SHAPE.STAR, size: 0.9, sizeEnd: 0.1, life: 0.08, color: [2.2, 1.9, 1.2], alphaEnd: 0, rot: Math.random() });
+          for (let k = 0; k < 4; k++) fx.add.emit({ pos: r.point, vel: randUnit(_v2).multiplyScalar(rand(4, 9)), shape: SHAPE.STREAK, size: 0.035, stretch: 0.03, life: rand(0.1, 0.2), color: [2.6, 2.1, 1.0], alphaEnd: 0, drag: 5 });
           r = segmentQuery(hp, end, R * 0.9, ex);
         }
       }

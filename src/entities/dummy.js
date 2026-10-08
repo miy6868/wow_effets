@@ -166,6 +166,7 @@ export class Dummy {
    *      launch (bool), spin, flash: [r,g,b] }
    */
   takeHit(h) {
+    G.iceHit?.(this, h);
     const T = G.time;
     this.lastHit = T;
     this.hitstop = Math.max(this.hitstop, h.hitstop ?? 0.06);
@@ -198,6 +199,7 @@ export class Dummy {
     else if (this.status.freeze > 0) this.flash.value.set(0.6, 0.9, 1.2, 0.45);
     else this.flash.value.w = 0;
     this.stunEyes -= dt;
+    this.updateStatus(dt);
     this.eyesX.visible = this.stunEyes > 0 || this.state === 'down';
     this.eyesN.visible = !this.eyesX.visible;
 
@@ -210,7 +212,7 @@ export class Dummy {
       this.syncVisual();
       return;
     }
-    this.shakeG.position.set(0, 0, 0);
+    if (!(this.status.shock > 0)) this.shakeG.position.set(0, 0, 0);
 
     if (this.status.freeze > 0) {
       this.status.freeze -= dt;
@@ -332,6 +334,38 @@ export class Dummy {
     this.syncVisual();
   }
 
+  updateStatus(dt) {
+    const st = this.status;
+    G.iceTick?.(this, dt);
+    if (st.shock > 0 && dt > 0) {
+      st.shock -= dt;
+      this.shockFx = (this.shockFx ?? 0) - dt;
+      if (this.shockFx <= 0) {
+        this.shockFx = 0.08 + Math.random() * 0.06;
+        G.arcs?.(this.center(_v), this.radius * 1.3 * this.s, 1, 0.07);
+      }
+      if (this.flashT <= 0 && Math.random() < 0.3) this.flash.value.set(0.7, 0.9, 1.6, 0.35);
+      this.shakeG.position.set((Math.random() - 0.5) * 0.06, 0, (Math.random() - 0.5) * 0.06);
+    }
+    if (st.burn > 0 && dt > 0) {
+      st.burn -= dt;
+      this.burnT = (this.burnT ?? 0) - dt;
+      this.burnFx = (this.burnFx ?? 0) - dt;
+      if (this.burnFx <= 0) {
+        this.burnFx = 0.05;
+        const c = this.center(_v);
+        const q = c.add(_v2.set((Math.random() - 0.5) * this.radius * 1.6, (Math.random() - 0.3) * this.height * 0.6, (Math.random() - 0.5) * this.radius * 1.6));
+        G.fx.puffs.emit({ pos: q, vel: new THREE.Vector3((Math.random() - 0.5), 2 + Math.random() * 2, (Math.random() - 0.5)), size: 0.12 * this.s, sizeEnd: 0.03, life: 0.45, mode: 1, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: 1.05, drag: 2, rise: 3, dissolveStart: 0.3, grow: 'in' });
+        if (Math.random() < 0.3) G.fx.add.emit({ pos: q, vel: new THREE.Vector3(0, 2.5, 0), shape: 1, size: 0.05, sizeEnd: 0, life: 0.6, color: [4, 1.8, 0.4], alphaEnd: 0.3 });
+      }
+      if (this.burnT <= 0) {
+        this.burnT = 0.4;
+        if (this.flashT <= 0) this.hurtT = Math.max(this.hurtT, 0.12);
+        G.hud?.damage(this.center(_v), 8 + Math.round(Math.random() * 6));
+      }
+    }
+  }
+
   turnTo(a, b, k) { return a + wrapPi(b - a) * Math.min(1, k); }
 
   enterAir(spin = 1) {
@@ -366,6 +400,7 @@ export class Dummy {
     this.pos.copy(this.home); this.vel.set(0, 0, 0);
     this.state = 'idle'; this.pitch = 0; this.roll = 0; this.pending = null; this.hitstop = 0;
     this.status.freeze = 0; this.status.burn = 0; this.status.shock = 0;
+    if (this.iceMesh) { this.root.remove(this.iceMesh); this.iceMesh = null; }
     this.syncVisual();
   }
 }

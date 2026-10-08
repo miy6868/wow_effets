@@ -99,6 +99,27 @@ export class GunWeapon {
     P.headYaw = 0; P.headPitch = 0;
   }
 
+  /** Two-handed aim: right hand on the grip, left hand on the fore grip. */
+  aimPose2H(P, p, recoil = 0, kick = 0.3, shoulderMount = false) {
+    _v3.subVectors(this.aimPoint, p.pos).applyAxisAngle(UP, -p.yaw);
+    const anchor = shoulderMount ? new THREE.Vector3(-0.21, 1.3, 0.12) : new THREE.Vector3(-0.17, 1.28, 0.26);
+    const d = _v3.sub(anchor).normalize();
+    d.y += recoil * kick; d.normalize();
+    const hand = anchor.clone().addScaledVector(d, 0.06 - recoil * 0.14);
+    P.handR.copy(hand);
+    bladeQuat(P.wR, d, UP);
+    this.foreHand(P);
+    P.twist = 0.3; P.lean = Math.max(P.lean, 0.06) - recoil * 0.12;
+    P.headYaw = -0.25; P.headPitch = 0;
+    P.elbowOut = 0.4;
+  }
+  /** Put the left hand on the weapon's fore grip. */
+  foreHand(P) {
+    const fg = this.modelR?.userData.foreGrip;
+    if (!fg) return;
+    P.handL.copy(fg).applyQuaternion(P.wR).add(P.handR);
+  }
+
   /** World muzzle position of a gun model. */
   muzzle(model, out = new THREE.Vector3()) {
     model.updateWorldMatrix(true, false);
@@ -130,7 +151,7 @@ export function fireBullet(o) {
       hit(d, {
         dir: pr.vel.clone().setY(0).normalize(), fxDir: pr.vel.clone().normalize(), point, kb: o.kb ?? 1.4, lift: d.airborne ? (o.airLift ?? 2.6) : (o.lift ?? 0),
         hitstop: o.stop ?? 0.03, atkStop: 0, shake: o.shake ?? 0.03, kick: o.kick ?? 0.15, kind: o.kind ?? 'bullet', color: o.hitColor,
-        dmg: Math.round((o.dmg ?? 30) * (0.85 + Math.random() * 0.3)), sound: o.sound ?? 'hitBullet', fxScale: o.fxScale ?? 1, crit: o.crit,
+        dmg: o.dmg === null ? undefined : Math.round((o.dmg ?? 30) * (0.85 + Math.random() * 0.3)), sound: o.sound ?? 'hitBullet', fxScale: o.fxScale ?? 1, crit: o.crit,
       });
       o.onHit?.(pr, d, point);
     },

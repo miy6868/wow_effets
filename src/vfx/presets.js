@@ -204,44 +204,45 @@ export const FXP = {
   /** Big anime explosion. */
   explosion(p, s = 1, opts = {}) {
     const fx = G.fx;
-    const fire = opts.fire ?? [3.2, 1.6, 0.35];
-    const deep = opts.deep ?? [1.6, 0.35, 0.08];
-    // 1. flash
-    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 9 * s, sizeEnd: 12 * s, life: 0.12, color: [6, 5, 4], alphaEnd: 0 });
-    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 8 * s, sizeEnd: 1, life: 0.16, color: [8, 7, 5], alphaEnd: 0, rot: Math.random() });
-    fx.sphere({ pos: p, r0: 0.5 * s, r1: 3.4 * s, color: [3, 2, 1.2], coreColor: [5, 4.5, 3.5], life: 0.14, power: 1.2, core: 1.2 });
-    // 2. shock rings + distortion handled elsewhere
-    fx.ring({ pos: p.clone().setY(0.08), normal: UP, r0: 0.5 * s, r1: 7 * s, w0: 0.12, w1: 0.01, color: [3, 2.4, 1.6], life: 0.45, sharp: 1 });
-    fx.ring({ pos: p, billboard: true, r0: 0.5 * s, r1: 5.5 * s, w0: 0.1, w1: 0.01, color: [2.5, 2, 1.5], life: 0.3, sharp: 1 });
+    const fire = opts.fire ?? [1.7, 0.85, 0.18];
+    const deep = opts.deep ?? [0.95, 0.22, 0.04];
+    // 1. flash core (tight, very short)
+    fx.add.emit({ pos: p, shape: SHAPE.STAR, size: 3.6 * s, sizeEnd: 0.5, life: 0.12, color: [4, 3.4, 2.4], alphaEnd: 0, rot: Math.random() });
+    fx.add.emit({ pos: p, shape: SHAPE.GLOW, size: 2.6 * s, sizeEnd: 3.6 * s, life: 0.12, color: [1.8, 1.2, 0.6], alpha: 0.85, alphaEnd: 0 });
+    fx.add.emit({ pos: p, shape: SHAPE.SPIKES, size: 4.2 * s, sizeEnd: 5.6 * s, life: 0.1, color: [1.8, 1.3, 0.7], alphaEnd: 0, rot: Math.random() * 6 });
+    fx.sphere({ pos: p, r0: 0.4 * s, r1: 2.4 * s, color: [1.5, 0.9, 0.4], coreColor: [2.2, 1.8, 1.2], life: 0.12, power: 1.4, core: 0.6 });
+    // 2. shock rings
+    fx.ring({ pos: p.clone().setY(0.08), normal: UP, r0: 0.5 * s, r1: 6.5 * s, w0: 0.06, w1: 0.008, color: [1.1, 0.8, 0.5], life: 0.4, sharp: 1 });
+    fx.ring({ pos: p, billboard: true, r0: 0.5 * s, r1: 4.2 * s, w0: 0.06, w1: 0.01, color: [1.3, 1.0, 0.7], life: 0.26, sharp: 1 });
     // 3. fireball core (cel fire puffs)
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 14; i++) {
       randUnit(_v2); _v2.y = Math.abs(_v2.y) * 0.8 + 0.1;
-      fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, rand(0.2, 0.8) * s), vel: _v2.clone().multiplyScalar(rand(4, 10) * s), size: rand(0.5, 0.9) * s, sizeEnd: rand(1.3, 2.0) * s, life: rand(0.45, 0.75), mode: PUFF.FIRE, color: fire, shade: deep, heat: rand(0.9, 1.15), drag: 6, rise: 2.5, dissolveStart: 0.3 });
+      fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, rand(0.2, 0.7) * s), vel: _v2.clone().multiplyScalar(rand(4, 9) * s), size: rand(0.4, 0.65) * s, sizeEnd: rand(0.95, 1.4) * s, life: rand(0.45, 0.7), mode: PUFF.FIRE, color: fire, shade: deep, heat: rand(0.95, 1.15), drag: 6, rise: 2.5, dissolveStart: 0.3 });
     }
     // 4. smoke that lingers and rises
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 8; i++) {
       randUnit(_v2); _v2.y = Math.abs(_v2.y) * 0.6 + 0.3;
-      fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, rand(0.5, 1.5) * s), vel: _v2.clone().multiplyScalar(rand(2, 5) * s), size: rand(0.6, 1.0) * s, sizeEnd: rand(1.6, 2.4) * s, life: rand(1.4, 2.2), mode: PUFF.SMOKE, color: [0.42, 0.38, 0.45], shade: [0.2, 0.17, 0.25], drag: 3, rise: 1.8, dissolveStart: 0.35 });
+      fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, rand(0.5, 1.2) * s), vel: _v2.clone().multiplyScalar(rand(2, 4) * s), size: rand(0.45, 0.7) * s, sizeEnd: rand(1.0, 1.45) * s, life: rand(1.0, 1.6), mode: PUFF.SMOKE, color: [0.4, 0.36, 0.42], shade: [0.2, 0.17, 0.25], drag: 3, rise: 1.6, dissolveStart: 0.3 });
     }
     // 5. sparks & embers
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 40; i++) {
       randUnit(_v2); _v2.y = Math.abs(_v2.y);
-      fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(10, 34) * s), shape: SHAPE.STREAK, size: 0.1 * s, stretch: 0.03, life: rand(0.3, 0.8), color: [6, 4, 2], colorEnd: [2, 0.4, 0.05], alphaEnd: 0, drag: 2.5, gravity: 14 });
+      fx.add.emit({ pos: p, vel: _v2.multiplyScalar(rand(10, 30) * s), shape: SHAPE.STREAK, size: 0.08 * s, stretch: 0.03, life: rand(0.3, 0.75), color: [4, 2.6, 1.2], colorEnd: [1.6, 0.35, 0.05], alphaEnd: 0, drag: 2.5, gravity: 14 });
     }
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 20; i++) {
       randUnit(_v2); _v2.y = Math.abs(_v2.y) + 0.3;
-      fx.add.emit({ pos: p.clone().addScaledVector(_v2, s), vel: _v2.multiplyScalar(rand(1, 4) * s), shape: SHAPE.DOT, size: rand(0.05, 0.1), sizeEnd: 0.0, life: rand(1, 2.2), color: [5, 2.5, 0.6], colorEnd: [2, 0.4, 0.05], alpha: 1, alphaEnd: 0.5, drag: 1.5, gravity: -1.5 });
+      fx.add.emit({ pos: p.clone().addScaledVector(_v2, s), vel: _v2.multiplyScalar(rand(1, 4) * s), shape: SHAPE.DOT, size: rand(0.05, 0.09), sizeEnd: 0.0, life: rand(1, 2), color: [3.5, 1.8, 0.45], colorEnd: [1.6, 0.35, 0.05], alpha: 1, alphaEnd: 0.5, drag: 1.5, gravity: -1.5 });
     }
     // 6. rocks
-    for (let i = 0; i < 14 * s; i++) {
+    for (let i = 0; i < 12 * s; i++) {
       randUnit(_v2); _v2.y = Math.abs(_v2.y) * 1.2 + 0.4;
-      fx.debris.rock.emit({ pos: p.clone().setY(Math.max(0.2, p.y)), vel: _v2.normalize().multiplyScalar(rand(6, 16)), scale: rand(0.1, 0.28) * s, life: rand(1.5, 2.5) });
+      fx.debris.rock.emit({ pos: p.clone().setY(Math.max(0.2, p.y)), vel: _v2.normalize().multiplyScalar(rand(6, 15)), scale: rand(0.08, 0.22) * s, life: rand(1.5, 2.5) });
     }
     // 7. scorch
-    if (p.y < 2.5) fx.decal({ pos: p, size: 3.6 * s, type: 0, color: [3, 1.0, 0.2], glow: 1.5, life: 7, fadeStart: 0.5 });
-    fx.light(p, [1, 0.6, 0.25], 9, 14 * s, 0.6);
-    G.rig?.shake(0.55 * s);
-    G.pipeline && (G.screen.chroma(0.012 * s, 0.25));
+    if (p.y < 2.5) fx.decal({ pos: p, size: 3.4 * s, type: 0, color: [3, 1.0, 0.2], glow: 1.4, life: 7, fadeStart: 0.5 });
+    fx.light(p, [1, 0.6, 0.25], 3.5, 10 * s, 0.5);
+    G.rig?.shake(0.5 * Math.min(1.3, s));
+    G.screen?.chroma(0.01 * s, 0.25);
   },
 
   // ── weapons ─────────────────────────────────────────────────────────────────

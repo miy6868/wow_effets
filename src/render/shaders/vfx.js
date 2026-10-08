@@ -421,17 +421,17 @@ export const puffFragment = /* glsl */ `
       col += vB.rgb * 0.15 * step(0.6, 1.0 - ndv);
       col *= 1.0 - uWorldDim * 0.7;
     } else if (mode < 1.5) {
-      // fire: heat bands (white → yellow → orange → red → dark)
-      float heat = vD.z * (0.55 + 0.45 * ndv) + (n - 0.5) * 0.35 - life * 0.25;
-      vec3 c0 = vec3(6.0, 5.2, 3.6);
-      vec3 c1 = vB.rgb;          // bright yellow-orange (HDR)
+      // fire: heat bands (white → yellow → orange → red → charcoal)
+      float heat = vD.z * (0.45 + 0.55 * ndv) + (n - 0.5) * 0.4 - life * 0.3;
+      vec3 c0 = vec3(2.4, 2.1, 1.5);
+      vec3 c1 = vB.rgb;          // yellow-orange
       vec3 c2 = vC.rgb;          // deep orange/red
-      vec3 c3 = vC.rgb * 0.18;   // charcoal
+      vec3 c3 = vec3(0.13, 0.08, 0.1);
       float w = 0.02;
       col = c3;
-      col = mix(col, c2, smoothstep(0.18 - w, 0.18 + w, heat));
+      col = mix(col, c2, smoothstep(0.15 - w, 0.15 + w, heat));
       col = mix(col, c1, smoothstep(0.42 - w, 0.42 + w, heat));
-      col = mix(col, c0, smoothstep(0.75 - w, 0.75 + w, heat));
+      col = mix(col, c0, smoothstep(0.9 - w, 0.9 + w, heat));
     } else {
       // magic mist: flat color with bright rim
       float lit = smoothstep(-0.1, 0.1, ndl);
@@ -439,5 +439,55 @@ export const puffFragment = /* glsl */ `
       col += vB.rgb * smoothstep(0.55, 0.85, 1.0 - ndv) * 1.2;
     }
     gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+// ── Screen-space distortion (rendered into a separate offset buffer) ─────────
+export const distortVertex = /* glsl */ `
+  varying vec2 vUv;
+  varying vec4 vClip;
+  varying vec4 vCenter;
+  void main() {
+    vUv = uv;
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * wp;
+    vClip = gl_Position;
+    vCenter = projectionMatrix * viewMatrix * vec4(modelMatrix[3].xyz, 1.0);
+  }
+`;
+export const distortFragment = /* glsl */ `
+  ${noiseChunk}
+  uniform float uMode;      // 0 ring push, 1 heat haze, 2 lens (pinch toward center)
+  uniform float uStrength;
+  uniform float uR;
+  uniform float uW;
+  uniform float uTime;
+  varying vec2 vUv;
+  varying vec4 vClip;
+  varying vec4 vCenter;
+  void main() {
+    vec2 ndc = vClip.xy / vClip.w;
+    vec2 c = vCenter.xy / vCenter.w;
+    vec2 d = ndc - c;
+    float dl = length(d);
+    vec2 dir = dl > 1e-5 ? d / dl : vec2(0.0);
+    vec2 p = vUv * 2.0 - 1.0;
+    float r = length(p);
+    vec2 off = vec2(0.0);
+    if (uMode < 0.5) {
+      float x = (r - uR) / max(uW, 1e-3);
+      float prof = exp(-x * x * 2.0) * sign(-x + 0.0001);
+      off = dir * exp(-x * x * 2.0) * uStrength;
+    } else if (uMode < 1.5) {
+      float n1 = vnoise(p * 3.0 + vec2(0.0, -uTime * 2.5));
+      float n2 = vnoise(p * 3.0 + vec2(17.0, -uTime * 2.1));
+      float m = 1.0 - smoothstep(0.3, 1.0, r);
+      off = (vec2(n1, n2) - 0.5) * uStrength * m;
+    } else {
+      float m = 1.0 - smoothstep(0.0, 1.0, r);
+      off = -dir * m * m * uStrength;
+    }
+    off *= 1.0 - smoothstep(0.92, 1.0, r);
+    gl_FragColor = vec4(off * 0.5, 0.0, 1.0);
   }
 `;

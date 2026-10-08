@@ -7,7 +7,7 @@ import { DebrisPool } from './debris.js';
 import { toonGlobals, MAX_PLIGHTS } from '../render/shaders/toon.js';
 import {
   basicVertex, slashVertex, slashFragment, ringFragment, fresnelFragment,
-  ribbonVertex, ribbonFragment, decalFragment, ghostVertex, ghostFragment,
+  ribbonVertex, ribbonFragment, decalFragment, ghostVertex, ghostFragment, distortVertex, distortFragment,
 } from '../render/shaders/vfx.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -110,6 +110,7 @@ export class Ribbon {
     this.geo = g;
     this.mesh = new THREE.Mesh(g, mat);
     this.mesh.frustumCulled = false;
+    this.mesh.userData.disposeGeo = true;
   }
   /** Camera-facing strip through pts (Vector3[]), widths number|number[] */
   setFacing(pts, widths, camPos, fades) {
@@ -271,7 +272,7 @@ export class FX {
       if (e.update) e.update(e, k, dt);
       if (e.t >= e.life) {
         e.obj.parent?.remove(e.obj);
-        if (e.dispose !== false) e.obj.traverse((o) => { if (o.material && !o.material.userData.shared) o.material.dispose(); });
+        if (e.dispose !== false) e.obj.traverse((o) => { if (o.material && !o.material.userData.shared) o.material.dispose(); if (o.userData.disposeGeo) o.geometry.dispose(); });
         if (e.onEnd) e.onEnd(e);
         this.effects.splice(i, 1);
       }
@@ -438,6 +439,34 @@ export class FX {
       if (o.grow) { const gs = s * (1 + o.grow * ease.outCubic(k)); m.scale.set(gs, 1, gs); }
       if (o.update) o.update(e, k, m);
     });
+  }
+
+  /**
+   * Screen distortion. o: pos, mode ('ring'|'haze'|'lens'), r0, r1 (world radius of the quad),
+   * strength, life, billboard (default true), normal, width (ring width 0..1), follow(m, k)
+   */
+  distort(o) {
+    const mode = o.mode === 'haze' ? 1 : o.mode === 'lens' ? 2 : 0;
+    const mat = new THREE.ShaderMaterial({
+      uniforms: { uMode: { value: mode }, uStrength: { value: o.strength ?? 0.02 }, uR: { value: 0.6 }, uW: { value: o.width ?? 0.12 }, uTime: { value: 0 } },
+      vertexShader: distortVertex, fragmentShader: distortFragment,
+      transparent: true, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
+      blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor,
+    });
+    const m = new THREE.Mesh(geo('quad'), mat);
+    m.frustumCulled = false;
+    m.position.copy(o.pos);
+    if (o.normal) m.quaternion.setFromUnitVectors(_v.set(0, 0, 1), o.normal);
+    const r0 = o.r0 ?? 0.5, r1 = o.r1 ?? 4, life = o.life ?? 0.4, s0 = o.strength ?? 0.02;
+    const u = mat.uniforms;
+    return this.spawn(m, life, (e, k) => {
+      const r = mode === 0 ? (r0 + (r1 - r0) * ease.outCubic(k)) / 0.6 : r0 + (r1 - r0) * k;
+      m.scale.set(r, r, r);
+      u.uTime.value = e.t;
+      u.uStrength.value = s0 * (mode === 0 ? (1 - k) : o.strengthCurve ? o.strengthCurve(k) : Math.sin(Math.PI * Math.min(1, k * 1.2)));
+      if (o.billboard !== false && !o.normal) m.quaternion.copy(this.camera.quaternion);
+      if (o.follow) o.follow(m, k);
+    }, this.pipeline.distortScene);
   }
 
   /** Afterimage of a character model. */

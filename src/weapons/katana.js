@@ -139,10 +139,10 @@ export class Katana extends MeleeWeapon {
       dur: 0.62, cancel: 0.42, dashCancel: 0.3, swing: [0.09, 0.18], follow: 0.14, over: 0.3, antic: 0.4,
       plane: { roll: Math.PI / 2 - 0.25 }, a0: -2.0, a1: 2.1, radius: 0.55, lunge: 0.6, maxLunge: 2.5,
       center: [-0.12, 1.2, 0.2], jumpVel: 0, gravity: 0.55, lean: -0.2,
-      hits: [H2({ t: 0.13, dmg: 150, kb: 1.2, lift: 15.5, stop: 0.1, atkStop: 0.08, shake: 0.24, kick: 0.6, spin: 1.2 })],
+      hits: [H2({ t: 0.13, dmg: 150, kb: 1.2, lift: 13, stop: 0.1, atkStop: 0.08, shake: 0.24, kick: 0.6, spin: 1.2 })],
       slash: slashLayers({ scale: 1.15, width: 0.85 }),
       onEvent: [
-        { t: 0.1, fn: (m) => { m.player.vel.y = 13.5; m.player.grounded = false; FXP.dust(m.player.pos, 0.9, 6); sparkleArc(m, 12);
+        { t: 0.1, fn: (m) => { m.player.vel.y = 12.5; m.player.grounded = false; FXP.dust(m.player.pos, 0.9, 6); sparkleArc(m, 12);
           G.fx.ring({ pos: m.player.pos.clone().setY(0.08), normal: UP, r0: 0.3, r1: 2.4, w0: 0.12, w1: 0.02, color: [0.6, 1.4, 3.2], life: 0.3, sharp: 1 }); } },
       ],
       whooshPitch: 0.9,
@@ -156,16 +156,16 @@ function H2(o) { return { range: 2.9, arc: 150, kind: 'slash', ...o }; }
 export function landingImpact(pos, s = 1, color = [0.6, 1.4, 3.2]) {
   const fx = G.fx;
   const p = pos.clone().setY(0.06);
-  fx.ring({ pos: p, normal: UP, r0: 0.4, r1: 4.2 * s, w0: 0.14, w1: 0.02, color, life: 0.4, sharp: 1 });
-  fx.ring({ pos: p.clone().setY(0.1), normal: UP, r0: 0.2, r1: 2.6 * s, w0: 0.35, w1: 0.05, color: [color[0] * 0.5, color[1] * 0.5, color[2] * 0.5], life: 0.45, noise: 0.2 });
+  fx.ring({ pos: p, normal: UP, r0: 0.4, r1: 4.2 * s, w0: 0.1, w1: 0.015, color: [color[0] * 0.7, color[1] * 0.7, color[2] * 0.7], life: 0.38, sharp: 1 });
+  fx.ring({ pos: p.clone().setY(0.1), normal: UP, r0: 0.2, r1: 2.6 * s, w0: 0.3, w1: 0.05, color: [color[0] * 0.25, color[1] * 0.25, color[2] * 0.25], life: 0.45, noise: 0.2 });
   fx.decal({ pos: p, size: 2.4 * s, type: 1, color: [color[0] * 2, color[1] * 2, color[2] * 2], glow: 1.2, life: 3.5, reveal: 0.12 });
   FXP.dust(p, 1.2 * s, 10);
-  fx.add.emit({ pos: p.clone().setY(0.5), shape: SHAPE.SPIKES, size: 4 * s, sizeEnd: 5.5 * s, life: 0.13, color: [color[0] * 1.2, color[1] * 1.2, color[2] * 1.2], alphaEnd: 0 });
+  fx.add.emit({ pos: p.clone().setY(0.5), shape: SHAPE.SPIKES, size: 3.2 * s, sizeEnd: 4.4 * s, life: 0.12, color: [color[0] * 0.7, color[1] * 0.7, color[2] * 0.7], alphaEnd: 0 });
   for (let i = 0; i < 10 * s; i++) {
     const a = Math.random() * Math.PI * 2;
     fx.debris.rock.emit({ pos: p.clone().setY(0.15), vel: new THREE.Vector3(Math.cos(a) * rand(2, 5), rand(4, 8), Math.sin(a) * rand(2, 5)), scale: rand(0.06, 0.14), life: rand(1, 1.6) });
   }
-  fx.light(p.clone().setY(1), color, 5, 8 * s, 0.25);
+  fx.light(p.clone().setY(1), color, 2.2, 6 * s, 0.22);
   G.rig.shake(0.35 * s);
   G.audio?.play('slam', { pos: p, vol: 0.8 });
   // knock nearby grounded dummies

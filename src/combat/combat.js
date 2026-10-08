@@ -37,7 +37,7 @@ export function hit(target, h) {
   if (h.shake) G.rig.shake(h.shake * S.shake);
   if (h.kick) G.rig.kick(fdir, h.kick * S.shake);
   if (h.dmg !== undefined) G.hud?.damage(point, h.dmg, h.crit);
-  G.hud?.combo();
+  if (h.combo !== false) G.hud?.combo();
   if (h.sound !== null) G.audio?.play(h.sound ?? 'hitSlash', { pos: point, vol: h.vol ?? 1, pitch: h.pitch });
   return point;
 }

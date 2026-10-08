@@ -53,6 +53,7 @@ export class SwingMove {
     this.hitAny = false;
     this.startPos = new THREE.Vector3();
     this.lungeDist = 0;
+    this.cam = spec.cam ?? null;
   }
 
   start() {

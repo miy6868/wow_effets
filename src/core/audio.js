@@ -226,6 +226,68 @@ export const SFX = {
     A.tone(d, t, 0.12, { type: 'triangle', f0: 1200 * p, f1: 1500, vol: 0.18 });
     A.noise(d, t, 0.08, { type: 'highpass', f0: 4000, f1: 6000, q: 1, a: 0.002, vol: 0.2 });
   },
+  pump(A, d, t, p) {
+    A.noise(d, t, 0.05, { type: 'bandpass', f0: 1800 * p, f1: 1200, q: 3, a: 0.002, vol: 0.4 });
+    A.noise(d, t + 0.11, 0.06, { type: 'bandpass', f0: 2400 * p, f1: 1500, q: 3, a: 0.002, vol: 0.45 });
+    A.tone(d, t + 0.11, 0.05, { type: 'square', f0: 300 * p, f1: 200, vol: 0.08 });
+  },
+  fireWhoosh(A, d, t, p) {
+    A.noise(d, t, 0.6, { type: 'lowpass', f0: 1800 * p, f1: 300, q: 0.7, a: 0.03, vol: 0.7, curve: 2.5 });
+    A.noise(d, t, 0.4, { type: 'bandpass', f0: 600 * p, f1: 1500, q: 0.8, a: 0.05, vol: 0.4 });
+  },
+  rocket(A, d, t, p) {
+    A.noise(d, t, 0.06, { type: 'lowpass', f0: 4000, f1: 1500, q: 0.6, a: 0.001, vol: 0.9 });
+    A.noise(d, t, 0.9, { type: 'bandpass', f0: 900 * p, f1: 300, q: 0.7, a: 0.01, vol: 0.8, curve: 3 });
+    A.tone(d, t, 0.3, { type: 'sine', f0: 120 * p, f1: 40, vol: 1.2 });
+  },
+  missile(A, d, t, p) {
+    A.noise(d, t, 0.35, { type: 'bandpass', f0: 1600 * p, f1: 700, q: 1, a: 0.005, vol: 0.4 });
+    A.tone(d, t, 0.25, { type: 'sawtooth', f0: 500 * p, f1: 900 * p, vol: 0.05 });
+  },
+  fireball(A, d, t, p) {
+    A.noise(d, t, 0.35, { type: 'bandpass', f0: 500 * p, f1: 1400, q: 0.8, a: 0.02, vol: 0.6, curve: 2 });
+    A.noise(d, t, 0.2, { type: 'lowpass', f0: 2500, f1: 600, q: 0.5, a: 0.005, vol: 0.4 });
+    A.tone(d, t, 0.2, { type: 'sine', f0: 200 * p, f1: 90, vol: 0.4 });
+  },
+  pillar(A, d, t, p) {
+    A.noise(d, t, 1.2, { type: 'lowpass', f0: 2500 * p, f1: 200, q: 0.6, a: 0.02, vol: 1.2, curve: 3 });
+    A.noise(d, t, 0.8, { type: 'bandpass', f0: 400, f1: 1600, q: 0.6, a: 0.1, vol: 0.5 });
+    A.tone(d, t, 0.7, { type: 'sine', f0: 65 * p, f1: 30, vol: 1.6 });
+  },
+  zap(A, d, t, p) {
+    A.noise(d, t, 0.12, { type: 'highpass', f0: 3000 * p, f1: 6000, q: 0.7, a: 0.001, vol: 0.6 });
+    A.tone(d, t, 0.1, { type: 'sawtooth', f0: 1600 * p, f1: 200, vol: 0.14 });
+    A.tone(d, t + 0.02, 0.08, { type: 'square', f0: 900 * p, f1: 2400, vol: 0.07 });
+  },
+  thunder(A, d, t, p) {
+    A.noise(d, t, 0.06, { type: 'highpass', f0: 2000, f1: 4000, q: 0.5, a: 0.0005, vol: 1.2 });
+    A.noise(d, t, 1.6, { type: 'lowpass', f0: 1800 * p, f1: 60, q: 0.7, a: 0.004, vol: 1.4, curve: 4 });
+    A.tone(d, t, 0.7, { type: 'sine', f0: 60 * p, f1: 25, vol: 1.6 });
+    A.tone(d, t, 0.2, { type: 'sawtooth', f0: 2200, f1: 200, vol: 0.12 });
+  },
+  ice(A, d, t, p) {
+    A.tone(d, t, 0.3, { type: 'sine', f0: 2400 * p, f1: 3200 * p, vol: 0.12, curve: 4 });
+    A.tone(d, t + 0.03, 0.3, { type: 'sine', f0: 3600 * p, f1: 4100 * p, vol: 0.08, curve: 4 });
+    A.noise(d, t, 0.18, { type: 'highpass', f0: 5000, f1: 7000, q: 1, a: 0.005, vol: 0.3 });
+  },
+  iceHit(A, d, t, p) {
+    A.noise(d, t, 0.12, { type: 'highpass', f0: 4000 * p, f1: 2500, q: 1, a: 0.001, vol: 0.7 });
+    A.tone(d, t, 0.15, { type: 'sine', f0: 3000 * p, f1: 2600 * p, vol: 0.15, curve: 4 });
+    A.tone(d, t, 0.1, { type: 'triangle', f0: 240 * p, f1: 90, vol: 0.5 });
+  },
+  iceWave(A, d, t, p) {
+    A.noise(d, t, 0.7, { type: 'bandpass', f0: 3000 * p, f1: 1200, q: 1.2, a: 0.01, vol: 0.6, curve: 2.5 });
+    A.tone(d, t, 0.6, { type: 'sine', f0: 90 * p, f1: 40, vol: 0.9 });
+  },
+  freeze(A, d, t, p) {
+    A.noise(d, t, 0.35, { type: 'highpass', f0: 3000 * p, f1: 6000, q: 1, a: 0.01, vol: 0.4 });
+    A.tone(d, t, 0.4, { type: 'sine', f0: 1800 * p, f1: 2600 * p, vol: 0.12, curve: 4 });
+  },
+  shatter(A, d, t, p) {
+    A.noise(d, t, 0.4, { type: 'highpass', f0: 3500 * p, f1: 1500, q: 0.8, a: 0.001, vol: 1 });
+    for (let i = 0; i < 4; i++) A.tone(d, t + i * 0.03, 0.2, { type: 'sine', f0: (2400 + Math.random() * 2400) * p, f1: 2000 * p, vol: 0.1, curve: 4 });
+    A.tone(d, t, 0.2, { type: 'triangle', f0: 200 * p, f1: 70, vol: 0.7 });
+  },
   charge(A, d, t, p) {
     A.tone(d, t, 0.3, { type: 'sawtooth', f0: 200 * p, f1: 600 * p, vol: 0.08, a: 0.05 });
     A.noise(d, t, 0.3, { type: 'bandpass', f0: 800 * p, f1: 2400 * p, q: 3, a: 0.05, vol: 0.2 });

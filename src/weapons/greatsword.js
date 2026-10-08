@@ -61,11 +61,11 @@ export function groundImpact(pos, s = 1, color = [3, 1.0, 0.25]) {
 function flameRing(pos, s, n = 10) {
   const fx = G.fx;
   for (let i = 0; i < n; i++) {
-    const a = (i / n) * Math.PI * 2;
-    const r = 2.4 * s;
+    const a = (i / n) * Math.PI * 2 + rand(-0.1, 0.1);
+    const r = 1.9 * s;
     const q = pos.clone().add(_v.set(Math.cos(a) * r, 0, Math.sin(a) * r));
-    for (let k = 0; k < 4; k++) {
-      fx.puffs.emit({ pos: q.clone().setY(0.3 + k * 0.5), vel: _v2.set(Math.cos(a) * 1.5, rand(5, 9), Math.sin(a) * 1.5), size: rand(0.35, 0.55) * s, sizeEnd: rand(0.15, 0.3), life: rand(0.45, 0.7), mode: PUFF.FIRE, color: [3.2, 1.6, 0.3], shade: [1.6, 0.3, 0.05], heat: rand(0.9, 1.2), drag: 3, rise: 3, dissolveStart: 0.35, grow: 'in' });
+    for (let k = 0; k < 3; k++) {
+      fx.puffs.emit({ pos: q.clone().setY(0.2 + k * 0.35), vel: _v2.set(Math.cos(a) * 1.2, rand(6, 10), Math.sin(a) * 1.2), size: rand(0.2, 0.3) * s, sizeEnd: rand(0.06, 0.12), life: rand(0.4, 0.6), mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: rand(0.9, 1.15), drag: 3, rise: 3, dissolveStart: 0.35, grow: 'in', stretch: 1.5 });
     }
   }
 }
@@ -112,7 +112,7 @@ export class Greatsword extends MeleeWeapon {
       { // 3: tornado spin
         dur: 1.15, cancel: 0.85, dashCancel: 0.75, swing: [0.24, 0.6], follow: 0.16, over: 0.2, antic: 0.4,
         plane: { roll: -0.1 }, a0: -1.0, a1: 1.0, radius: 0.45, twoHanded: true, spinTurns: 1.5, spinWin: [0.22, 0.62],
-        lunge: 1.5, lungeWin: [0.2, 0.6], maxLunge: 3, center: [-0.05, 1.15, 0.1], lean: 0.2, stance: 'low', crouch: 0.15,
+        lunge: 1.5, lungeWin: [0.2, 0.6], maxLunge: 3, center: [-0.05, 1.15, 0.1], lean: 0.2, stance: 'low', crouch: 0.15, cam: { dist: 6.6 },
         hits: [
           H({ t: 0.33, arc: 360, dmg: 150, kb: 2, stop: 0.07, atkStop: 0.06, shake: 0.18, fxScale: 0.9 }),
           H({ t: 0.45, arc: 360, dmg: 150, kb: 2, stop: 0.07, atkStop: 0.06, shake: 0.18, fxScale: 0.9 }),
@@ -184,7 +184,7 @@ export class Greatsword extends MeleeWeapon {
       dur: 1.6, cancel: 1.6, dashCancel: 1.6, swing: [0.4, 0.5], follow: 0.12, over: 0.1, antic: 0.8,
       plane: { roll: Math.PI / 2 }, a0: 2.7, a1: -1.15, radius: 0.48, twoHanded: true, gravity: 1, jumpVel: 0,
       lunge: 4.5 + level * 0.8, minLunge: 2, maxLunge: 6 + level, stopDist: 1.0, lungeWin: [0.05, 0.5], lockRange: 11,
-      center: [-0.05, 1.35, 0.1], lean: 0.5, stance: 'air',
+      center: [-0.05, 1.35, 0.1], lean: 0.5, stance: 'air', cam: { dist: 7.2 + level * 0.6 },
       hits: [],
       slash: layers({ scale: 1.15 + level * 0.1 }),
       whoosh: 'whooshBig', whooshPitch: 0.65,
@@ -203,11 +203,11 @@ export class Greatsword extends MeleeWeapon {
       onLand: (m) => {
         const p2 = m.player.pos.clone().addScaledVector(m.fwd, 1.6);
         groundImpact(p2, s);
-        if (level >= 1) flameRing(p2, s, 8 + level * 4);
+        if (level >= 1) flameRing(p2, s, 8 + level * 3);
         if (level >= 2) {
           G.screen.impact(0.05, true, [1, 0.85, 0.7]);
           G.slowmo(0.15, 0.1, 0.35);
-          G.fx.sphere({ pos: p2.clone().setY(0.5), r0: 0.5, r1: 5 * s, color: [2.5, 0.9, 0.2], coreColor: [3, 2.2, 1.2], life: 0.3, power: 1.5, core: 0.3, squashY: 0.45 });
+          G.fx.sphere({ pos: p2.clone().setY(0.5), r0: 0.5, r1: 4.2 * s, color: [1.3, 0.45, 0.1], coreColor: [1.4, 1.0, 0.6], life: 0.3, power: 1.8, core: 0.15, squashY: 0.45 });
         }
         G.screen.flash([1, 0.75, 0.5], 0.18 + level * 0.06, 0.1);
         G.screen.chroma(0.01 + level * 0.006, 0.3);
@@ -249,7 +249,7 @@ function flameSwirl(m) {
   for (let i = 0; i < 6; i++) {
     const a = Math.random() * Math.PI * 2, r = rand(1.2, 2.6);
     const q = p.pos.clone().add(_v.set(Math.cos(a) * r, rand(0.6, 1.4), Math.sin(a) * r));
-    G.fx.puffs.emit({ pos: q, vel: _v2.set(-Math.sin(a) * 4, rand(1, 3), Math.cos(a) * 4), size: rand(0.25, 0.4), sizeEnd: 0.1, life: rand(0.35, 0.55), mode: PUFF.FIRE, color: [3.2, 1.6, 0.3], shade: [1.6, 0.3, 0.05], heat: 1.1, drag: 3, rise: 2, dissolveStart: 0.3 });
+    G.fx.puffs.emit({ pos: q, vel: _v2.set(-Math.sin(a) * 4, rand(1, 3), Math.cos(a) * 4), size: rand(0.25, 0.4), sizeEnd: 0.1, life: rand(0.35, 0.55), mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: 1.1, drag: 3, rise: 2, dissolveStart: 0.3 });
   }
 }
 
@@ -298,7 +298,7 @@ class ChargeAction {
       }
       if (this.level >= 1 && Math.random() < 0.5) {
         const q = p.pos.clone().add(_v.set(rand(-0.6, 0.6), 0.2, rand(-0.6, 0.6)));
-        G.fx.puffs.emit({ pos: q, vel: _v2.set(0, rand(2, 4), 0), size: rand(0.12, 0.22), sizeEnd: 0.05, life: 0.5, mode: PUFF.FIRE, color: [3.2, 1.6, 0.3], shade: [1.6, 0.3, 0.05], heat: 1, drag: 2, rise: 2, dissolveStart: 0.3 });
+        G.fx.puffs.emit({ pos: q, vel: _v2.set(0, rand(2, 4), 0), size: rand(0.12, 0.22), sizeEnd: 0.05, life: 0.5, mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: 1, drag: 2, rise: 2, dissolveStart: 0.3 });
       }
       // blade runes flare
       const tip = p.toWorld(new THREE.Vector3(-0.35, 0.9 + Math.random() * 1.5, -0.6));

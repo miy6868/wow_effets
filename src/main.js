@@ -95,7 +95,7 @@ function frame(dtReal) {
   projectiles.update(Time.dt);
   fx.update(Time.dt);
 
-  const camOpts = player.weapon?.cameraOpts?.(player) ?? {};
+  const camOpts = { ...(player.weapon?.cameraOpts?.(player) ?? {}), ...(player.action?.cam ?? {}) };
   rig.update(dtReal, player.pos, input, camOpts);
   screen.update(dtReal);
   hud.update(dtReal);

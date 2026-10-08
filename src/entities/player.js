@@ -278,9 +278,12 @@ export class Player {
     const stride = 0.42 * s;
     L.footR.set(-0.13 - 0.06 * idle, Math.max(0, -Math.sin(ph)) * 0.28 * s, Math.cos(ph) * stride + 0.05 * s - 0.12 * idle);
     L.footL.set(0.13 + 0.05 * idle, Math.max(0, Math.sin(ph)) * 0.28 * s, -Math.cos(ph) * stride + 0.05 * s + 0.1 * idle);
-    L.handR.set(-0.34, 0.78 + s * 0.06, 0.06 - Math.cos(ph) * 0.26 * s);
-    L.handL.set(0.34, 0.78 + s * 0.06, 0.06 + Math.cos(ph) * 0.26 * s);
-    L.headYaw = 0; L.headPitch = 0.05 * s; L.elbowOut = 0; L.flip = 0; L.spin = 0;
+    // arm swing: hands rise as they come forward (bent elbows), slightly inward
+    const swR = -Math.cos(ph), swL = Math.cos(ph);
+    L.handR.set(-0.33 + Math.max(0, swR) * 0.07 * s, 0.8 + s * (0.06 + Math.max(0, swR) * 0.16), 0.04 + swR * 0.3 * s);
+    L.handL.set(0.33 - Math.max(0, swL) * 0.07 * s, 0.8 + s * (0.06 + Math.max(0, swL) * 0.16), 0.04 + swL * 0.3 * s);
+    L.headPitch = -0.04 * s + Math.abs(Math.sin(ph)) * 0.03 * s;
+    L.headYaw = -L.twist * 0.6; L.elbowOut = 0; L.flip = 0; L.spin = 0;
     L.coatFlare = 0.45 * s + Math.sin(ph * 2) * 0.06 * s + (this.grounded ? 0 : 0.25);
     bladeQuat(L.wR, _v.set(0, -0.35, -1), _v2.set(0, -1, 0.2));
     bladeQuat(L.wL, _v.set(0, -0.35, -1), _v2.set(0, -1, 0.2));

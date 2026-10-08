@@ -38,7 +38,7 @@ export function hit(target, h) {
   // heavy impacts: a quick radial smear toward the hit point
   if (stop >= 0.12 && G.screen) {
     const sp = point.clone().project(G.rig.camera);
-    G.screen.radial(0.5 + Math.min(0.6, stop * 2), 0.12, sp.x * 0.5 + 0.5, sp.y * 0.5 + 0.5);
+    G.screen.radial(0.3 + Math.min(0.35, stop * 1.5), 0.1, sp.x * 0.5 + 0.5, sp.y * 0.5 + 0.5);
   }
   if (h.kick) G.rig.kick(fdir, h.kick * S.shake);
   if (h.dmg !== undefined) G.hud?.damage(point, h.dmg, h.crit);

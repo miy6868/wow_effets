@@ -187,7 +187,7 @@ export class UltDeadEye extends UltBase {
       if (rt > CUTIN) {
         this.phase = 'mark'; this.r0 = rt;
         const f = p.forward(new THREE.Vector3()), r = p.right(new THREE.Vector3());
-        setCine(p.pos.clone().addScaledVector(f, -3.8).addScaledVector(r, 1.7).add(_v.set(0, 1.9, 0)), p.pos.clone().addScaledVector(f, 12).add(_v.set(0, 0.9, 0)), 46, 8);
+        setCine(p.pos.clone().addScaledVector(f, -4.6).addScaledVector(r, 2.1).add(_v.set(0, 2.0, 0)), p.pos.clone().addScaledVector(f, 12).add(_v.set(0, 0.9, 0)), 46, 8);
         G.slowmo(0.06, 2.4, 0.4, 0.05);
         G.screen.dim(0.25);
         G.screen.desat(0.75, 2.6);
@@ -237,8 +237,8 @@ export class UltDeadEye extends UltBase {
       },
       onHit: (pr, dd, point) => {
         if (mark) mark.t = mark.life;
-        hit(dd, { dir: pr.vel.clone().setY(0).normalize(), fxDir: pr.vel.clone().normalize(), point, kb: 15, lift: 7, hitstop: 0.12, shake: 0.25, kind: 'pierce', color: [1, 0.5, 0.3], fxScale: 1.6, dmg: 777, crit: true, sound: 'hitPierce', spin: 1.8 });
-        G.fx.ring({ pos: point, billboard: true, r0: 0.2, r1: 2.2, w0: 0.08, w1: 0.01, color: [2, 0.6, 0.4], life: 0.3, sharp: 1 });
+        hit(dd, { dir: pr.vel.clone().setY(0).normalize(), fxDir: pr.vel.clone().normalize(), point, kb: 15, lift: 7, hitstop: 0.12, shake: 0.25, kind: 'pierce', color: [1, 0.5, 0.3], fxScale: 1.0, dmg: 777, crit: true, sound: 'hitPierce', spin: 1.8 });
+        G.fx.ring({ pos: point, billboard: true, r0: 0.2, r1: 1.5, w0: 0.05, w1: 0.01, color: [1.2, 0.35, 0.25], life: 0.25, sharp: 1 });
       },
     });
   }

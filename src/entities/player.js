@@ -82,6 +82,7 @@ export class Player {
     this.weaponIndex = i;
     this.weapon = this.weapons[i];
     this.weapon.equip(this);
+    this.equipT = 0;
     G.hud?.setWeapon(i);
     G.audio?.play('equip');
     // equip flourish
@@ -330,6 +331,13 @@ export class Player {
 
   applyVisual() {
     const m = this.model;
+    // weapon materializes with a small elastic pop after switching
+    if (this.equipT !== undefined && this.equipT < 0.3) {
+      this.equipT += G.timeScale > 0 ? 1 / 60 : 0;
+      const k = Math.min(1, this.equipT / 0.2);
+      const sc = Math.max(0.01, easing.outBack(k));
+      m.sockR.scale.setScalar(sc); m.sockL.scale.setScalar(sc);
+    }
     m.root.position.copy(this.pos);
     // attacker shudder during hitstop: the blade "bites" into the target
     if (this.hitstopT > 0) {
@@ -456,7 +464,10 @@ export class DashAction {
     this.ghostT -= dt;
     if (this.ghostT <= 0 && this.t < MOVE.dashTime + 0.02) {
       this.ghostT = 0.022;
-      G.fx.ghost(p.model.root, { color: [0.25, 0.5, 1.4], rim: [0.6, 1.5, 3.5], life: 0.3, alpha: 0.75 });
+      const wc = p.weapon?.color ?? [0.4, 0.8, 2.2];
+      const m = Math.max(wc[0], wc[1], wc[2]) || 1;
+      const rim = [wc[0] / m * 3.2, wc[1] / m * 3.2, wc[2] / m * 3.2];
+      G.fx.ghost(p.model.root, { color: rim.map((x) => x * 0.12), rim, life: 0.3, alpha: 0.7 });
     }
     if (p.grounded && Math.random() < dt * 30) FXP.slideDust(p.pos, p.vel, 0.6);
     if (this.t > MOVE.dashTime) p.gravityScale = 1;

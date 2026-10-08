@@ -113,6 +113,10 @@ export class CameraRig {
       cam.position.add(_v2);
     }
     cam.rotateZ(this.rollKick);
+    // gentle handheld drift (breathing camera)
+    const ht = this.shakeTime * 0.35;
+    cam.rotateX(vnoise(ht, 11) * 0.0035);
+    cam.rotateY(vnoise(ht, 12) * 0.0035);
 
     let fov = this.baseFov + this.fovOffset + this.fovPunchV;
     if (this.cine && this.cine.fov) fov = fov + (this.cine.fov - fov) * this.cineW;

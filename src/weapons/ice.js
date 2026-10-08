@@ -209,7 +209,7 @@ function spikeCluster(pos, dir, s = 1) {
   // burst at the base
   fx.add.emit({ pos: pos.clone().setY(0.4), shape: SHAPE.STAR, size: 1.6 * s, sizeEnd: 0.2, life: 0.1, color: [1.8, 2.6, 3.4], alphaEnd: 0 });
   fx.ring({ pos: pos.clone().setY(0.06), normal: UP, r0: 0.2, r1: 1.6 * s, w0: 0.1, w1: 0.015, color: [0.8, 1.3, 2.1], life: 0.25, sharp: 1 });
-  fx.decal({ pos, size: 1.8 * s, type: 2, color: [0.3, 0.55, 0.9], dark: [0.5, 0.72, 0.92], alpha: 0.55, life: 2.6, fadeStart: 0.6 });
+  fx.decal({ pos, size: 1.8 * s, type: 2, color: [0.22, 0.42, 0.75], dark: [0.4, 0.52, 0.7], alpha: 0.42, life: 2.6, fadeStart: 0.5 });
   for (let i = 0; i < 6; i++) {
     randUnit(_v2); _v2.y = Math.abs(_v2.y) + 0.5;
     fx.debris.shard.emit({ pos: pos.clone().setY(0.2), vel: _v2.normalize().multiplyScalar(rand(3, 7)), scale: rand(0.04, 0.09), life: rand(0.6, 1.0) });

@@ -99,6 +99,7 @@ function frame(dtReal) {
   dummies.update(Time.dt);
   projectiles.update(Time.dt);
   ambience.update(Time.dt, player.pos);
+  arena.update(Time.dt, fx, player.pos);
   fx.update(Time.dt);
 
   const camOpts = { ...(player.weapon?.cameraOpts?.(player) ?? {}), ...(player.action?.cam ?? {}) };

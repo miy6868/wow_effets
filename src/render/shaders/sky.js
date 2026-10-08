@@ -126,3 +126,55 @@ export const ridgeFragment = /* glsl */ `
     gl_FragColor = vec4(col, 1.0);
   }
 `;
+
+// Instanced grass clumps: wind sway, tip-lit cel gradient, fog.
+export const grassVertex = /* glsl */ `
+  attribute vec4 iOff;     // x, z, scale, rotation
+  attribute float iTint;
+  uniform float uTime;
+  uniform vec3 uPlayer;
+  varying float vH;
+  varying float vTint;
+  varying vec3 vPosW;
+  void main() {
+    float c = cos(iOff.w), s = sin(iOff.w);
+    vec3 p = position * iOff.z;
+    p = vec3(c * p.x - s * p.z, p.y, s * p.x + c * p.z);
+    vec3 wp = vec3(iOff.x, 0.0, iOff.y) + p;
+    float h = position.y / 0.6;
+    float h2 = h * h;
+    // wind: slow swells + flutter
+    float w = sin(uTime * 1.3 + iOff.x * 0.15 + iOff.y * 0.1) * 0.6 + sin(uTime * 3.1 + iOff.x * 0.9) * 0.25;
+    wp.x += w * 0.12 * h2 * iOff.z;
+    wp.z += w * 0.05 * h2 * iOff.z;
+    // bend away from the player
+    vec2 d = wp.xz - uPlayer.xz;
+    float dl = length(d);
+    wp.xz += normalize(d + 1e-4) * (1.0 - smoothstep(0.3, 1.4, dl)) * 0.35 * h2;
+    vH = h;
+    vTint = iTint;
+    vPosW = wp;
+    gl_Position = projectionMatrix * viewMatrix * vec4(wp, 1.0);
+  }
+`;
+export const grassFragment = /* glsl */ `
+  uniform vec3 uBase;
+  uniform vec3 uTip;
+  uniform vec3 uSunTint;
+  uniform vec3 uFogColor;
+  uniform vec2 uFog;
+  uniform float uWorldDim;
+  varying float vH;
+  varying float vTint;
+  varying vec3 vPosW;
+  void main() {
+    float w = fwidth(vH) + 0.01;
+    float band = smoothstep(0.45 - w, 0.45 + w, vH);
+    vec3 col = mix(uBase, uTip, band);
+    col = mix(col, uTip + uSunTint * 0.25, smoothstep(0.85 - w, 0.85 + w, vH) * 0.7);
+    col *= 0.85 + vTint * 0.3;
+    col *= 1.0 - uWorldDim * 0.8;
+    float f = smoothstep(uFog.x, uFog.y, length(vPosW - cameraPosition));
+    gl_FragColor = vec4(mix(col, uFogColor, f), 1.0);
+  }
+`;

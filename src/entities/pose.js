@@ -19,13 +19,14 @@ export class Pose {
     this.elbowOut = 0.0; // extra outward elbow pole bias
     this.flip = 0;       // whole-body pitch around the hips (flips)
     this.spin = 0;       // whole-body yaw around the hips (spins)
+    this.coatFlare = 0;  // coat skirt kicked back by motion
   }
   copy(p) {
     this.hip.copy(p.hip); this.lean = p.lean; this.roll = p.roll; this.twist = p.twist; this.squash = p.squash;
     this.handR.copy(p.handR); this.handL.copy(p.handL); this.wR.copy(p.wR); this.wL.copy(p.wL);
     this.footR.copy(p.footR); this.footL.copy(p.footL);
     this.headYaw = p.headYaw; this.headPitch = p.headPitch; this.elbowOut = p.elbowOut;
-    this.flip = p.flip; this.spin = p.spin;
+    this.flip = p.flip; this.spin = p.spin; this.coatFlare = p.coatFlare;
     return this;
   }
   lerp(p, t) {
@@ -38,6 +39,7 @@ export class Pose {
     this.headYaw += (p.headYaw - this.headYaw) * t; this.headPitch += (p.headPitch - this.headPitch) * t;
     this.elbowOut += (p.elbowOut - this.elbowOut) * t;
     this.flip += (p.flip - this.flip) * t; this.spin += (p.spin - this.spin) * t;
+    this.coatFlare += (p.coatFlare - this.coatFlare) * t;
     return this;
   }
   /** Only blend the upper body (arms/weapons/torso) */

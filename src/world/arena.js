@@ -1,7 +1,7 @@
 // The training arena: stone plaza, grass field, pillars, distant hills, sky.
 import * as THREE from 'three';
 import { makeGroundMaterial, toonGlobals } from '../render/shaders/toon.js';
-import { skyVertex, skyFragment, ridgeVertex, ridgeFragment } from '../render/shaders/sky.js';
+import { skyVertex, skyFragment, ridgeVertex, ridgeFragment, grassVertex, grassFragment } from '../render/shaders/sky.js';
 import { toonMesh } from '../render/toon.js';
 
 export const ARENA_R = 26;
@@ -52,6 +52,94 @@ export class Arena {
 
     this.buildPillars();
     this.buildHills();
+    this.buildGrass();
+    this.buildLanterns();
+  }
+
+  buildGrass() {
+    // one clump = 5 tapered blades
+    const pos = [];
+    for (let b = 0; b < 5; b++) {
+      const a = (b / 5) * Math.PI * 2 + Math.random() * 0.6;
+      const r = 0.05 + Math.random() * 0.07;
+      const h = 0.38 + Math.random() * 0.25;
+      const lean = 0.08 + Math.random() * 0.1;
+      const cx = Math.cos(a) * r, cz = Math.sin(a) * r;
+      const tx = Math.cos(a + 1.57) * 0.035, tz = Math.sin(a + 1.57) * 0.035;
+      pos.push(cx - tx, 0, cz - tz, cx + tx, 0, cz + tz, cx + Math.cos(a) * lean, h, cz + Math.sin(a) * lean);
+    }
+    const base = new THREE.BufferGeometry();
+    base.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    const g = new THREE.InstancedBufferGeometry();
+    g.setAttribute('position', base.attributes.position);
+    const N = 7000;
+    const off = new Float32Array(N * 4), tint = new Float32Array(N);
+    let n = 0;
+    while (n < N) {
+      const r = ARENA_R + 0.6 + Math.pow(Math.random(), 1.6) * 48;
+      const a = Math.random() * Math.PI * 2;
+      // patchy distribution
+      const x = Math.cos(a) * r, z = Math.sin(a) * r;
+      const patch = Math.sin(x * 0.21) * Math.sin(z * 0.17) + Math.sin(x * 0.07 + z * 0.05);
+      if (patch < -0.6 && Math.random() < 0.8) continue;
+      off.set([x, z, 0.8 + Math.random() * 0.9 * (r < ARENA_R + 6 ? 0.8 : 1.2), Math.random() * 6.28], n * 4);
+      tint[n] = Math.random();
+      n++;
+    }
+    g.setAttribute('iOff', new THREE.InstancedBufferAttribute(off, 4));
+    g.setAttribute('iTint', new THREE.InstancedBufferAttribute(tint, 1));
+    g.instanceCount = N;
+    this.grassMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: toonGlobals.uTime, uPlayer: { value: new THREE.Vector3() },
+        uBase: { value: new THREE.Color(0x3f5e3a) }, uTip: { value: new THREE.Color(0x86a25a) },
+        uSunTint: { value: new THREE.Color(1.0, 0.7, 0.4) },
+        uFogColor: toonGlobals.uFogColor, uFog: toonGlobals.uFog, uWorldDim: toonGlobals.uWorldDim,
+      },
+      vertexShader: grassVertex, fragmentShader: grassFragment, side: THREE.DoubleSide,
+    });
+    const m = new THREE.Mesh(g, this.grassMat);
+    m.frustumCulled = false;
+    this.scene.add(m);
+  }
+
+  buildLanterns() {
+    const stone = 0x8a8c9e;
+    const n = 8;
+    this.lanterns = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + Math.PI / n;
+      const r = ARENA_R - 0.9;
+      const g = new THREE.Group();
+      const T = (geo, color, o = {}) => toonMesh(geo, { color, outlineWidth: 2.0, ...o });
+      const base = T(new THREE.CylinderGeometry(0.42, 0.5, 0.25, 6), stone); base.position.y = 0.125; g.add(base);
+      const post = T(new THREE.CylinderGeometry(0.13, 0.16, 0.95, 8), stone); post.position.y = 0.72; g.add(post);
+      const tray = T(new THREE.CylinderGeometry(0.38, 0.3, 0.12, 6), stone); tray.position.y = 1.24; g.add(tray);
+      const box = T(new THREE.CylinderGeometry(0.24, 0.24, 0.42, 6), 0xffd79a, { emissive: 1.25, rim: 0 }); box.position.y = 1.51; g.add(box);
+      for (let k = 0; k < 6; k++) {
+        const bar = T(new THREE.BoxGeometry(0.05, 0.44, 0.05), 0x5c5f72, { outline: false });
+        const ka = (k / 6) * Math.PI * 2;
+        bar.position.set(Math.cos(ka) * 0.245, 1.51, Math.sin(ka) * 0.245);
+        g.add(bar);
+      }
+      const roof = T(new THREE.ConeGeometry(0.58, 0.36, 6), 0x6f7286); roof.position.y = 1.9; g.add(roof);
+      const knob = T(new THREE.SphereGeometry(0.08, 8, 6), 0x6f7286); knob.position.y = 2.12; g.add(knob);
+      g.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+      g.rotation.y = -a;
+      this.scene.add(g);
+      this.lanterns.push(g.position.clone().setY(1.51));
+    }
+  }
+
+  /** Lantern glow motes. */
+  update(dt, fx, playerPos) {
+    if (this.grassMat) this.grassMat.uniforms.uPlayer.value.copy(playerPos);
+    if (!fx || dt <= 0) return;
+    this._lt = (this._lt ?? 0) - dt;
+    if (this._lt > 0) return;
+    this._lt = 0.12;
+    const p = this.lanterns[(Math.random() * this.lanterns.length) | 0];
+    fx.add.emit({ pos: p.clone().add(new THREE.Vector3((Math.random() - 0.5) * 0.3, 0.1, (Math.random() - 0.5) * 0.3)), vel: new THREE.Vector3((Math.random() - 0.5) * 0.2, 0.25 + Math.random() * 0.3, (Math.random() - 0.5) * 0.2), shape: 0, size: 0.06, sizeEnd: 0.02, life: 2 + Math.random(), color: [1.6, 0.9, 0.4], alpha: 0.9, alphaEnd: 0, fadeIn: 0.2 });
   }
 
   /** Project the sun into screen space for the god-ray pass. */

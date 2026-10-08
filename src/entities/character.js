@@ -85,10 +85,11 @@ export class CharacterModel {
     hairCap.position.set(0, 0.02, -0.03);
     hairCap.rotation.x = -0.35;
     this.head.add(hairCap);
-    const spikeGeo = new THREE.ConeGeometry(0.09, 0.32, 6);
+    const spikeGeo = new THREE.ConeGeometry(0.085, 0.42, 6);
     const spikes = [
-      [0, 0.12, -0.2, -2.1, 0], [0.13, 0.08, -0.17, -2.0, -0.5], [-0.13, 0.08, -0.17, -2.0, 0.5],
-      [0.07, 0.2, -0.12, -1.6, -0.3], [-0.07, 0.2, -0.12, -1.6, 0.3], [0, 0.0, -0.22, -2.5, 0],
+      [0, 0.12, -0.2, -2.1, 0], [0.13, 0.08, -0.17, -2.0, -0.55], [-0.13, 0.08, -0.17, -2.0, 0.55],
+      [0.07, 0.2, -0.12, -1.65, -0.3], [-0.07, 0.2, -0.12, -1.65, 0.3], [0, 0.0, -0.22, -2.5, 0],
+      [0.2, 0.0, -0.08, -2.2, -1.1], [-0.2, 0.0, -0.08, -2.2, 1.1],
     ];
     for (const [x, y, z, rx, rz] of spikes) {
       const s = T(spikeGeo, c.hair, { spec: 0.35 });
@@ -180,7 +181,7 @@ export class CharacterModel {
     b.scale.set(1 / Math.sqrt(pose.squash), pose.squash, 1 / Math.sqrt(pose.squash));
     this.torso.rotation.set(pose.lean * 0.65, pose.twist, pose.roll * 0.5, 'YXZ');
     this.head.rotation.set(pose.headPitch - pose.lean * 0.5, pose.headYaw - pose.twist * 0.5, -pose.roll * 0.4, 'YXZ');
-    this.coatTail.rotation.x = -Math.max(-0.3, Math.min(0.6, pose.lean * 0.7 + (pose.coatFlare ?? 0)));
+    this.coatTail.rotation.x = -Math.max(-0.3, Math.min(1.0, pose.lean * 0.5 + (pose.coatFlare ?? 0)));
 
     b.updateMatrix();
     this.torso.updateMatrix();

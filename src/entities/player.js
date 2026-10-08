@@ -277,6 +277,7 @@ export class Player {
     L.handR.set(-0.34, 0.78 + s * 0.06, 0.06 - Math.cos(ph) * 0.26 * s);
     L.handL.set(0.34, 0.78 + s * 0.06, 0.06 + Math.cos(ph) * 0.26 * s);
     L.headYaw = 0; L.headPitch = 0.05 * s; L.elbowOut = 0; L.flip = 0; L.spin = 0;
+    L.coatFlare = 0.45 * s + Math.sin(ph * 2) * 0.06 * s + (this.grounded ? 0 : 0.25);
     bladeQuat(L.wR, _v.set(0, -0.35, -1), _v2.set(0, -1, 0.2));
     bladeQuat(L.wL, _v.set(0, -0.35, -1), _v2.set(0, -1, 0.2));
     if (!this.grounded) {
@@ -311,7 +312,7 @@ export class Player {
       else {
         this.pose.lerpUpper(this.act, w);
         // allow actions to drive hips/feet
-        if (this.action.legs) { this.pose.hip.lerp(this.act.hip, w); this.pose.footR.lerp(this.act.footR, w); this.pose.footL.lerp(this.act.footL, w); this.pose.flip += (this.act.flip - this.pose.flip) * w; this.pose.spin += (this.act.spin - this.pose.spin) * w; }
+        if (this.action.legs) { this.pose.hip.lerp(this.act.hip, w); this.pose.footR.lerp(this.act.footR, w); this.pose.footL.lerp(this.act.footL, w); this.pose.flip += (this.act.flip - this.pose.flip) * w; this.pose.spin += (this.act.spin - this.pose.spin) * w; this.pose.coatFlare += (this.act.coatFlare - this.pose.coatFlare) * w; }
       }
     }
     // smooth to avoid pops between actions
@@ -458,6 +459,7 @@ export class DashAction {
     P.handR.set(-0.3, 0.72, -0.55); P.handL.set(0.3, 0.72, -0.55);
     P.footR.set(-0.13, 0.12, 0.35); P.footL.set(0.13, 0.25, -0.45);
     P.headPitch = -0.3;
+    P.coatFlare = 0.9;
   }
   poseWeight(t) { return t < MOVE.dashTime ? 1 : 1 - clamp01((t - MOVE.dashTime) / 0.08); }
   end() { this.player.gravityScale = 1; }

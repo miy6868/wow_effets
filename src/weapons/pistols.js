@@ -30,6 +30,7 @@ export class Pistols extends GunWeapon {
   press(p, btn) {
     if (btn === 1) {
       if (p.action && !p.action.cancelable?.('attack')) return;
+      G.hud?.skill('건카타', 'GUN KATA');
       p.startAction(new GunKata(this));
     } else this.trigger = true;
   }

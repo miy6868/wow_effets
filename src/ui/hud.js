@@ -30,6 +30,7 @@ export class HUD {
     this.dmgLayer = el('div', 'dmg-layer', this.root);
     this.nums = [];
     this.toastEl = el('div', 'toast', this.root);
+    this.skillEl = el('div', 'skill', this.root);
     this.status = el('div', 'status', this.root);
     this.hint = el('div', 'hud-hint', this.root);
     this.hint.innerHTML = '<b>H</b> 조작법 · <b>F</b> 필살기 · <b>Shift</b> 대시 · <b>C</b> 순간이동 · <b>Z</b> 슬로모션 · <b>P</b> 일시정지';
@@ -120,6 +121,14 @@ export class HUD {
     el.style.setProperty('--fade', k < 0.12 ? k / 0.12 : k > 0.85 ? (1 - k) / 0.15 : 1);
   }
 
+  /** Skill name call-out for special moves (anime-style caption). */
+  skill(name, sub = '') {
+    const e = this.skillEl;
+    e.innerHTML = `<div class="nm">${name}</div>${sub ? `<div class="sb">${sub}</div>` : ''}`;
+    e.classList.remove('on'); void e.offsetWidth; e.classList.add('on');
+    this.skillT = 1.3;
+  }
+
   toast(text, dur = 1.2) {
     this.toastEl.textContent = text;
     this.toastEl.classList.remove('on'); void this.toastEl.offsetWidth; this.toastEl.classList.add('on');
@@ -136,6 +145,7 @@ export class HUD {
 
   update(dtReal) {
     this.updateCutin(dtReal);
+    if (this.skillT > 0) { this.skillT -= dtReal; if (this.skillT <= 0) this.skillEl.classList.remove('on'); }
     if (this.comboT > 0) {
       this.comboT -= dtReal;
       if (this.comboT <= 0) { this.comboCount = 0; this.comboEl.classList.remove('on'); }

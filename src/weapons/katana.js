@@ -153,6 +153,7 @@ export class Katana extends MeleeWeapon {
 
   heavy(p, a) {
     // 월광: rising launcher – the player rises with the target
+    G.hud?.skill('월광', 'MOONRISE');
     const spec = {
       dur: 0.62, cancel: 0.42, dashCancel: 0.3, swing: [0.09, 0.18], follow: 0.14, over: 0.3, antic: 0.4,
       plane: { roll: Math.PI / 2 - 0.25 }, a0: -2.0, a1: 2.1, radius: 0.55, lunge: 0.6, maxLunge: 2.5,
@@ -161,7 +162,7 @@ export class Katana extends MeleeWeapon {
       slash: slashLayers({ scale: 1.15, width: 0.85 }),
       onEvent: [
         { t: 0.1, fn: (m) => { m.player.vel.y = 12.5; m.player.grounded = false; FXP.dust(m.player.pos, 0.9, 6); sparkleArc(m, 12);
-          G.fx.ring({ pos: m.player.pos.clone().setY(0.08), normal: UP, r0: 0.3, r1: 2.4, w0: 0.12, w1: 0.02, color: [0.6, 1.4, 3.2], life: 0.3, sharp: 1 }); } },
+          G.fx.ring({ pos: m.player.pos.clone().setY(0.08), normal: UP, r0: 0.3, r1: 2.2, w0: 0.07, w1: 0.012, color: [0.25, 0.6, 1.4], life: 0.28, sharp: 1 }); } },
       ],
       whooshPitch: 0.9,
     };

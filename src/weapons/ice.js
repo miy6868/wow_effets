@@ -158,6 +158,7 @@ export class IceMagic extends MagicWeapon {
   }
 
   spikes(p) {
+    G.hud?.skill('빙결 파도', 'GLACIAL WAVE');
     this.cool = 1.2; this.aimT = 1.3; this.castK = 1.3; this.castSide = 0;
     const start = p.pos.clone().addScaledVector(p.forward(_v), 1.2);
     const tgt = this.aimPoint.clone(); tgt.y = 0;

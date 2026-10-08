@@ -190,7 +190,7 @@ export class Spear extends MeleeWeapon {
     return 0;
   }
 
-  heavy(p) { p.startAction(new DragonLunge(this)); }
+  heavy(p) { G.hud?.skill('청룡 돌격', 'AZURE DRAGON'); p.startAction(new DragonLunge(this)); }
 
   restPose(P, p) {
     P.handR.set(-0.3, 0.95, 0.05);

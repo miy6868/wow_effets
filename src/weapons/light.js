@@ -246,6 +246,7 @@ class BeamAction {
   release() {
     if (this.phase !== 'charge') return;
     const c = Math.max(0.25, this.charge);
+    G.hud?.skill('성광포', 'HOLY CANNON');
     this.phase = 'fire';
     this.fireT = 0;
     this.fireDur = 0.6 + c * 0.9;

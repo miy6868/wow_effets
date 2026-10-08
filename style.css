@@ -150,3 +150,10 @@ body.cine .wbar, body.cine .wtitle, body.cine .hud-hint, body.cine .ult, body.ci
 
 /* photo mode (P): clean frame, only the status line */
 body.photo .wbar, body.photo .wtitle, body.photo .hud-hint, body.photo .ult, body.photo .combo, body.photo .crosshair, body.photo .dmg-layer { opacity: 0 !important; }
+
+/* special move caption */
+.skill { position: absolute; right: 9%; top: 58%; text-align: right; opacity: 0; transform: translateX(14px); transition: opacity 0.45s, transform 0.45s; pointer-events: none; }
+.skill.on { opacity: 1; transform: none; transition: opacity 0.08s, transform 0.25s cubic-bezier(.2,.9,.3,1); }
+.skill .nm { font-family: var(--serif); font-size: 30px; font-weight: 900; letter-spacing: 6px; text-shadow: 0 2px 14px rgba(0,0,0,0.7); }
+.skill .sb { font-size: 10px; letter-spacing: 6px; color: var(--hi); margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(243,217,164,0.5); display: inline-block; }
+body.cine .skill, body.photo .skill { opacity: 0 !important; }

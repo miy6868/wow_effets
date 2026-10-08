@@ -113,6 +113,7 @@ export class LightningMagic extends MagicWeapon {
   }
 
   thunder(p) {
+    G.hud?.skill('낙뢰', 'THUNDERFALL');
     this.cool = 1.4; this.aimT = 1.4; this.castK = 1.4; this.castSide = 0;
     const base = this.aimPoint.clone(); base.y = 0.03;
     if (base.distanceTo(p.pos) > 26) base.copy(p.pos).addScaledVector(_v.subVectors(base, p.pos).setY(0).normalize(), 26);

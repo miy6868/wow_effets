@@ -71,7 +71,7 @@ export class DualBlades extends MeleeWeapon {
     bladeQuat(P.wL, _v.set(0.2, -0.6, -1), _v2.set(1, 0, 0));
   }
 
-  heavy(p) { p.startAction(new BladeStorm(this)); }
+  heavy(p) { G.hud?.skill('칼날 폭풍', 'BLADE STORM'); p.startAction(new BladeStorm(this)); }
 }
 
 // ── Blade storm: a moving tornado of crimson slashes ──────────────────────────

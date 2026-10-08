@@ -162,6 +162,7 @@ class PillarCharge {
 }
 
 export function eruption(pos, s = 1) {
+  G.hud?.skill('홍련주', 'CRIMSON PILLAR');
   const fx = G.fx;
   // anticipation: circle flares, ground cracks glow
   fx.decal({ pos, size: 2.2 * s, type: 3, color: [1.6, 0.6, 0.12], life: 1.0, spin: 2.5, additive: true, fadeStart: 0.25 });

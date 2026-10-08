@@ -87,6 +87,7 @@ export class Shotgun extends GunWeapon {
   }
 
   dragon(p) {
+    G.hud?.skill('용의 숨결', "DRAGON'S BREATH");
     this.cool = 1.0; this.pumpT = 0; this.ejected = false;
     this.aimT = 1.0; this.recoil = 1.2;
     const from = this.muzzle(this.modelR, new THREE.Vector3());

@@ -100,6 +100,7 @@ export class RocketLauncher extends GunWeapon {
   }
 
   swarm(p) {
+    G.hud?.skill('미사일 난무', 'MISSILE CIRCUS');
     this.cool = 1.6; this.aimT = 1.6; this.recoil = 0.6;
     const from = this.backblast(p);
     const dir = _v.subVectors(this.aimPoint, from).normalize().clone();

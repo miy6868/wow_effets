@@ -185,6 +185,7 @@ export class Greatsword extends MeleeWeapon {
   }
 
   leap(p, level) {
+    G.hud?.skill(level >= 2 ? '염화 · 대분쇄' : level >= 1 ? '염화 · 낙염' : '낙하참', ['LEAP SLAM', 'BURNING DESCENT', 'INFERNO CRUSH', 'INFERNO CRUSH'][level]);
     const s = 0.85 + level * 0.3;
     const spec = {
       dur: 1.6, cancel: 1.6, dashCancel: 1.6, swing: [0.4, 0.5], follow: 0.12, over: 0.1, antic: 0.8,

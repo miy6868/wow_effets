@@ -117,6 +117,7 @@ export class DarkMagic extends MagicWeapon {
   }
 
   blackHole(p) {
+    G.hud?.skill('심연', 'EVENT HORIZON');
     this.holeCool = 3.2; this.aimT = 1.4; this.castK = 1.6; this.castSide = 0;
     const at = this.aimPoint.clone();
     const flat = at.clone().sub(p.pos).setY(0);

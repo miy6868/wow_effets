@@ -176,10 +176,17 @@ export function eruption(pos, s = 1) {
     fx.distort({ pos: pos.clone().setY(3), mode: 'haze', r0: 3.5 * s, r1: 4 * s, strength: 0.035, life: 1.6 });
     // the column: a fresnel cylinder of light + stacked fire puffs shooting up
     fx.sphere({ pos: pos.clone().setY(3.5), r0: 0.5 * s, r1: 1.3 * s, color: [1.5, 0.5, 0.1], coreColor: [2.2, 1.6, 0.9], life: 0.8, power: 1.8, core: 0.6, squashY: 4.2, alphaCurve: (k) => (1 - k) * (1 - k) });
-    for (let i = 0; i < 46; i++) {
-      const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * 1.1 * s;
+    // column: a dense core of cel fire puffs wrapped in licking flame tongues
+    for (let i = 0; i < 26; i++) {
+      const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * 0.8 * s;
       const q = pos.clone().add(_v.set(Math.cos(a) * r, rand(0, 0.8), Math.sin(a) * r));
-      fx.puffs.emit({ pos: q, vel: _v2.set(Math.cos(a) * 0.8, rand(10, 22) * Math.sqrt(s), Math.sin(a) * 0.8), size: rand(0.35, 0.6) * s, sizeEnd: rand(0.15, 0.35) * s, life: rand(0.5, 0.85), mode: PUFF.FIRE, color: FIRE, shade: DEEP, heat: rand(1.0, 1.25), drag: 1.6, rise: 2, dissolveStart: 0.35, stretch: 1.4 });
+      fx.puffs.emit({ pos: q, vel: _v2.set(Math.cos(a) * 0.6, rand(10, 22) * Math.sqrt(s), Math.sin(a) * 0.6), size: rand(0.32, 0.5) * s, sizeEnd: rand(0.1, 0.25) * s, life: rand(0.5, 0.8), mode: PUFF.FIRE, color: FIRE, shade: DEEP, heat: rand(0.85, 1.05), drag: 1.6, rise: 2, dissolveStart: 0.3, stretch: 1.25 });
+    }
+    for (let i = 0; i < 34; i++) {
+      const a = Math.random() * Math.PI * 2, r = (0.7 + Math.random() * 0.6) * s;
+      const q = pos.clone().add(_v.set(Math.cos(a) * r, rand(0.2, 1.5), Math.sin(a) * r));
+      fx.add.emit({ pos: q, vel: _v2.set(Math.cos(a) * 0.5, rand(8, 16) * Math.sqrt(s), Math.sin(a) * 0.5), shape: SHAPE.FLAME, size: rand(0.8, 1.4) * s, w: 0.5, sizeEnd: rand(0.2, 0.4),
+        life: rand(0.35, 0.6), color: [2.2, 0.95, 0.22], colorEnd: [1.0, 0.16, 0.03], alpha: 1, alphaEnd: 0, fadeIn: 0.06, drag: 1.2, rot: rand(-0.15, 0.15) });
     }
     // base swirl
     for (let i = 0; i < 16; i++) {

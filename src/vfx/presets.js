@@ -232,10 +232,10 @@ export const FXP = {
       randUnit(_v2); _v2.y = Math.abs(_v2.y) * 0.8 + 0.1;
       fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, rand(0.2, 0.7) * s), vel: _v2.clone().multiplyScalar(rand(4, 9) * s), size: rand(0.4, 0.65) * s, sizeEnd: rand(0.95, 1.4) * s, life: rand(0.45, 0.7), mode: PUFF.FIRE, color: fire, shade: deep, heat: rand(0.95, 1.15), drag: 6, rise: 2.5, dissolveStart: 0.3 });
     }
-    // 4. smoke that lingers and rises
-    for (let i = 0; i < 8; i++) {
-      randUnit(_v2); _v2.y = Math.abs(_v2.y) * 0.6 + 0.3;
-      fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, rand(0.5, 1.2) * s), vel: _v2.clone().multiplyScalar(rand(2, 4) * s), size: rand(0.45, 0.7) * s, sizeEnd: rand(1.0, 1.45) * s, life: rand(1.0, 1.6), mode: PUFF.SMOKE, color: [0.4, 0.36, 0.42], shade: [0.2, 0.17, 0.25], drag: 3, rise: 1.6, dissolveStart: 0.3 });
+    // 4. smoke: a rising mushroom stem + crown, dark and dense, dissolving from the edges
+    for (let i = 0; i < 7; i++) {
+      randUnit(_v2); _v2.y = Math.abs(_v2.y) * 0.4 + 0.6; _v2.normalize();
+      fx.puffs.emit({ pos: p.clone().addScaledVector(_v2, rand(0.3, 0.8) * s), vel: _v2.clone().multiplyScalar(rand(2.5, 4.5) * s), size: rand(0.35, 0.55) * s, sizeEnd: rand(0.75, 1.05) * s, life: rand(1.1, 1.6), mode: PUFF.SMOKE, color: [0.32, 0.28, 0.33], shade: [0.14, 0.11, 0.18], drag: 3.2, rise: 2.2, dissolveStart: 0.22, grow: 'out' });
     }
     // 5. sparks & embers
     for (let i = 0; i < 40; i++) {

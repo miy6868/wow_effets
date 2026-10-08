@@ -5,7 +5,7 @@ import { MeleeWeapon, SwingMove, trailDef } from './melee.js';
 import { greatswordModel } from './models.js';
 import { WeaponTrail } from '../vfx/fx.js';
 import { FXP, rand, cone, randUnit } from '../vfx/presets.js';
-import { SHAPE } from '../vfx/particles.js';
+import { SHAPE, CURVE } from '../vfx/particles.js';
 import { PUFF } from '../vfx/puffs.js';
 import { bladeQuat, clamp01, easing } from '../entities/pose.js';
 import { hit } from '../combat/combat.js';
@@ -62,12 +62,17 @@ export function groundImpact(pos, s = 1, color = [3, 1.0, 0.25]) {
 function flameRing(pos, s, n = 10) {
   const fx = G.fx;
   for (let i = 0; i < n; i++) {
-    const a = (i / n) * Math.PI * 2 + rand(-0.1, 0.1);
+    const a = (i / n) * Math.PI * 2 + rand(-0.12, 0.12);
     const r = 1.9 * s;
     const q = pos.clone().add(_v.set(Math.cos(a) * r, 0, Math.sin(a) * r));
+    // flame tongues: teardrop cel flames licking upward, staggered
     for (let k = 0; k < 3; k++) {
-      fx.puffs.emit({ pos: q.clone().setY(0.2 + k * 0.35), vel: _v2.set(Math.cos(a) * 1.2, rand(6, 10), Math.sin(a) * 1.2), size: rand(0.2, 0.3) * s, sizeEnd: rand(0.06, 0.12), life: rand(0.4, 0.6), mode: PUFF.FIRE, color: [1.7, 0.85, 0.18], shade: [0.95, 0.22, 0.04], heat: rand(0.8, 1.0), drag: 3, rise: 3, dissolveStart: 0.35, grow: 'in', stretch: 1.5 });
+      fx.add.emit({ pos: q.clone().setY(0.25 + k * 0.28), vel: _v2.set(Math.cos(a) * 0.6, rand(3.5, 6.5), Math.sin(a) * 0.6), shape: SHAPE.FLAME,
+        size: rand(0.7, 1.1) * s * (1 - k * 0.2), w: 0.55, sizeEnd: rand(0.15, 0.3), life: rand(0.32, 0.5) + k * 0.06,
+        color: [2.2, 0.95, 0.22], colorEnd: [1.1, 0.18, 0.03], alpha: 1, alphaEnd: 0.0, fadeIn: 0.08, drag: 2.5, rot: rand(-0.2, 0.2), sizeCurve: CURVE.LINEAR });
     }
+    if (i % 2 === 0) fx.add.emit({ pos: q.clone().setY(0.3), vel: _v2.set(0, rand(4, 7), 0), shape: SHAPE.STREAK, size: 0.05, stretch: 0.04, life: rand(0.4, 0.7), color: [3.2, 1.6, 0.4], colorEnd: [1.5, 0.3, 0.05], alphaEnd: 0, drag: 1, gravity: -2 });
+    if (i % 3 === 0) fx.puffs.emit({ pos: q.clone().setY(0.5), vel: _v2.set(0, rand(1.5, 2.5), 0), size: 0.22 * s, sizeEnd: 0.5 * s, life: rand(0.8, 1.1), mode: PUFF.SMOKE, color: [0.36, 0.32, 0.36], shade: [0.18, 0.15, 0.22], drag: 2, rise: 1.2, dissolveStart: 0.25 });
   }
 }
 
@@ -204,7 +209,7 @@ export class Greatsword extends MeleeWeapon {
       onLand: (m) => {
         const p2 = m.player.pos.clone().addScaledVector(m.fwd, 1.6);
         groundImpact(p2, s);
-        if (level >= 1) flameRing(p2, s, 8 + level * 3);
+        if (level >= 1) flameRing(p2, s, 10 + level * 3);
         if (level >= 2) {
           G.screen.impact(0.05, true, [1, 0.85, 0.7]);
           G.slowmo(0.15, 0.1, 0.35);

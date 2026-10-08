@@ -408,6 +408,13 @@ export class Dummy {
   }
 
   syncVisual() {
+    // idle life: head tilts toward the player, golem core breathes
+    const tt = G.time ?? 0;
+    if (this.headG) {
+      this.headG.rotation.z = Math.sin(tt * 0.9 + this.home.x) * 0.06;
+      this.headG.rotation.x = Math.sin(tt * 0.7 + this.home.z) * 0.04;
+    }
+    if (this.core) { const k = 1 + Math.sin(tt * 3) * 0.12; this.core.scale.set(this.s * k, this.s * 1.3 * k, this.s * 0.6); }
     this.root.position.copy(this.pos);
     this.yawG.rotation.y = this.yaw;
     // lying: lower the pivot so the body rests on the ground
